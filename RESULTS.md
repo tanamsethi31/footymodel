@@ -49,6 +49,29 @@ Public results data + a goals-only statistical model is **not** enough to beat
 closing lines. This matches reality: most models don't. We proved it rigorously
 instead of fooling ourselves — which is the whole point of Phase 3.
 
+## Phase 2b — does xG help? (Understat, big-5 leagues)
+
+Understat covers only the big-5 (+ Russia), so this was tested on E0/SP1/D1/I1/F1
+— all *sharp* markets. 99.9% xG coverage on 10,707 matches. We compared fitting
+team strengths on pure goals vs a goal/xG blend vs pure xG.
+
+| Target | Pooled yield | Calibration error |
+|--------|-------------:|------------------:|
+| pure goals (blend 1.0) | −11.38% | 0.015 |
+| 50/50 goals+xG (0.5) | **−10.16%** | **0.009** |
+| pure xG (0.0) | −11.41% | 0.011 |
+
+**xG helps model *quality* — calibration error nearly halves (0.015→0.009) and
+yield improves ~1.2 pts — but it does NOT create an edge.** Every league × blend
+cell is negative; best single cell is E0 at 50/50 (−6.6%), still losing. xG
+closes ~1 point of an ~11-point gap. Two independent model families (goals, xG)
+now give the same answer: public data can't beat the closing line on these
+markets.
+
+Caveat: xG could only be tested on the big-5 (sharpest markets). It remains
+untested on mid-tier leagues (needs FBref), where the goals model got closest
+to break-even (Championship −1.6%).
+
 ## Candidate next experiments (base rate: most still fail)
 1. **Benchmark vs OPENING odds, not closing.** Edge, if it exists, usually lives
    in early prices before the market sharpens. Realistic (you bet when lines
