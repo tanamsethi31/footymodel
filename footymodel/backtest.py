@@ -50,12 +50,18 @@ def remove_margin(odds: np.ndarray) -> np.ndarray:
 
 def walk_forward(df: pd.DataFrame, league: str, test_start: str,
                  xi: float = 0.0018, edge: float = 0.05, blend: float = 1.0,
-                 min_train: int = 200, min_odds: float = 1.2,
-                 max_odds: float = 15.0) -> tuple[pd.DataFrame, pd.DataFrame]:
+                 bet_odds: str = "close", min_train: int = 200,
+                 min_odds: float = 1.2, max_odds: float = 15.0
+                 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Run the walk-forward backtest for one league.
 
+    `bet_odds`: "close" bets at (and settles on) closing odds; "open" uses the
+    opening/early line. Either way we record Closing Line Value
+    (CLV = open/close − 1) per bet — positive mean CLV is the gold-standard
+    signal that our picks beat the market's own correction.
+
     Returns (bets, predictions):
-      bets        — one row per placed value bet (for P&L / yield).
+      bets        — one row per placed value bet (for P&L / yield / CLV).
       predictions — one row per (fixture, market) evaluated (for calibration).
     """
     league_df = df[df["league"] == league].sort_values("date").reset_index(drop=True)
@@ -80,7 +86,9 @@ def walk_forward(df: pd.DataFrame, league: str, test_start: str,
                 continue
 
             for market, (pkey, ocol, outcome_fn) in MARKETS.items():
-                odds = getattr(r, ocol)
+                close_odds = getattr(r, ocol)
+                open_odds = getattr(r, ocol + "_open")
+                odds = open_odds if bet_odds == "open" else close_odds
                 if pd.isna(odds) or not (min_odds <= odds <= max_odds):
                     continue
                 p = mp[pkey]
@@ -91,10 +99,14 @@ def walk_forward(df: pd.DataFrame, league: str, test_start: str,
                 ev = p * odds - 1.0
                 if ev > edge:
                     profit = (odds - 1.0) if won else -1.0
+                    # CLV: did we get a bigger price than the close? (>0 = beat close)
+                    clv = (open_odds / close_odds - 1.0) if (
+                        not pd.isna(open_odds) and not pd.isna(close_odds)) else np.nan
                     bets.append({
                         "date": d, "league": league,
                         "home": r.home_team, "away": r.away_team,
                         "market": market, "odds": float(odds),
+                        "bet_odds": bet_odds, "clv": clv,
                         "model_p": p, "fair_p_raw": 1.0 / odds,
                         "ev": ev, "won": won, "profit": profit,
                     })
@@ -115,6 +127,10 @@ def summarize_bets(bets: pd.DataFrame) -> None:
     print(f"Staked       : {staked:.0f} u   Returned: {staked + profit:.1f} u")
     print(f"Profit       : {profit:+.2f} u")
     print(f"YIELD (ROI)  : {profit / staked * 100:+.2f}%   <-- the number that matters")
+    if "clv" in bets and bets["clv"].notna().any():
+        clv = bets["clv"].dropna()
+        print(f"CLV          : mean {clv.mean()*100:+.2f}%   beat-close rate {(clv > 0).mean()*100:.1f}%"
+              f"   <-- >0 = genuine edge signal")
     print("\n  By market:")
     for mk, g in bets.groupby("market"):
         y = g["profit"].sum() / len(g) * 100
@@ -154,14 +170,16 @@ def _benchmark_yield(preds: pd.DataFrame, df: pd.DataFrame, league: str) -> None
         print(f"\nBaseline (bet favourite every match): yield {profit/n*100:+.2f}% over {n} bets")
 
 
-def run(leagues, test_start, xi, edge, df=None, blend=1.0):
+def run(leagues, test_start, xi, edge, df=None, blend=1.0, bet_odds="close"):
     if df is None:
         df = load()
     all_bets, all_preds = [], []
     for lg in leagues:
-        tag = f" | blend={blend:g} (goals={blend:g}/xG={1-blend:g})" if blend < 1 else ""
+        tag = f" | blend={blend:g}" if blend < 1 else ""
+        tag += f" | betting {bet_odds.upper()} odds" if bet_odds != "close" else ""
         print(f"\n{'='*64}\n{lg} — {config.LEAGUES.get(lg, lg)}{tag}\n{'='*64}")
-        bets, preds = walk_forward(df, lg, test_start, xi=xi, edge=edge, blend=blend)
+        bets, preds = walk_forward(df, lg, test_start, xi=xi, edge=edge,
+                                   blend=blend, bet_odds=bet_odds)
         summarize_bets(bets)
         _benchmark_yield(preds, df, lg)
         if not preds.empty:
@@ -195,12 +213,15 @@ def main():
                         "Requires the matches_xg dataset (footymodel.understat).")
     p.add_argument("--xg-data", action="store_true",
                    help="Load the xG dataset (matches_xg.parquet) instead of matches.parquet.")
+    p.add_argument("--bet-odds", choices=["close", "open"], default="close",
+                   help="Bet/settle at closing (default) or opening odds. CLV is always reported.")
     args = p.parse_args()
     df = None
     if args.xg_data or args.blend < 1.0:
         from .understat import load_xg
         df = load_xg()
-    run(args.leagues, args.test_start, args.xi, args.edge, df=df, blend=args.blend)
+    run(args.leagues, args.test_start, args.xi, args.edge, df=df,
+        blend=args.blend, bet_odds=args.bet_odds)
 
 
 if __name__ == "__main__":

@@ -91,3 +91,15 @@ ODDS_CANDIDATES = {
     "odds_over25": ["AvgC>2.5", "B365C>2.5", "P>2.5", "Avg>2.5", "BbAv>2.5", "B365>2.5"],
     "odds_under25": ["AvgC<2.5", "B365C<2.5", "P<2.5", "Avg<2.5", "BbAv<2.5", "B365<2.5"],
 }
+
+# OPENING / early odds — strictly the NON-closing columns (football-data collects
+# these well before kickoff). Paired with the closing odds above, these let us
+# measure Closing Line Value (did the market move toward our picks?) and test
+# whether the model beats the softer opening line.
+ODDS_OPEN_CANDIDATES = {
+    "odds_h_open": ["AvgH", "B365H", "BbAvH", "PSH"],
+    "odds_d_open": ["AvgD", "B365D", "BbAvD", "PSD"],
+    "odds_a_open": ["AvgA", "B365A", "BbAvA", "PSA"],
+    "odds_over25_open": ["Avg>2.5", "B365>2.5", "BbAv>2.5", "P>2.5"],
+    "odds_under25_open": ["Avg<2.5", "B365<2.5", "BbAv<2.5", "P<2.5"],
+}
