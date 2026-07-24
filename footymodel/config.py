@@ -103,3 +103,13 @@ ODDS_OPEN_CANDIDATES = {
     "odds_over25_open": ["Avg>2.5", "B365>2.5", "BbAv>2.5", "P>2.5"],
     "odds_under25_open": ["Avg<2.5", "B365<2.5", "BbAv<2.5", "P<2.5"],
 }
+
+# BEST-PRICE (market maximum) odds — the best price available across all books,
+# not the average. Line shopping: betting the max strips most of the margin and
+# is a real market-structure edge. "_max" = closing max, "_maxopen" = opening max.
+ODDS_MAX_CANDIDATES = {
+    "odds_h_max": ["MaxCH"], "odds_d_max": ["MaxCD"], "odds_a_max": ["MaxCA"],
+    "odds_over25_max": ["MaxC>2.5"], "odds_under25_max": ["MaxC<2.5"],
+    "odds_h_maxopen": ["MaxH"], "odds_d_maxopen": ["MaxD"], "odds_a_maxopen": ["MaxA"],
+    "odds_over25_maxopen": ["Max>2.5"], "odds_under25_maxopen": ["Max<2.5"],
+}

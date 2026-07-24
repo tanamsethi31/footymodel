@@ -136,6 +136,31 @@ we're not beating it, just paying the vig. An O/U-specialised model could push C
 toward zero (break-even), but positive CLV — the thing real profit needs — did not
 appear. No-go stands.
 
+## Best-price / line-shopping test — the biggest lever found
+
+Re-priced the SAME O/U value bets at the market MAXIMUM odds (best across books)
+instead of the average:
+
+| Execution | Bets | Yield |
+|-----------|-----:|------:|
+| Avg close (prior tests) | 3371 | −8.98% |
+| Avg open | 3087 | −7.30% |
+| **Max close (best price)** | 5101 | **−2.56%** |
+| Max open (best price) | 4376 | −3.20% |
+
+Line shopping recovers **~6.4 pts** of yield (overround 1.055 → 1.005 — nearly
+all the margin). Real and large — the single biggest lever. **But still negative
+(−2.6%):** even margin-free, our picks are ~2.6% worse than the best-price fair
+line, so the residual is genuine model edge we don't have. And max odds is an
+idealized ceiling (needs many books, best-price capture, and bookmakers limit
+winners) — realistic execution sits between avg and max.
+
+**Quantified roadmap to profitability (now within striking distance):**
+1. Line shopping / best price — **+6 pts, proven.**
+2. Tier 1 modeling (xG all leagues, direct totals model with proper variance,
+   validated features, tuning) — est. +1–3 pts → break-even.
+3. Tier 2 information (lineups/injuries + fast execution) — the final push.
+
 ## The remaining untested thread (low expected value)
 - **FBref xG on mid-tier leagues.** But xG bought only ~1pt on the big-5, and
   CLV is already negative on every mid-tier league here — so better inputs are
