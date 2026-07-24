@@ -134,7 +134,11 @@ def summarize_bets(bets: pd.DataFrame) -> None:
     print("\n  By market:")
     for mk, g in bets.groupby("market"):
         y = g["profit"].sum() / len(g) * 100
-        print(f"    {mk:8s} n={len(g):4d}  win={g['won'].mean()*100:4.0f}%  yield={y:+6.1f}%")
+        clv_txt = ""
+        if "clv" in g and g["clv"].notna().any():
+            c = g["clv"].dropna()
+            clv_txt = f"  CLV={c.mean()*100:+5.2f}%  beat={(c > 0).mean()*100:3.0f}%"
+        print(f"    {mk:8s} n={len(g):4d}  win={g['won'].mean()*100:4.0f}%  yield={y:+6.1f}%{clv_txt}")
 
 
 def calibration_table(preds: pd.DataFrame, bins: int = 10) -> pd.DataFrame:
