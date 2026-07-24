@@ -72,12 +72,55 @@ Caveat: xG could only be tested on the big-5 (sharpest markets). It remains
 untested on mid-tier leagues (needs FBref), where the goals model got closest
 to break-even (Championship −1.6%).
 
-## Candidate next experiments (base rate: most still fail)
-1. **Benchmark vs OPENING odds, not closing.** Edge, if it exists, usually lives
-   in early prices before the market sharpens. Realistic (you bet when lines
-   open). Uses data we already have. **Highest-value next test.**
-2. **Add xG (Understat)** — Phase 2b. The plan's flagged upgrade; more predictive
-   inputs. Real work (multi-source join), uncertain payoff.
-3. **Restrict markets / raise edge threshold.** Diagnostic-driven, but no market
-   is robustly positive, so unlikely to rescue it alone.
-4. **Accept the no-go.** The honest, plan-mandated option: do not bet real money.
+## Phase 3b — opening odds + Closing Line Value (the clincher)
+
+Bet at the softer OPENING line instead of closing, and measure **CLV**
+(open/close − 1): did the market move *toward* our picks? Positive mean CLV /
+>50% beat-close rate is the gold-standard, low-noise signal of genuine edge —
+professionals trust it above short-term ROI.
+
+| League | Yield @ open | Mean CLV | Beat-close rate |
+|--------|-------------:|---------:|----------------:|
+| E1 Championship | −1.1% | −1.02% | 42.5% |
+| E0 Premier League | −11.1% | −0.48% | 46.5% |
+| N1 Eredivisie | −12.0% | −0.86% | 45.5% |
+| B1 Belgium | −11.3% | −0.03% | 47.2% |
+| P1 Portugal | −15.1% | −1.16% | 42.2% |
+| T1 Turkey | −21.9% | −0.79% | 45.8% |
+| G1 Greece | −10.7% | +0.44% | 51.4% |
+| **Pooled** | **−11.1%** | **−0.63%** | **45.4%** |
+
+**CLV is negative in 6 of 7 leagues; pooled beat-close rate is 45.4% (< 50%).**
+Our picks systematically get *worse* prices than the close — the market moves
+*against* our selections after we'd have bet them. That is the opposite of edge,
+and CLV is the least-noisy metric we have, so this is structural, not variance.
+Greece's marginal +0.44% (on 790 bets, one league out of seven) is exactly the
+kind of false positive multiple comparisons produce, and its yield is still
+−10.7%.
+
+---
+
+# FINAL VERDICT: NO-GO — do not bet real money
+
+Three independent tests agree:
+1. Goals model vs closing: **−11.7%**
+2. xG model vs closing (big-5): **−10.2%** best
+3. Goals model vs opening + **CLV −0.63%, beat-close 45.4%**
+
+A goals/xG statistical model built on public data **cannot beat the market** on
+these leagues. The negative CLV is decisive: we're on the wrong side of the
+line's own movement. This is the disciplined stop the plan defined, and hitting
+it is a *success* — we learned it in a backtest instead of with real money.
+
+## What it would actually take (beyond this project's scope)
+- Faster / private data the closing line hasn't absorbed (real-time injuries,
+  lineups, team news, weather) — an information edge, not a modeling edge.
+- Manual specialization in specific soft sub-markets / lower leagues, not a
+  broad automated model.
+- Accepting that the closing line is, empirically, very hard to beat — which is
+  exactly what we just demonstrated rigorously.
+
+## The remaining untested thread (low expected value)
+- **FBref xG on mid-tier leagues.** But xG bought only ~1pt on the big-5, and
+  CLV is already negative on every mid-tier league here — so better inputs are
+  unlikely to flip the sign. Recommendation: **accept the no-go.**
