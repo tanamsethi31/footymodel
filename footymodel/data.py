@@ -122,6 +122,32 @@ def normalize(df: pd.DataFrame, start_year: int, div: str) -> pd.DataFrame:
     return out
 
 
+def add_shot_xg_proxy(df: pd.DataFrame) -> pd.DataFrame:
+    """Add a shots-on-target expected-goals proxy for ALL leagues.
+
+    Real xG (Understat) covers only the big-5. But shots-on-target — which we
+    have for every league — is a higher-volume, more stable signal than actual
+    goals. We scale each side's SoT by the league's goals-per-SoT conversion to
+    get `home_xg`/`away_xg` proxies the model can fit on (via `blend`), giving
+    xG-quality inputs everywhere. The conversion is a stable per-league constant.
+    """
+    df = df.copy()
+    df["home_xg"] = pd.NA
+    df["away_xg"] = pd.NA
+    for lg, g in df.groupby("league"):
+        sot = pd.concat([g["home_sot"], g["away_sot"]]).sum()
+        goals = pd.concat([g["fthg"], g["ftag"]]).sum()
+        if not sot or pd.isna(sot):
+            continue
+        conv = goals / sot  # league-average goals per shot on target
+        idx = g.index
+        df.loc[idx, "home_xg"] = df.loc[idx, "home_sot"] * conv
+        df.loc[idx, "away_xg"] = df.loc[idx, "away_sot"] * conv
+    df["home_xg"] = pd.to_numeric(df["home_xg"], errors="coerce")
+    df["away_xg"] = pd.to_numeric(df["away_xg"], errors="coerce")
+    return df
+
+
 def drop_invalid_odds(df: pd.DataFrame) -> pd.DataFrame:
     """Drop rows whose 1X2 closing odds are internally impossible.
 
@@ -161,6 +187,7 @@ def build_dataset(leagues: list[str], start_years: list[int],
     combined = pd.concat(frames, ignore_index=True)
     combined = combined.sort_values(["date", "league"]).reset_index(drop=True)
     combined = drop_invalid_odds(combined)
+    combined = add_shot_xg_proxy(combined)
     return combined
 
 

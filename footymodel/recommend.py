@@ -102,8 +102,9 @@ def log_paper_trades(slip: pd.DataFrame, path: Path = PAPER_LOG) -> None:
 
 def _banner():
     print("!" * 72)
-    print("PAPER-TRADE MODE. Backtest shows NO edge (O/U yield ~-7%, CLV ~-0.2%).")
-    print("Do NOT stake real money on these unless live paper results turn positive.")
+    print("PAPER-TRADE MODE. Best-price backtest yield ~-2.6% (best case, idealized).")
+    print("Enter the BEST odds you can find across bookmakers. Do NOT stake real")
+    print("money unless live paper results turn positive.")
     print("!" * 72)
 
 
@@ -116,6 +117,10 @@ def demo(league: str, edge: float, market_blend: float, bankroll: float) -> None
         print(f"No data for league {league}."); return
     last_date = lg["date"].max()
     upcoming = lg[lg["date"] == last_date].copy()
+    # Bank the best-price edge: bet the market MAXIMUM odds, not the average.
+    for m in ("over25", "under25"):
+        if f"odds_{m}_max" in upcoming:
+            upcoming[f"odds_{m}"] = upcoming[f"odds_{m}_max"]
     model = fit_league(df, league, before=last_date, blend=1.0)
 
     print(f"\nLeague {league} — treating {last_date.date()} as 'upcoming' "
