@@ -120,6 +120,22 @@ it is a *success* — we learned it in a backtest instead of with real money.
 - Accepting that the closing line is, empirically, very hard to beat — which is
   exactly what we just demonstrated rigorously.
 
+## Per-market CLV — Over/Under is the least-bad market (but still no edge)
+
+Pooled across 7 leagues at opening odds:
+
+| Market | n | Yield | Mean CLV | Beat-close |
+|--------|--:|------:|---------:|-----------:|
+| O/U (all) | 6182 | −7.3% | **−0.22%** | 47.4% |
+| 1X2 (all) | 10140 | −13.3% | −0.88% | — |
+
+Totals CLV is 4× less negative than 1X2 — they avoid the favourite-longshot trap
+that drove the 1X2 losses. But O/U CLV is **still negative (−0.22%, beat 47.4%)**.
+A near-zero CLV means our total-goals estimate essentially *matches* the market's:
+we're not beating it, just paying the vig. An O/U-specialised model could push CLV
+toward zero (break-even), but positive CLV — the thing real profit needs — did not
+appear. No-go stands.
+
 ## The remaining untested thread (low expected value)
 - **FBref xG on mid-tier leagues.** But xG bought only ~1pt on the big-5, and
   CLV is already negative on every mid-tier league here — so better inputs are
