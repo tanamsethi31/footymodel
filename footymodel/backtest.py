@@ -49,7 +49,7 @@ def remove_margin(odds: np.ndarray) -> np.ndarray:
 
 
 def walk_forward(df: pd.DataFrame, league: str, test_start: str,
-                 xi: float = 0.0018, edge: float = 0.05,
+                 xi: float = 0.0018, edge: float = 0.05, blend: float = 1.0,
                  min_train: int = 200, min_odds: float = 1.2,
                  max_odds: float = 15.0) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Run the walk-forward backtest for one league.
@@ -68,7 +68,7 @@ def walk_forward(df: pd.DataFrame, league: str, test_start: str,
         train = league_df[league_df["date"] < d]
         if len(train) < min_train:
             continue
-        model = DixonColes(xi=xi).fit(train, ref_date=d)
+        model = DixonColes(xi=xi).fit(train, ref_date=d, blend=blend)
         fixtures = league_df[league_df["date"] == d]
 
         for r in fixtures.itertuples(index=False):
@@ -154,13 +154,14 @@ def _benchmark_yield(preds: pd.DataFrame, df: pd.DataFrame, league: str) -> None
         print(f"\nBaseline (bet favourite every match): yield {profit/n*100:+.2f}% over {n} bets")
 
 
-def run(leagues, test_start, xi, edge, df=None):
+def run(leagues, test_start, xi, edge, df=None, blend=1.0):
     if df is None:
         df = load()
     all_bets, all_preds = [], []
     for lg in leagues:
-        print(f"\n{'='*64}\n{lg} — {config.LEAGUES.get(lg, lg)}\n{'='*64}")
-        bets, preds = walk_forward(df, lg, test_start, xi=xi, edge=edge)
+        tag = f" | blend={blend:g} (goals={blend:g}/xG={1-blend:g})" if blend < 1 else ""
+        print(f"\n{'='*64}\n{lg} — {config.LEAGUES.get(lg, lg)}{tag}\n{'='*64}")
+        bets, preds = walk_forward(df, lg, test_start, xi=xi, edge=edge, blend=blend)
         summarize_bets(bets)
         _benchmark_yield(preds, df, lg)
         if not preds.empty:
@@ -189,8 +190,17 @@ def main():
                    help="Bet only on/after this date; earlier matches train the model.")
     p.add_argument("--xi", type=float, default=0.0018, help="Time-decay rate/day")
     p.add_argument("--edge", type=float, default=0.05, help="Min EV to place a bet")
+    p.add_argument("--blend", type=float, default=1.0,
+                   help="Target = blend*goals + (1-blend)*xG. 1=goals, 0=pure xG. "
+                        "Requires the matches_xg dataset (footymodel.understat).")
+    p.add_argument("--xg-data", action="store_true",
+                   help="Load the xG dataset (matches_xg.parquet) instead of matches.parquet.")
     args = p.parse_args()
-    run(args.leagues, args.test_start, args.xi, args.edge)
+    df = None
+    if args.xg_data or args.blend < 1.0:
+        from .understat import load_xg
+        df = load_xg()
+    run(args.leagues, args.test_start, args.xi, args.edge, df=df, blend=args.blend)
 
 
 if __name__ == "__main__":

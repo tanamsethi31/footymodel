@@ -63,15 +63,28 @@ class DixonColes:
     n_matches: int = 0
     ref_date: pd.Timestamp | None = None
     converged: bool = False
+    blend: float = 1.0  # 1.0 = pure actual goals; 0.0 = pure xG
 
     # --- fitting ------------------------------------------------------------
-    def fit(self, df: pd.DataFrame, ref_date=None,
-            home_goals_col: str = "fthg", away_goals_col: str = "ftag") -> "DixonColes":
+    def fit(self, df: pd.DataFrame, ref_date=None, blend: float = 1.0) -> "DixonColes":
         """Fit on `df` (one league). Time-decay weights are relative to
         `ref_date` (defaults to the latest match date). For a backtest, pass
-        only past matches and set ref_date to the fixture date."""
-        df = df.dropna(subset=[home_goals_col, away_goals_col,
-                               "home_team", "away_team", "date"]).copy()
+        only past matches and set ref_date to the fixture date.
+
+        `blend` mixes the target that team strengths are fitted to:
+            target = blend * actual_goals + (1 - blend) * xG
+        blend=1.0 -> classic goals-based Dixon-Coles (integer, uses the
+        low-score tau correction). blend<1.0 fits on the continuous goal/xG
+        blend via the continuous Poisson MLE; the tau correction (an
+        integer-score effect) is dropped and rho fixed at 0. Requires
+        `home_xg`/`away_xg` columns when blend<1.0.
+        """
+        self.blend = blend
+        use_tau = blend >= 1.0
+        need = ["fthg", "ftag", "home_team", "away_team", "date"]
+        if not use_tau:
+            need += ["home_xg", "away_xg"]
+        df = df.dropna(subset=need).copy()
         if ref_date is None:
             ref_date = df["date"].max()
         ref_date = pd.Timestamp(ref_date)
@@ -83,8 +96,18 @@ class DixonColes:
 
         hi = df["home_team"].map(idx).to_numpy()
         ai = df["away_team"].map(idx).to_numpy()
-        x = df[home_goals_col].to_numpy(dtype=int)
-        y = df[away_goals_col].to_numpy(dtype=int)
+
+        # Fitting targets (continuous when xG is blended in).
+        gh = df["fthg"].to_numpy(dtype=float)
+        ga = df["ftag"].to_numpy(dtype=float)
+        if use_tau:
+            th, ta = gh, ga
+            xi_int, yi_int = gh.astype(int), ga.astype(int)  # for tau
+        else:
+            xh = df["home_xg"].to_numpy(dtype=float)
+            xa = df["away_xg"].to_numpy(dtype=float)
+            th = blend * gh + (1.0 - blend) * xh
+            ta = blend * ga + (1.0 - blend) * xa
 
         age_days = (ref_date - df["date"]).dt.days.to_numpy()
         weights = np.exp(-self.xi * np.clip(age_days, 0, None))
@@ -101,15 +124,18 @@ class DixonColes:
             lam = np.exp(log_lam)
             mu = np.exp(log_mu)
 
-            tau = _tau(x, y, lam, mu, rho)
-            tau = np.clip(tau, 1e-10, None)
-
-            ll = (np.log(tau) + x * log_lam - lam + y * log_mu - mu)
+            # Continuous Poisson MLE for the rate params (factorial term drops).
+            ll = th * log_lam - lam + ta * log_mu - mu
+            if use_tau:
+                tau = np.clip(_tau(xi_int, yi_int, lam, mu, rho), 1e-10, None)
+                ll = ll + np.log(tau)
             penalty = _RIDGE * (np.sum(attack ** 2) + np.sum(defence ** 2))
             return -np.sum(weights * ll) + penalty
 
-        p0 = np.concatenate([np.zeros(n), np.zeros(n), [0.25], [-0.05]])
-        bounds = [(None, None)] * (2 * n) + [(None, None), _RHO_BOUNDS]
+        rho0 = -0.05 if use_tau else 0.0
+        p0 = np.concatenate([np.zeros(n), np.zeros(n), [0.25], [rho0]])
+        rho_bounds = _RHO_BOUNDS if use_tau else (0.0, 0.0)  # freeze rho for xG fits
+        bounds = [(None, None)] * (2 * n) + [(None, None), rho_bounds]
         res = minimize(neg_ll, p0, method="L-BFGS-B", bounds=bounds)
 
         attack = res.x[:n] - res.x[:n].mean()
