@@ -42,12 +42,37 @@ python -m footymodel.data --leagues E0 E1 N1 --seasons 2021 2022 2023 2024
 
 Output: `data/processed/matches.parquet` — one tidy row per match.
 
+## Betting tool — weekly workflow (Over/Under)
+
+The recommender fits the model on all history and outputs O/U value bets with
+fractional-Kelly stakes for upcoming fixtures, logging them for paper-trading.
+
+```bash
+. .venv/bin/activate
+# Demo on the latest matchday in the dataset (grades vs actual results):
+python -m footymodel.recommend --league E1
+
+# Live use next season — supply current fixtures + odds:
+#   fixtures.csv columns: home_team,away_team,odds_over25,odds_under25
+python -m footymodel.recommend --league E1 --fixtures fixtures.csv
+```
+
+Every run appends to `data/processed/paper_trades.csv`. Team names must match
+football-data.co.uk spellings (e.g. "Sheffield United", "Nott'm Forest").
+
+> **HONEST STATUS — paper-trade only.** The backtest verdict (`RESULTS.md`) is
+> **no edge**: O/U yield ~−7%, Closing Line Value ~−0.2% (negative). The model is
+> well-calibrated but cannot beat the market on public data. Track live paper
+> results; only consider real money if they turn *positive*, or after adding an
+> information edge the market lacks (injuries, lineups, team news).
+
 ## Roadmap
 
 - [x] Phase 0 — scaffold
-- [ ] Phase 1 — data pipeline
-- [ ] Phase 2 — Dixon-Coles goals engine (xG-adjusted)
-- [ ] Phase 3 — value + backtest harness (the go/no-go gate)
-- [ ] Phase 4 — optional ML layer
-- [ ] Phase 5 — staking / bankroll rules
-- [ ] Phase 6 — deployment (paper-trade first)
+- [x] Phase 1 — data pipeline (`data.py`)
+- [x] Phase 2 — Dixon-Coles goals engine (`model.py`)
+- [x] Phase 2b — Understat xG integration (`understat.py`)
+- [x] Phase 3 — value + backtest harness + CLV (`backtest.py`) → **no edge**
+- [x] Phase 4 — O/U market-aware strategy + sweep (`strategy.py`)
+- [x] Phase 5 — staking / bankroll (`staking.py`)
+- [x] Phase 6 — recommender / paper-trade (`recommend.py`)

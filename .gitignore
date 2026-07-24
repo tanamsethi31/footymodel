@@ -6,3 +6,5 @@ data/processed/
 *.parquet
 .DS_Store
 .ipynb_checkpoints/
+
+data/processed/paper_trades.csv
