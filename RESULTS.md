@@ -155,11 +155,36 @@ line, so the residual is genuine model edge we don't have. And max odds is an
 idealized ceiling (needs many books, best-price capture, and bookmakers limit
 winners) — realistic execution sits between avg and max.
 
-**Quantified roadmap to profitability (now within striking distance):**
-1. Line shopping / best price — **+6 pts, proven.**
-2. Tier 1 modeling (xG all leagues, direct totals model with proper variance,
-   validated features, tuning) — est. +1–3 pts → break-even.
-3. Tier 2 information (lineups/injuries + fast execution) — the final push.
+**Quantified roadmap — updated with Tier-1 test result:**
+1. Line shopping / best price — **+6 pts, proven & banked** (default in recommender).
+2. Tier 1 modeling — **TESTED, no help.** Shot-xG-blend fitting gave −2.78% at
+   best price vs −2.56% goals-only (marginally worse). Consistent with Phase 2b
+   (real xG improved calibration, not edge). *Better public-data inputs don't
+   create edge — the market already has them.* The −2.56% best-price floor holds.
+3. Tier 2 information (lineups/injuries + fast execution, or softer/niche markets)
+   — the ONLY remaining path to profit, and it's a data/execution project, not a
+   modeling one.
+
+**Bottom line:** the model is as good as it gets on public data. Execution
+(best price) closed most of the gap; modeling cannot close the rest. Real profit
+requires information or market access the closing line lacks.
+
+## Prediction-quality & confidence-selection test ("just bet the confident ones")
+
+Ignore value/odds; measure raw predictive skill, then bet the model's *favored*
+O/U side (not the market-disagreement side).
+
+- **Predictive skill is near a coin flip:** favored-side accuracy 56.2%, Brier
+  0.246 (coin flip 0.25), log-loss 0.690 (coin flip 0.693). Total goals is hard.
+- **Confidence-selection @ best price ≈ break-even:** all-favored −0.31% (t=−0.29);
+  conf≥0.65 +1.17% but **t=0.52, not significant**, and per-league scatter
+  (B1 +9.7% … G1 −4.6%) confirms noise, not edge.
+
+Key result: **confidence-selection (−0.3%) beats value-betting (−2.6%)** because
+it avoids the model's blind spots — but it lands on break-even, i.e. it
+reproduces the market's fair line. Confirmed from every angle now (value, xG,
+opening odds, CLV, line-shopping, confidence): **public data matches the market,
+never beats it.**
 
 ## The remaining untested thread (low expected value)
 - **FBref xG on mid-tier leagues.** But xG bought only ~1pt on the big-5, and
