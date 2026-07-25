@@ -204,12 +204,27 @@ blend regularizes it. First genuine *model* improvement in the project (vs the
 execution wins). BUT the gain is small (Brier −0.0008 from a crude model) and,
 critically, **this is prediction accuracy, not profit.**
 
+**Strengthened model (xA for playmakers, home advantage, scale calibration,
+blend sweep):** edge roughly DOUBLED vs the crude version.
+
+| Model | Brier | LogLoss | Fav-acc |
+|-------|------:|--------:|--------:|
+| Team-level | 0.2443 | 0.6815 | 56.2% |
+| Lineup-only | 0.2431 | 0.6797 | 56.9% |
+| **Blend (w=0.4)** | **0.2427** | **0.6784** | 56.8% |
+
+Now every blend beats team-only; even lineup-only beats it. Brier improvement
+grew 0.0008 → 0.0016 as the model improved — the signal responds to model
+quality (a good sign it's real information, not noise). **t-stat 1.49 (not yet
+significant)** on one league; significance is a sample-size problem — big-5
+(~5x data) would reach t≈3.3 if the effect holds.
+
 **The Phase-B reality:** the closing line already prices lineups, so this
 accuracy gain won't beat closing odds in a backtest. Real profit needs the LIVE
 piece — ingest confirmed lineups ~1h pre-kickoff, re-price instantly, bet soft
-books/exchange before they adjust. That is a live-data-infrastructure project,
-forward-tested, with no backtest guarantee. Phase A says the signal is real;
-whether it's monetizable depends on execution speed we haven't built.
+books/exchange before they adjust. Live-infrastructure, forward-tested, no
+backtest guarantee. **De-risking path: (1) expand to big-5 to confirm the
+prediction edge is significant; (2) if confirmed, build Phase B live pipeline.**
 
 ## The remaining untested thread (low expected value)
 - **FBref xG on mid-tier leagues.** But xG bought only ~1pt on the big-5, and

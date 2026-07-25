@@ -35,21 +35,23 @@ def load_players() -> pd.DataFrame:
 
 
 def player_attack_ratings(players: pd.DataFrame, as_of: pd.Timestamp,
-                          league_mean_xg90: float) -> dict:
-    """Per-90 xG rating per player from matches strictly before `as_of`,
-    time-decayed and shrunk toward the league mean."""
+                          league_mean_c90: float, xa_weight: float = 0.5,
+                          prior_90s: float = PRIOR_90S) -> dict:
+    """Per-90 attacking-CONTRIBUTION rating per player (xG + xa_weight*xA) from
+    matches strictly before `as_of`, time-decayed and shrunk toward league mean.
+    Including xA credits playmakers whose absence lowers team output."""
     past = players[players["date"] < as_of]
     if past.empty:
         return {}
     w = np.exp(-DECAY_XI * (as_of - past["date"]).dt.days.clip(lower=0))
+    contrib = past["xg"] + xa_weight * past["xa"]
     nineties = past["minutes"] / 90.0
     g = pd.DataFrame({
         "pid": past["player_id"].values,
-        "wxg": (w * past["xg"]).values,
+        "wc": (w * contrib).values,
         "w90": (w * nineties).values,
     }).groupby("pid").sum()
-    # Shrunk per-90 rate: (sum weighted xG + prior) / (sum weighted 90s + prior_n)
-    rate = (g["wxg"] + PRIOR_90S * league_mean_xg90) / (g["w90"] + PRIOR_90S)
+    rate = (g["wc"] + prior_90s * league_mean_c90) / (g["w90"] + prior_90s)
     return rate.to_dict()
 
 
@@ -83,24 +85,21 @@ def _ou_prob_over25(total_mean: float) -> float:
     return float(1.0 - poisson.cdf(2, total_mean))
 
 
-def accuracy_test(test_start: str = "2022-07-01", league: str = "E0") -> pd.DataFrame:
-    """Walk-forward: compare lineup-model O/U prob accuracy vs the team-level
-    baseline (from evals_main.parquet) on the same matches."""
-    from .data import PROCESSED_DIR
-    from .understat import load_xg
-
+def accuracy_test(test_start: str = "2022-07-01", league: str = "E0",
+                  xa_weight: float = 0.5, prior_90s: float = PRIOR_90S) -> pd.DataFrame:
+    """Walk-forward. Returns per-match RAW expected totals for the team-average
+    and lineup models (+ outcome). Calibration/blending/metrics done downstream
+    so blend weights can be swept cheaply."""
     players = load_players()
     players = players[players["league"] == league]
     team_xg = build_team_xg(players)
 
-    # Actual totals + team-name join via the xG-merged match table.
-    mx = load_xg()
-    mx = mx[mx["league"] == league].copy()
-    mx["date"] = pd.to_datetime(mx["date"]).dt.normalize()
-    mx["total"] = mx["fthg"] + mx["ftag"]
+    # Home advantage: mean home xG / mean away xG in the data.
+    hm = team_xg[team_xg["side"] == "h"]["xg_for"].mean()
+    am = team_xg[team_xg["side"] == "a"]["xg_for"].mean()
+    home_mult = float(np.sqrt(hm / am)) if am else 1.0
 
-    # Map Understat team titles -> football-data names via date+score is complex;
-    # instead work entirely in Understat space: get per-match home/away titles.
+    # Work in Understat space: per-match home/away titles.
     meta = players.groupby("match_id").agg(
         date=("date", "first"), league=("league", "first"),
         home_us=("home_us", "first"), away_us=("away_us", "first")).reset_index()
@@ -120,27 +119,30 @@ def accuracy_test(test_start: str = "2022-07-01", league: str = "E0") -> pd.Data
         past_players = players[players.date < d]
         if len(past_players) < 5000:
             continue
-        lm_xg90 = past_players["xg"].sum() / (past_players["minutes"].sum() / 90.0)
-        ratings = player_attack_ratings(players, d, lm_xg90)
+        # league mean contribution per 90 (for shrinkage prior)
+        contrib = past_players["xg"] + xa_weight * past_players["xa"]
+        lm_c90 = contrib.sum() / (past_players["minutes"].sum() / 90.0)
+        ratings = player_attack_ratings(players, d, lm_c90, xa_weight, prior_90s)
         att_fac, def_fac, lg_team_xg = team_factors(team_xg, d)
-        fallback = lm_xg90
+        fallback = lm_c90
 
         for m in meta[meta.date == d].itertuples(index=False):
             hs, as_ = home_line.get(m.match_id, []), away_line.get(m.match_id, [])
             if not hs or not as_:
                 continue
-            # LINEUP model: attack = sum of starters' player ratings
-            h_line = sum(ratings.get(p, fallback) for p in hs) * def_fac.get(m.away_us, 1.0)
-            a_line = sum(ratings.get(p, fallback) for p in as_) * def_fac.get(m.home_us, 1.0)
-            # TEAM baseline: attack = team-average factor (no lineup info)
-            h_team = lg_team_xg * att_fac.get(m.home_us, 1.0) * def_fac.get(m.away_us, 1.0)
-            a_team = lg_team_xg * att_fac.get(m.away_us, 1.0) * def_fac.get(m.home_us, 1.0)
-            # BLEND: lineup info as a regularized adjustment to the team baseline
-            blend_total = 0.5 * (h_line + a_line) + 0.5 * (h_team + a_team)
+            # LINEUP: starter-contribution sum as an ABSOLUTE attack multiplier.
+            # Reference full-strength sum ~ 1.5*lg_team_xg (xG + xa_weight*xA);
+            # residual bias in that constant is removed by downstream scale calib.
+            ref = 1.5 * lg_team_xg
+            att_line_h = sum(ratings.get(p, fallback) for p in hs) / ref
+            att_line_a = sum(ratings.get(p, fallback) for p in as_) / ref
+            h_line = lg_team_xg * att_line_h * def_fac.get(m.away_us, 1.0) * home_mult
+            a_line = lg_team_xg * att_line_a * def_fac.get(m.home_us, 1.0) / home_mult
+            # TEAM baseline
+            h_team = lg_team_xg * att_fac.get(m.home_us, 1.0) * def_fac.get(m.away_us, 1.0) * home_mult
+            a_team = lg_team_xg * att_fac.get(m.away_us, 1.0) * def_fac.get(m.home_us, 1.0) / home_mult
             rows.append({
                 "date": d, "match_id": m.match_id, "over_won": bool(m.total > 2.5),
-                "p_over_lineup": _ou_prob_over25(h_line + a_line),
-                "p_over_team": _ou_prob_over25(h_team + a_team),
-                "p_over_blend": _ou_prob_over25(blend_total),
+                "exp_team": h_team + a_team, "exp_line": h_line + a_line,
             })
     return pd.DataFrame(rows)
