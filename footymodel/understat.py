@@ -110,11 +110,20 @@ def fetch_match_players(match_id: str, refresh: bool = False) -> list[dict]:
         raw = cache.read_text()
     else:
         url = f"https://understat.com/getMatchData/{match_id}"
-        resp = requests.get(url, headers=_HEADERS, timeout=30)
-        resp.raise_for_status()
-        raw = resp.text
+        raw = None
+        for attempt in range(5):  # resilient to resets / transient rate limits
+            try:
+                resp = requests.get(url, headers=_HEADERS, timeout=30)
+                resp.raise_for_status()
+                raw = resp.text
+                break
+            except requests.RequestException:
+                time.sleep(2 ** attempt)  # 1,2,4,8,16s backoff
+        if raw is None:
+            print(f"    ! skipped match {match_id} (network)", flush=True)
+            return []
         cache.write_text(raw)
-        time.sleep(0.4)
+        time.sleep(0.5)
 
     import json
     payload = json.loads(raw)
