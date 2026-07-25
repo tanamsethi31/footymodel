@@ -98,6 +98,75 @@ def fetch_xg(divs: list[str], start_years: list[int], refresh: bool = False) -> 
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
 
+RAW_MATCH_DIR = data_mod.ROOT / "data" / "raw_understat_matches"
+PLAYER_OUTPUT = data_mod.PROCESSED_DIR / "player_match.parquet"
+
+
+def fetch_match_players(match_id: str, refresh: bool = False) -> list[dict]:
+    """Fetch per-match player rosters (lineups + player xG) from Understat."""
+    RAW_MATCH_DIR.mkdir(parents=True, exist_ok=True)
+    cache = RAW_MATCH_DIR / f"{match_id}.json"
+    if cache.exists() and not refresh:
+        raw = cache.read_text()
+    else:
+        url = f"https://understat.com/getMatchData/{match_id}"
+        resp = requests.get(url, headers=_HEADERS, timeout=30)
+        resp.raise_for_status()
+        raw = resp.text
+        cache.write_text(raw)
+        time.sleep(0.4)
+
+    import json
+    payload = json.loads(raw)
+    rows = []
+    for side, players in payload.get("rosters", {}).items():
+        for p in players.values():
+            rows.append({
+                "match_id": str(match_id), "side": side,
+                "player_id": p["player_id"], "player": p["player"],
+                "position": p["position"], "positionOrder": int(p.get("positionOrder", 0)),
+                "minutes": int(p["time"]), "goals": int(p["goals"]),
+                "xg": float(p["xG"]), "xa": float(p["xA"]),
+                "xgchain": float(p["xGChain"]), "xgbuildup": float(p["xGBuildup"]),
+            })
+    return rows
+
+
+def build_player_dataset(divs: list[str], start_years: list[int],
+                         refresh: bool = False) -> pd.DataFrame:
+    """Scrape per-match player rosters for the given league-seasons.
+
+    Uses match ids from the cached getLeagueData files. One-time cost; cached
+    per match. Returns a tidy player-match DataFrame joined to date/teams.
+    """
+    import json
+    frames = []
+    for div in divs:
+        us = DIV_TO_UNDERSTAT[div]
+        for yr in start_years:
+            league_cache = RAW_XG_DIR / f"{us}_{yr}.json"
+            if not league_cache.exists():
+                fetch_league_season(us, yr)  # populate cache
+            payload = json.loads(league_cache.read_text())
+            matches = [d for d in payload["dates"] if d.get("isResult")]
+            print(f"  {us} {config.season_label(yr)}: {len(matches)} matches", flush=True)
+            for i, d in enumerate(matches):
+                rows = fetch_match_players(d["id"], refresh=refresh)
+                meta = {
+                    "date": pd.Timestamp(d["datetime"]).normalize(),
+                    "league": div, "season": config.season_label(yr),
+                    "home_us": d["h"]["title"], "away_us": d["a"]["title"],
+                }
+                for r in rows:
+                    r.update(meta)
+                    r["team_us"] = meta["home_us"] if r["side"] == "h" else meta["away_us"]
+                frames.append(pd.DataFrame(rows))
+                if (i + 1) % 100 == 0:
+                    print(f"    ... {i+1}/{len(matches)}", flush=True)
+    out = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+    return out
+
+
 def _similar(a: str, b: str) -> float:
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
