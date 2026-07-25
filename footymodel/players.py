@@ -135,9 +135,12 @@ def accuracy_test(test_start: str = "2022-07-01", league: str = "E0") -> pd.Data
             # TEAM baseline: attack = team-average factor (no lineup info)
             h_team = lg_team_xg * att_fac.get(m.home_us, 1.0) * def_fac.get(m.away_us, 1.0)
             a_team = lg_team_xg * att_fac.get(m.away_us, 1.0) * def_fac.get(m.home_us, 1.0)
+            # BLEND: lineup info as a regularized adjustment to the team baseline
+            blend_total = 0.5 * (h_line + a_line) + 0.5 * (h_team + a_team)
             rows.append({
                 "date": d, "match_id": m.match_id, "over_won": bool(m.total > 2.5),
                 "p_over_lineup": _ou_prob_over25(h_line + a_line),
                 "p_over_team": _ou_prob_over25(h_team + a_team),
+                "p_over_blend": _ou_prob_over25(blend_total),
             })
     return pd.DataFrame(rows)

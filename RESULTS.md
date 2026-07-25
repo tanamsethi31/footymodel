@@ -186,6 +186,31 @@ reproduces the market's fair line. Confirmed from every angle now (value, xG,
 opening odds, CLV, line-shopping, confidence): **public data matches the market,
 never beats it.**
 
+## Phase A — lineup-aware player model (validates the thesis, marginally)
+
+Scraped Understat per-match rosters (2,280 PL matches, 1,343 players). Built
+time-decayed, shrunk player xG/90 ratings; team attack = sum of the starting XI's
+ratings. O/U prediction accuracy vs the team-average baseline (same matches):
+
+| Model | Brier | LogLoss | Fav-acc |
+|-------|------:|--------:|--------:|
+| Team-level | 0.2452 | 0.6836 | 56.1% |
+| Lineup-only | 0.2462 | 0.6872 | 57.5% |
+| **Blend (½ team + ½ lineup)** | **0.2444** | **0.6824** | 56.8% |
+
+**Lineup info helps prediction:** the blend beats team-only on all three metrics.
+Lineup-only ranks better (57.5% acc) but is miscalibrated (worse Brier) — the
+blend regularizes it. First genuine *model* improvement in the project (vs the
+execution wins). BUT the gain is small (Brier −0.0008 from a crude model) and,
+critically, **this is prediction accuracy, not profit.**
+
+**The Phase-B reality:** the closing line already prices lineups, so this
+accuracy gain won't beat closing odds in a backtest. Real profit needs the LIVE
+piece — ingest confirmed lineups ~1h pre-kickoff, re-price instantly, bet soft
+books/exchange before they adjust. That is a live-data-infrastructure project,
+forward-tested, with no backtest guarantee. Phase A says the signal is real;
+whether it's monetizable depends on execution speed we haven't built.
+
 ## The remaining untested thread (low expected value)
 - **FBref xG on mid-tier leagues.** But xG bought only ~1pt on the big-5, and
   CLV is already negative on every mid-tier league here — so better inputs are

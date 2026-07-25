@@ -29,7 +29,8 @@ def metrics(p):
 
 print(f"{'model':>10} {'Brier':>8} {'LogLoss':>8} {'FavAcc':>8}")
 print("-" * 38)
-for name, col in [("team", "p_over_team"), ("lineup", "p_over_lineup")]:
+for name, col in [("team", "p_over_team"), ("lineup", "p_over_lineup"),
+                  ("blend", "p_over_blend")]:
     b, ll, fa = metrics(r[col].values)
     print(f"{name:>10} {b:>8.4f} {ll:>8.4f} {fa*100:>7.1f}%")
 print("-" * 38)
