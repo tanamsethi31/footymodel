@@ -223,8 +223,36 @@ significant)** on one league; significance is a sample-size problem — big-5
 accuracy gain won't beat closing odds in a backtest. Real profit needs the LIVE
 piece — ingest confirmed lineups ~1h pre-kickoff, re-price instantly, bet soft
 books/exchange before they adjust. Live-infrastructure, forward-tested, no
-backtest guarantee. **De-risking path: (1) expand to big-5 to confirm the
-prediction edge is significant; (2) if confirmed, build Phase B live pipeline.**
+backtest guarantee.
+
+## Big-5 confirmation test — the edge does NOT generalize (sobering)
+
+Scraped all big-5 rosters (10,706 matches, 322,832 player-rows) and re-ran the
+lineup-vs-team test per league:
+
+| League | n | Team Brier | Best blend Brier | t-stat |
+|--------|--:|-----------:|------------------:|-------:|
+| **E0 (PL)** | 1140 | 0.2443 | 0.2427 (w=0.40) | **1.49** |
+| SP1 (La Liga) | 1140 | 0.2403 | 0.2401 (w=0.75) | 0.61 |
+| D1 (Bundesliga) | 917 | 0.2371 | 0.2363 (w=0.50) | 0.84 |
+| I1 (Serie A) | 1140 | 0.2461 | 0.2454 (w=0.50) | 0.85 |
+| **F1 (Ligue 1)** | 992 | 0.2466 | 0.2466 (w=1.00) | — (no blend beat team at all) |
+| Pooled (5 leagues) | 5329 | 0.2430 | 0.2425 | 1.71 |
+
+**Verdict: the lineup edge does NOT replicate consistently.** It was strongest
+in the Premier League — the league we developed and tuned on — and weaker or
+absent everywhere else (Ligue 1: literally no blend weight beat the team-only
+baseline). Pooling 4.7x more data should have pushed t past ~3.2 if the true
+effect were as strong as PL suggested; instead it only reached 1.71, diluted by
+the other four leagues. This is the classic signature of **overfitting to the
+first dataset tested**, not a universal signal.
+
+**Revised conclusion:** the PL result was likely partly noise/league-specific,
+not proof of a robust, transferable lineup edge. This does not fully kill the
+lineup hypothesis (team news is real information in principle), but it means we
+do **not** have the confident "go" signal needed to justify building the
+expensive Phase B live-infrastructure project. Building live lineup ingestion +
+fast execution on this evidence would be gambling on an unconfirmed effect.
 
 ## The remaining untested thread (low expected value)
 - **FBref xG on mid-tier leagues.** But xG bought only ~1pt on the big-5, and

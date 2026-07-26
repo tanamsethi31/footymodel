@@ -10,37 +10,44 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import numpy as np
+import pandas as pd
 from scipy.stats import poisson
 
 from footymodel.players import accuracy_test
 
 XA_WEIGHT = 0.5
 PRIOR_90S = 6.0
-r = accuracy_test(test_start="2022-07-01", league="E0",
-                  xa_weight=XA_WEIGHT, prior_90s=PRIOR_90S)
+LEAGUES = sys.argv[1].split(",") if len(sys.argv) > 1 else ["E0"]
+
+frames = []
+for lg in LEAGUES:
+    rl = accuracy_test(test_start="2022-07-01", league=lg,
+                       xa_weight=XA_WEIGHT, prior_90s=PRIOR_90S)
+    rl["league"] = lg
+    print(f"  {lg}: {len(rl)} matches")
+    frames.append(rl)
+r = pd.concat(frames, ignore_index=True)
 y = r["over_won"].astype(int).values
-print(f"Evaluated {len(r)} PL matches | xa_weight={XA_WEIGHT} prior_90s={PRIOR_90S}\n")
+print(f"\nEvaluated {len(r)} matches across {LEAGUES} | xa_weight={XA_WEIGHT} prior_90s={PRIOR_90S}\n")
 
-actual_mean = r["over_won"].mean()  # base over-rate, for reference
-tot_mean = 2.7  # ~PL mean total; used only as sanity anchor
-
-# Scale-calibrate each model so mean predicted total == mean actual total.
-actual_total_mean = None
-def calibrate(col):
-    # we don't have per-match actual totals here (only over/under bool), so
-    # calibrate expected totals to the known PL scoring rate via the over-rate:
-    # scale so the model's mean P(over) matches the empirical over-rate.
-    raw = r[col].values
+# Scale-calibrate PER LEAGUE (scoring rates differ) so mean predicted P(over)
+# matches that league's empirical over-rate, then pool for the significance test.
+def calibrate_league(raw, target_mean):
     lo, hi = 0.5, 1.5
-    for _ in range(40):  # bisection on scale to match mean p_over to base rate
+    for _ in range(40):
         s = (lo + hi) / 2
         mp = (1 - poisson.cdf(2, raw * s)).mean()
-        if mp > actual_mean: hi = s
+        if mp > target_mean: hi = s
         else: lo = s
     return raw * (lo + hi) / 2
 
-team_t = calibrate("exp_team")
-line_t = calibrate("exp_line")
+team_t = np.zeros(len(r))
+line_t = np.zeros(len(r))
+for lg in LEAGUES:
+    m = (r["league"] == lg).values
+    target = y[m].mean()
+    team_t[m] = calibrate_league(r.loc[m, "exp_team"].values, target)
+    line_t[m] = calibrate_league(r.loc[m, "exp_line"].values, target)
 
 
 def metrics(total):
