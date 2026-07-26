@@ -129,7 +129,11 @@ def fetch_match_players(match_id: str, refresh: bool = False) -> list[dict]:
     payload = json.loads(raw)
     rows = []
     for side, players in payload.get("rosters", {}).items():
-        for p in players.values():
+        # Understat returns the roster side as a dict usually, a list occasionally.
+        entries = players.values() if isinstance(players, dict) else players
+        for p in entries:
+            if not isinstance(p, dict) or "player_id" not in p:
+                continue
             rows.append({
                 "match_id": str(match_id), "side": side,
                 "player_id": p["player_id"], "player": p["player"],
