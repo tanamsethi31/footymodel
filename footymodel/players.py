@@ -1,19 +1,24 @@
-"""Phase A — lineup-aware player-level totals model.
+"""Phase A — lineup-aware player-level totals model. CONFIRMED (see RESULTS.md):
+pooled t=3.04 across big-5 leagues (5,329 matches) for the full-lineup
+(attack+defence from the actual starting XI) model vs a team-average baseline.
 
-Idea: estimate each team's attacking output for a match from the actual starting
-XI's player ratings, not a static team average. When a high-xG player is missing,
-the team's expected goals drop — the information the market prices via lineups.
+    player attack rating  = time-decayed, shrunk (xG + xa_weight*xA) per-90
+    player defence rating = time-decayed, shrunk team-xG-conceded-while-playing
+                             per-90 (proxy; Understat has no individual
+                             defensive-action xG)
+    team lineup attack    = sum of starting XI's attack ratings
+    team lineup defence   = mean of starting XI's defence ratings
+    total goals           = home_xG + away_xG -> Poisson -> Over/Under prob
 
-    player attack rating = time-decayed, shrunk xG-per-90 (from past matches)
-    team lineup xG       = sum of starting XI player ratings  (x opponent defence)
-    total goals          = home_xG + away_xG -> Poisson -> Over/Under prob
-
-We compare this model's O/U prediction accuracy (Brier / log-loss) against the
-team-level baseline. NOTE: accuracy is necessary but not sufficient — profit
-needs live lineups + fast execution (Phase B), which cannot be backtested on
-opening/closing snapshots alone.
+`LineupModel` is the single source of truth for this prediction — both the
+backtest (`accuracy_test`) and the live engine (`live/engine.py`) call it, so
+what we validated is exactly what runs live. NOTE: this predicts accuracy, not
+profit by itself — the closing line already prices lineups; real edge (if any)
+lives in the live window right after lineups drop (Phase B).
 """
 from __future__ import annotations
+
+from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
@@ -23,8 +28,13 @@ from .understat import PLAYER_OUTPUT
 
 # Shrinkage: a player's rating is pulled toward the league mean by PRIOR_90S
 # worth of average performance — protects thin samples (new/fringe players).
-PRIOR_90S = 5.0
+PRIOR_90S = 6.0
+XA_WEIGHT = 0.5
 DECAY_XI = 0.0018  # per-day time decay, matching the team model
+
+# Confirmed best blend from the big-5 test (RESULTS.md): 25% team-average +
+# 75% full-lineup. blend_w is the TEAM weight.
+BEST_BLEND_W = 0.25
 
 
 def load_players() -> pd.DataFrame:
@@ -34,66 +44,10 @@ def load_players() -> pd.DataFrame:
     return df
 
 
-def player_attack_ratings(players: pd.DataFrame, as_of: pd.Timestamp,
-                          league_mean_c90: float, xa_weight: float = 0.5,
-                          prior_90s: float = PRIOR_90S) -> dict:
-    """Per-90 attacking-CONTRIBUTION rating per player (xG + xa_weight*xA) from
-    matches strictly before `as_of`, time-decayed and shrunk toward league mean.
-    Including xA credits playmakers whose absence lowers team output."""
-    past = players[players["date"] < as_of]
-    if past.empty:
-        return {}
-    w = np.exp(-DECAY_XI * (as_of - past["date"]).dt.days.clip(lower=0))
-    contrib = past["xg"] + xa_weight * past["xa"]
-    nineties = past["minutes"] / 90.0
-    g = pd.DataFrame({
-        "pid": past["player_id"].values,
-        "wc": (w * contrib).values,
-        "w90": (w * nineties).values,
-    }).groupby("pid").sum()
-    rate = (g["wc"] + prior_90s * league_mean_c90) / (g["w90"] + prior_90s)
-    return rate.to_dict()
-
-
-def player_defence_ratings(players_with_xga: pd.DataFrame, as_of: pd.Timestamp,
-                          league_mean_dc90: float, prior_90s: float = PRIOR_90S) -> dict:
-    """Per-90 defensive-concession rating per player: the team's xG-against in
-    matches they played, minutes-weighted, time-decayed, shrunk to league mean.
-
-    This is a proxy (Understat has no individual defensive-action xG) standard
-    in public analytics: "goals/xG conceded per 90 while on the pitch." Lower =
-    better defender. Requires `xg_against` joined onto each player-match row."""
-    past = players_with_xga[players_with_xga["date"] < as_of]
-    if past.empty:
-        return {}
-    w = np.exp(-DECAY_XI * (as_of - past["date"]).dt.days.clip(lower=0))
-    nineties = past["minutes"] / 90.0
-    g = pd.DataFrame({
-        "pid": past["player_id"].values,
-        "wxga": (w * past["xg_against"] * nineties).values,
-        "w90": (w * nineties).values,
-    }).groupby("pid").sum()
-    rate = (g["wxga"] + prior_90s * league_mean_dc90) / (g["w90"] + prior_90s)
-    return rate.to_dict()
-
-
-def team_factors(team_xg: pd.DataFrame, as_of: pd.Timestamp) -> tuple[dict, dict, float]:
-    """Per-team attack and defence multipliers (vs league avg) from past matches.
-    Returns (attack_factor, defence_factor, league_avg_team_xg)."""
-    past = team_xg[team_xg["date"] < as_of]
-    if past.empty:
-        return {}, {}, 1.35
-    lg = past["xg_for"].mean()
-    att = (past.groupby("team")["xg_for"].mean() / lg).to_dict()
-    dfn = (past.groupby("team")["xg_against"].mean() / past["xg_against"].mean()).to_dict()
-    return att, dfn, lg
-
-
 def build_team_xg(players: pd.DataFrame) -> pd.DataFrame:
     """Aggregate player-match rows to team-match xG for/against (for defence)."""
     tm = players.groupby(["match_id", "date", "league", "team_us", "side"], as_index=False).agg(
         xg_for=("xg", "sum"))
-    # opponent xg = the other side's xg_for in the same match
     opp = tm.copy()
     opp["side"] = opp["side"].map({"h": "a", "a": "h"})
     opp = opp.rename(columns={"xg_for": "xg_against", "team_us": "opp"})[
@@ -103,37 +57,126 @@ def build_team_xg(players: pd.DataFrame) -> pd.DataFrame:
 
 
 def _ou_prob_over25(total_mean: float) -> float:
-    """P(total goals > 2.5) for a Poisson total."""
     return float(1.0 - poisson.cdf(2, total_mean))
 
 
+@dataclass
+class LineupModel:
+    """Fit once (as of a given date) on a league's player history; predict
+    totals for any home/away starting XI. Shared by backtest and live engine."""
+
+    league: str
+    as_of: pd.Timestamp
+    xa_weight: float = XA_WEIGHT
+    prior_90s: float = PRIOR_90S
+    blend_w: float = BEST_BLEND_W
+
+    attack_ratings: dict = field(default_factory=dict, repr=False)
+    defence_ratings: dict = field(default_factory=dict, repr=False)
+    att_fac: dict = field(default_factory=dict, repr=False)
+    def_fac: dict = field(default_factory=dict, repr=False)
+    lg_team_xg: float = 1.35
+    home_mult: float = 1.0
+    attack_fallback: float = 0.0
+    defence_fallback: float = 0.0
+    n_past_matches: int = 0
+
+    @classmethod
+    def fit(cls, players: pd.DataFrame, league: str, as_of: pd.Timestamp,
+           xa_weight: float = XA_WEIGHT, prior_90s: float = PRIOR_90S,
+           blend_w: float = BEST_BLEND_W) -> "LineupModel":
+        players = players[players["league"] == league]
+        team_xg = build_team_xg(players)
+        players = players.merge(
+            team_xg[["match_id", "team", "xg_against"]],
+            left_on=["match_id", "team_us"], right_on=["match_id", "team"], how="left")
+
+        as_of = pd.Timestamp(as_of)
+        past = players[players["date"] < as_of]
+        past_team_xg = team_xg[team_xg["date"] < as_of]
+
+        m = cls(league=league, as_of=as_of, xa_weight=xa_weight,
+                prior_90s=prior_90s, blend_w=blend_w)
+        m.n_past_matches = past["match_id"].nunique()
+        if past.empty or past_team_xg.empty:
+            return m  # caller should check n_past_matches before trusting predictions
+
+        # Attack ratings.
+        w = np.exp(-DECAY_XI * (as_of - past["date"]).dt.days.clip(lower=0))
+        contrib = past["xg"] + xa_weight * past["xa"]
+        nineties = past["minutes"] / 90.0
+        lm_c90 = contrib.sum() / nineties.sum()
+        g = pd.DataFrame({"pid": past["player_id"].values,
+                         "wc": (w * contrib).values, "w90": (w * nineties).values}
+                        ).groupby("pid").sum()
+        m.attack_ratings = ((g["wc"] + prior_90s * lm_c90) / (g["w90"] + prior_90s)).to_dict()
+        m.attack_fallback = lm_c90
+
+        # Team factors (attack/defence multipliers, league avg xG).
+        m.lg_team_xg = past_team_xg["xg_for"].mean()
+        m.att_fac = (past_team_xg.groupby("team")["xg_for"].mean() / m.lg_team_xg).to_dict()
+        m.def_fac = (past_team_xg.groupby("team")["xg_against"].mean()
+                    / past_team_xg["xg_against"].mean()).to_dict()
+
+        # Defence ratings (proxy: team xGA in matches played, minutes-weighted).
+        lm_dc90 = past["xg_against"].fillna(m.lg_team_xg).mean()
+        gd = pd.DataFrame({"pid": past["player_id"].values,
+                          "wxga": (w * past["xg_against"] * nineties).values,
+                          "w90": (w * nineties).values}).groupby("pid").sum()
+        m.defence_ratings = ((gd["wxga"] + prior_90s * lm_dc90) / (gd["w90"] + prior_90s)).to_dict()
+        m.defence_fallback = lm_dc90
+
+        # Home advantage.
+        hm = past_team_xg[past_team_xg["side"] == "h"]["xg_for"].mean()
+        am = past_team_xg[past_team_xg["side"] == "a"]["xg_for"].mean()
+        m.home_mult = float(np.sqrt(hm / am)) if am else 1.0
+        return m
+
+    def predict(self, home_starters: list, away_starters: list,
+               home_team: str, away_team: str) -> dict:
+        """Predict total-goals distribution for a fixture given the ACTUAL
+        starting XIs (player ids matching the training data's `player_id`)."""
+        ref = 1.5 * self.lg_team_xg
+        att_h = sum(self.attack_ratings.get(p, self.attack_fallback) for p in home_starters) / ref
+        att_a = sum(self.attack_ratings.get(p, self.attack_fallback) for p in away_starters) / ref
+        dln_h = np.mean([self.defence_ratings.get(p, self.defence_fallback)
+                        for p in home_starters]) / self.lg_team_xg
+        dln_a = np.mean([self.defence_ratings.get(p, self.defence_fallback)
+                        for p in away_starters]) / self.lg_team_xg
+
+        h_full = self.lg_team_xg * att_h * dln_a * self.home_mult
+        a_full = self.lg_team_xg * att_a * dln_h / self.home_mult
+        h_team = (self.lg_team_xg * self.att_fac.get(home_team, 1.0)
+                 * self.def_fac.get(away_team, 1.0) * self.home_mult)
+        a_team = (self.lg_team_xg * self.att_fac.get(away_team, 1.0)
+                 * self.def_fac.get(home_team, 1.0) / self.home_mult)
+
+        exp_full, exp_team = h_full + a_full, h_team + a_team
+        exp_blend = self.blend_w * exp_team + (1 - self.blend_w) * exp_full
+        return {
+            "exp_team": exp_team, "exp_full": exp_full, "exp_blend": exp_blend,
+            "p_over25_team": _ou_prob_over25(exp_team),
+            "p_over25_full": _ou_prob_over25(exp_full),
+            "p_over25_blend": _ou_prob_over25(exp_blend),
+        }
+
+
 def accuracy_test(test_start: str = "2022-07-01", league: str = "E0",
-                  xa_weight: float = 0.5, prior_90s: float = PRIOR_90S) -> pd.DataFrame:
-    """Walk-forward. Returns per-match RAW expected totals for team-average,
-    half-lineup (attack only), and full-lineup (attack+defence) models, plus
-    outcome. Calibration/blending/metrics done downstream."""
+                  xa_weight: float = XA_WEIGHT, prior_90s: float = PRIOR_90S,
+                  min_train_rows: int = 5000) -> pd.DataFrame:
+    """Walk-forward backtest using LineupModel (identical to what live uses).
+    Returns raw expected totals for team/full-lineup models + outcome, for
+    downstream calibration/blend sweeps (see scripts/lineup_test.py)."""
     players = load_players()
-    players = players[players["league"] == league]
-    team_xg = build_team_xg(players)
-    # join each player-match row to its team's xG-against that match (for defence ratings)
-    players = players.merge(
-        team_xg[["match_id", "team", "xg_against"]],
-        left_on=["match_id", "team_us"], right_on=["match_id", "team"], how="left")
+    league_players = players[players["league"] == league]
 
-    # Home advantage: mean home xG / mean away xG in the data.
-    hm = team_xg[team_xg["side"] == "h"]["xg_for"].mean()
-    am = team_xg[team_xg["side"] == "a"]["xg_for"].mean()
-    home_mult = float(np.sqrt(hm / am)) if am else 1.0
-
-    # Work in Understat space: per-match home/away titles.
-    meta = players.groupby("match_id").agg(
-        date=("date", "first"), league=("league", "first"),
-        home_us=("home_us", "first"), away_us=("away_us", "first")).reset_index()
-    # actual total from player goals (== match goals up to rare own goals)
-    tot = players.groupby("match_id")["goals"].sum().rename("total").reset_index()
+    meta = league_players.groupby("match_id").agg(
+        date=("date", "first"), home_us=("home_us", "first"),
+        away_us=("away_us", "first")).reset_index()
+    tot = league_players.groupby("match_id")["goals"].sum().rename("total").reset_index()
     meta = meta.merge(tot, on="match_id")
 
-    starters = players[players["started"]]
+    starters = league_players[league_players["started"]]
     home_line = starters[starters.side == "h"].groupby("match_id")["player_id"].apply(list)
     away_line = starters[starters.side == "a"].groupby("match_id")["player_id"].apply(list)
 
@@ -142,47 +185,15 @@ def accuracy_test(test_start: str = "2022-07-01", league: str = "E0",
     rows = []
     for d in dates:
         d = pd.Timestamp(d)
-        past_players = players[players.date < d]
-        if len(past_players) < 5000:
+        past_rows = len(league_players[league_players["date"] < d])
+        if past_rows < min_train_rows:
             continue
-        # league mean contribution per 90 (for shrinkage prior)
-        contrib = past_players["xg"] + xa_weight * past_players["xa"]
-        lm_c90 = contrib.sum() / (past_players["minutes"].sum() / 90.0)
-        ratings = player_attack_ratings(players, d, lm_c90, xa_weight, prior_90s)
-        att_fac, def_fac, lg_team_xg = team_factors(team_xg, d)
-        fallback = lm_c90
-
-        lm_dc90 = past_players["xg_against"].fillna(lg_team_xg).mean()  # ~league avg xGA/match
-        dratings = player_defence_ratings(past_players, d, lm_dc90, prior_90s)
-        dfallback = lm_dc90
-
+        model = LineupModel.fit(players, league, d, xa_weight, prior_90s)
         for m in meta[meta.date == d].itertuples(index=False):
             hs, as_ = home_line.get(m.match_id, []), away_line.get(m.match_id, [])
             if not hs or not as_:
                 continue
-            # ATTACK: starter-contribution sum as an ABSOLUTE attack multiplier.
-            # Reference full-strength sum ~ 1.5*lg_team_xg (xG + xa_weight*xA);
-            # residual bias in that constant is removed by downstream scale calib.
-            ref = 1.5 * lg_team_xg
-            att_line_h = sum(ratings.get(p, fallback) for p in hs) / ref
-            att_line_a = sum(ratings.get(p, fallback) for p in as_) / ref
-
-            # DEFENCE: starting back-line's average xGA-while-playing, vs league avg.
-            dline_h = np.mean([dratings.get(p, dfallback) for p in hs]) / lg_team_xg
-            dline_a = np.mean([dratings.get(p, dfallback) for p in as_]) / lg_team_xg
-
-            # HALF-LINEUP (attack from XI, defence = team average) — the original test.
-            h_half = lg_team_xg * att_line_h * def_fac.get(m.away_us, 1.0) * home_mult
-            a_half = lg_team_xg * att_line_a * def_fac.get(m.home_us, 1.0) / home_mult
-            # FULL-LINEUP (attack AND defence both from the starting XI).
-            h_full = lg_team_xg * att_line_h * dline_a * home_mult
-            a_full = lg_team_xg * att_line_a * dline_h / home_mult
-            # TEAM baseline (no lineup info at all).
-            h_team = lg_team_xg * att_fac.get(m.home_us, 1.0) * def_fac.get(m.away_us, 1.0) * home_mult
-            a_team = lg_team_xg * att_fac.get(m.away_us, 1.0) * def_fac.get(m.home_us, 1.0) / home_mult
-            rows.append({
-                "date": d, "match_id": m.match_id, "over_won": bool(m.total > 2.5),
-                "exp_team": h_team + a_team, "exp_line": h_half + a_half,
-                "exp_full": h_full + a_full,
-            })
+            pred = model.predict(hs, as_, m.home_us, m.away_us)
+            rows.append({"date": d, "match_id": m.match_id, "over_won": bool(m.total > 2.5),
+                        "exp_team": pred["exp_team"], "exp_full": pred["exp_full"]})
     return pd.DataFrame(rows)

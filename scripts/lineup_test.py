@@ -1,10 +1,7 @@
-"""Does lineup info improve O/U prediction? Team vs half-lineup (attack-only)
-vs full-lineup (attack+defence from the actual starting XI).
-
-Runs the walk-forward test (raw expected totals), scale-calibrates each model
-PER LEAGUE, sweeps blend weights against the team baseline for both the
-half-lineup and full-lineup models, and reports Brier/log-loss/accuracy plus a
-paired significance test of the best model vs the team baseline.
+"""Regression check + blend sweep for the CONFIRMED full-lineup model
+(RESULTS.md: pooled t=3.04 across big-5). Uses players.LineupModel directly —
+the same class the live engine calls — so this also validates that refactor
+didn't drift from the confirmed result.
 """
 import sys
 from pathlib import Path
@@ -17,20 +14,17 @@ from scipy.stats import poisson
 
 from footymodel.players import accuracy_test
 
-XA_WEIGHT = 0.5
-PRIOR_90S = 6.0
 LEAGUES = sys.argv[1].split(",") if len(sys.argv) > 1 else ["E0"]
 
 frames = []
 for lg in LEAGUES:
-    rl = accuracy_test(test_start="2022-07-01", league=lg,
-                       xa_weight=XA_WEIGHT, prior_90s=PRIOR_90S)
+    rl = accuracy_test(test_start="2022-07-01", league=lg)
     rl["league"] = lg
     print(f"  {lg}: {len(rl)} matches")
     frames.append(rl)
 r = pd.concat(frames, ignore_index=True)
 y = r["over_won"].astype(int).values
-print(f"\nEvaluated {len(r)} matches across {LEAGUES} | xa_weight={XA_WEIGHT} prior_90s={PRIOR_90S}\n")
+print(f"\nEvaluated {len(r)} matches across {LEAGUES}\n")
 
 
 def calibrate_league(raw, target_mean):
@@ -44,13 +38,11 @@ def calibrate_league(raw, target_mean):
 
 
 team_t = np.zeros(len(r))
-half_t = np.zeros(len(r))
 full_t = np.zeros(len(r))
 for lg in LEAGUES:
     m = (r["league"] == lg).values
     target = y[m].mean()
     team_t[m] = calibrate_league(r.loc[m, "exp_team"].values, target)
-    half_t[m] = calibrate_league(r.loc[m, "exp_line"].values, target)
     full_t[m] = calibrate_league(r.loc[m, "exp_full"].values, target)
 
 
@@ -68,14 +60,13 @@ print("-" * 42)
 print(f"{'team':>14} {bt:>8.4f} {llt:>8.4f} {fat*100:>6.1f}%")
 
 best = (se_team, "team (baseline)", bt)
-for name, line_est in [("half (attack)", half_t), ("full (att+def)", full_t)]:
-    for w in [1.0, 0.75, 0.6, 0.5, 0.4, 0.25, 0.0]:
-        blend = w * team_t + (1 - w) * line_est
-        b, ll, fa, se = metrics(blend)
-        tag = f"{name} w={w}"
-        print(f"{tag:>14} {b:>8.4f} {ll:>8.4f} {fa*100:>6.1f}%")
-        if b < best[2]:
-            best = (se, tag, b)
+for w in [1.0, 0.75, 0.6, 0.5, 0.4, 0.25, 0.0]:
+    blend = w * team_t + (1 - w) * full_t
+    b, ll, fa, se = metrics(blend)
+    tag = f"full w={w}"
+    print(f"{tag:>14} {b:>8.4f} {ll:>8.4f} {fa*100:>6.1f}%")
+    if b < best[2]:
+        best = (se, tag, b)
 
 se_best, tag_best, b_best = best
 print("-" * 42)
