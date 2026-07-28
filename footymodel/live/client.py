@@ -15,10 +15,26 @@ from __future__ import annotations
 
 import os
 import time
+from pathlib import Path
 
 import requests
 
 BASE_URL = "https://v3.football.api-sports.io"
+
+_ENV_FILE = Path(__file__).resolve().parent.parent.parent / ".env"
+
+
+def _load_dotenv() -> None:
+    """Minimal .env loader (no new dependency) — doesn't override an already-set
+    env var. Keeps the key out of shell history / process env exports."""
+    if not _ENV_FILE.exists():
+        return
+    for line in _ENV_FILE.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, val = line.partition("=")
+        os.environ.setdefault(key.strip(), val.strip())
 
 
 class ApiFootballError(RuntimeError):
@@ -27,6 +43,7 @@ class ApiFootballError(RuntimeError):
 
 class ApiFootballClient:
     def __init__(self, api_key: str | None = None, min_interval: float = 1.0):
+        _load_dotenv()
         self.api_key = api_key or os.environ.get("API_FOOTBALL_KEY")
         if not self.api_key:
             raise ApiFootballError(
@@ -36,19 +53,24 @@ class ApiFootballClient:
         self._min_interval = min_interval
         self._last_call = 0.0
 
-    def _get(self, path: str, params: dict | None = None) -> dict:
-        wait = self._min_interval - (time.monotonic() - self._last_call)
-        if wait > 0:
-            time.sleep(wait)
-        resp = requests.get(f"{BASE_URL}/{path}", headers=self._headers,
-                            params=params or {}, timeout=20)
-        self._last_call = time.monotonic()
-        if resp.status_code != 200:
-            raise ApiFootballError(f"{path} -> HTTP {resp.status_code}: {resp.text[:300]}")
-        payload = resp.json()
-        if payload.get("errors"):
-            raise ApiFootballError(f"{path} -> API errors: {payload['errors']}")
-        return payload
+    def _get(self, path: str, params: dict | None = None, _retries: int = 3) -> dict:
+        for attempt in range(_retries + 1):
+            wait = self._min_interval - (time.monotonic() - self._last_call)
+            if wait > 0:
+                time.sleep(wait)
+            resp = requests.get(f"{BASE_URL}/{path}", headers=self._headers,
+                                params=params or {}, timeout=20)
+            self._last_call = time.monotonic()
+            if resp.status_code == 429 and attempt < _retries:
+                time.sleep(3 * (attempt + 1))  # per-minute limit — back off and retry
+                continue
+            if resp.status_code != 200:
+                raise ApiFootballError(f"{path} -> HTTP {resp.status_code}: {resp.text[:300]}")
+            payload = resp.json()
+            if payload.get("errors"):
+                raise ApiFootballError(f"{path} -> API errors: {payload['errors']}")
+            return payload
+        raise ApiFootballError(f"{path} -> rate-limited after {_retries} retries")
 
     def status(self) -> dict:
         """Account/quota status. Free call (does not count against the daily quota)."""

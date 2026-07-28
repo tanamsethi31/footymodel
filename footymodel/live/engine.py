@@ -171,35 +171,45 @@ class LiveWatcher:
         return row
 
     def run_once(self, hours_ahead: int = DEFAULT_HOURS_AHEAD) -> list[dict]:
+        """Query fixtures by DATE ONLY (no league/season filter) and filter
+        client-side by league id. The API-Football Free tier blocks the
+        league+season combo for the current season/date but date-only queries
+        work fine — confirmed against a live key on 2026-07-28."""
         seen = _load_seen()
         new_rows = []
         now = pd.Timestamp.now(tz="UTC")
-        today = now.strftime("%Y-%m-%d")
+        api_id_to_div = {v: k for k, v in LEAGUE_API_IDS.items()}
 
-        for league, api_id in LEAGUE_API_IDS.items():
+        # Cover a day boundary: fetch today's and tomorrow's date buckets.
+        all_fixtures = []
+        for date_str in {now.strftime("%Y-%m-%d"),
+                         (now + pd.Timedelta(days=1)).strftime("%Y-%m-%d")}:
             try:
-                fixtures = self.client.fixtures_by_date(today, league=api_id)
+                all_fixtures.extend(self.client.fixtures_by_date(date_str))
             except ApiFootballError as e:
-                print(f"! fixtures fetch failed for {league}: {e}")
+                print(f"! fixtures fetch failed for {date_str}: {e}")
+
+        for fx in all_fixtures:
+            div = api_id_to_div.get(fx["league"]["id"])
+            if div is None:
+                continue  # not one of our confirmed-model leagues
+            fid = fx["fixture"]["id"]
+            if fid in seen:
                 continue
-            for fx in fixtures:
-                fid = fx["fixture"]["id"]
-                if fid in seen:
-                    continue
-                kickoff = pd.Timestamp(fx["fixture"]["date"])
-                mins_to_ko = (kickoff - now).total_seconds() / 60
-                if not (0 <= mins_to_ko <= hours_ahead * 60):
-                    continue
-                print(f"  checking {fx['teams']['home']['name']} v "
-                      f"{fx['teams']['away']['name']} (kickoff in {mins_to_ko:.0f}min)")
-                try:
-                    row = self.process_fixture(league, fx)
-                except Exception as e:
-                    print(f"  ! error processing fixture {fid}: {e}")
-                    continue
-                if row is not None:
-                    new_rows.append(row)
-                    seen.add(fid)
+            kickoff = pd.Timestamp(fx["fixture"]["date"])
+            mins_to_ko = (kickoff - now).total_seconds() / 60
+            if not (0 <= mins_to_ko <= hours_ahead * 60):
+                continue
+            print(f"  checking {fx['teams']['home']['name']} v "
+                  f"{fx['teams']['away']['name']} (kickoff in {mins_to_ko:.0f}min)")
+            try:
+                row = self.process_fixture(div, fx)
+            except Exception as e:
+                print(f"  ! error processing fixture {fid}: {e}")
+                continue
+            if row is not None:
+                new_rows.append(row)
+                seen.add(fid)
 
         if new_rows:
             df = pd.DataFrame(new_rows)
@@ -214,18 +224,23 @@ class LiveWatcher:
 
 def verify_leagues():
     """Print what each hardcoded league ID actually resolves to — run this
-    once with a real key before trusting LEAGUE_API_IDS."""
+    once with a real key before trusting LEAGUE_API_IDS.
+
+    Uses the `leagues?id=` lookup, not fixtures?league=&season= — the latter is
+    blocked on the API-Football Free tier for the current season (confirmed
+    2026-07-26: "Free plans do not have access to this season, try from 2022 to
+    2024"). Live fixture fetching in run_once() instead queries by DATE ONLY
+    (works on Free tier) and filters by league id client-side."""
     client = ApiFootballClient()
-    season = pd.Timestamp.now().year
     for div, api_id in LEAGUE_API_IDS.items():
         try:
-            fx = client.fixtures_by_date(pd.Timestamp.now().strftime("%Y-%m-%d"),
-                                         league=api_id, season=season)
-            print(f"{div} -> league_id {api_id}: {len(fx)} fixtures today "
-                  f"(check names below match expectations)")
-            for f in fx[:2]:
-                print(f"    {f['league']['name']} ({f['league']['country']}): "
-                      f"{f['teams']['home']['name']} v {f['teams']['away']['name']}")
+            resp = client._get("leagues", {"id": api_id})["response"]
+            if not resp:
+                print(f"{div} -> league_id {api_id}: NO DATA — check the id")
+                continue
+            info = resp[0]
+            print(f"{div} -> league_id {api_id}: {info['league']['name']} "
+                  f"({info['country']['name']})")
         except ApiFootballError as e:
             print(f"{div} -> league_id {api_id}: ERROR {e}")
 
