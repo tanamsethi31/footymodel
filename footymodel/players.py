@@ -55,6 +55,28 @@ def player_attack_ratings(players: pd.DataFrame, as_of: pd.Timestamp,
     return rate.to_dict()
 
 
+def player_defence_ratings(players_with_xga: pd.DataFrame, as_of: pd.Timestamp,
+                          league_mean_dc90: float, prior_90s: float = PRIOR_90S) -> dict:
+    """Per-90 defensive-concession rating per player: the team's xG-against in
+    matches they played, minutes-weighted, time-decayed, shrunk to league mean.
+
+    This is a proxy (Understat has no individual defensive-action xG) standard
+    in public analytics: "goals/xG conceded per 90 while on the pitch." Lower =
+    better defender. Requires `xg_against` joined onto each player-match row."""
+    past = players_with_xga[players_with_xga["date"] < as_of]
+    if past.empty:
+        return {}
+    w = np.exp(-DECAY_XI * (as_of - past["date"]).dt.days.clip(lower=0))
+    nineties = past["minutes"] / 90.0
+    g = pd.DataFrame({
+        "pid": past["player_id"].values,
+        "wxga": (w * past["xg_against"] * nineties).values,
+        "w90": (w * nineties).values,
+    }).groupby("pid").sum()
+    rate = (g["wxga"] + prior_90s * league_mean_dc90) / (g["w90"] + prior_90s)
+    return rate.to_dict()
+
+
 def team_factors(team_xg: pd.DataFrame, as_of: pd.Timestamp) -> tuple[dict, dict, float]:
     """Per-team attack and defence multipliers (vs league avg) from past matches.
     Returns (attack_factor, defence_factor, league_avg_team_xg)."""
@@ -87,12 +109,16 @@ def _ou_prob_over25(total_mean: float) -> float:
 
 def accuracy_test(test_start: str = "2022-07-01", league: str = "E0",
                   xa_weight: float = 0.5, prior_90s: float = PRIOR_90S) -> pd.DataFrame:
-    """Walk-forward. Returns per-match RAW expected totals for the team-average
-    and lineup models (+ outcome). Calibration/blending/metrics done downstream
-    so blend weights can be swept cheaply."""
+    """Walk-forward. Returns per-match RAW expected totals for team-average,
+    half-lineup (attack only), and full-lineup (attack+defence) models, plus
+    outcome. Calibration/blending/metrics done downstream."""
     players = load_players()
     players = players[players["league"] == league]
     team_xg = build_team_xg(players)
+    # join each player-match row to its team's xG-against that match (for defence ratings)
+    players = players.merge(
+        team_xg[["match_id", "team", "xg_against"]],
+        left_on=["match_id", "team_us"], right_on=["match_id", "team"], how="left")
 
     # Home advantage: mean home xG / mean away xG in the data.
     hm = team_xg[team_xg["side"] == "h"]["xg_for"].mean()
@@ -126,23 +152,37 @@ def accuracy_test(test_start: str = "2022-07-01", league: str = "E0",
         att_fac, def_fac, lg_team_xg = team_factors(team_xg, d)
         fallback = lm_c90
 
+        lm_dc90 = past_players["xg_against"].fillna(lg_team_xg).mean()  # ~league avg xGA/match
+        dratings = player_defence_ratings(past_players, d, lm_dc90, prior_90s)
+        dfallback = lm_dc90
+
         for m in meta[meta.date == d].itertuples(index=False):
             hs, as_ = home_line.get(m.match_id, []), away_line.get(m.match_id, [])
             if not hs or not as_:
                 continue
-            # LINEUP: starter-contribution sum as an ABSOLUTE attack multiplier.
+            # ATTACK: starter-contribution sum as an ABSOLUTE attack multiplier.
             # Reference full-strength sum ~ 1.5*lg_team_xg (xG + xa_weight*xA);
             # residual bias in that constant is removed by downstream scale calib.
             ref = 1.5 * lg_team_xg
             att_line_h = sum(ratings.get(p, fallback) for p in hs) / ref
             att_line_a = sum(ratings.get(p, fallback) for p in as_) / ref
-            h_line = lg_team_xg * att_line_h * def_fac.get(m.away_us, 1.0) * home_mult
-            a_line = lg_team_xg * att_line_a * def_fac.get(m.home_us, 1.0) / home_mult
-            # TEAM baseline
+
+            # DEFENCE: starting back-line's average xGA-while-playing, vs league avg.
+            dline_h = np.mean([dratings.get(p, dfallback) for p in hs]) / lg_team_xg
+            dline_a = np.mean([dratings.get(p, dfallback) for p in as_]) / lg_team_xg
+
+            # HALF-LINEUP (attack from XI, defence = team average) — the original test.
+            h_half = lg_team_xg * att_line_h * def_fac.get(m.away_us, 1.0) * home_mult
+            a_half = lg_team_xg * att_line_a * def_fac.get(m.home_us, 1.0) / home_mult
+            # FULL-LINEUP (attack AND defence both from the starting XI).
+            h_full = lg_team_xg * att_line_h * dline_a * home_mult
+            a_full = lg_team_xg * att_line_a * dline_h / home_mult
+            # TEAM baseline (no lineup info at all).
             h_team = lg_team_xg * att_fac.get(m.home_us, 1.0) * def_fac.get(m.away_us, 1.0) * home_mult
             a_team = lg_team_xg * att_fac.get(m.away_us, 1.0) * def_fac.get(m.home_us, 1.0) / home_mult
             rows.append({
                 "date": d, "match_id": m.match_id, "over_won": bool(m.total > 2.5),
-                "exp_team": h_team + a_team, "exp_line": h_line + a_line,
+                "exp_team": h_team + a_team, "exp_line": h_half + a_half,
+                "exp_full": h_full + a_full,
             })
     return pd.DataFrame(rows)
