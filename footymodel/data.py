@@ -107,7 +107,8 @@ def normalize(df: pd.DataFrame, start_year: int, div: str) -> pd.DataFrame:
 
     for target, candidates in {**config.ODDS_CANDIDATES,
                                **config.ODDS_OPEN_CANDIDATES,
-                               **config.ODDS_MAX_CANDIDATES}.items():
+                               **config.ODDS_MAX_CANDIDATES,
+                               **config.ODDS_AH_CANDIDATES}.items():
         series = _resolve(df, candidates)
         out[target] = series.values if series is not None else pd.NA
 

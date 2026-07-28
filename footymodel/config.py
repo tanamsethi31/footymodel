@@ -113,3 +113,20 @@ ODDS_MAX_CANDIDATES = {
     "odds_h_maxopen": ["MaxH"], "odds_d_maxopen": ["MaxD"], "odds_a_maxopen": ["MaxA"],
     "odds_over25_maxopen": ["Max>2.5"], "odds_under25_maxopen": ["Max<2.5"],
 }
+
+# ASIAN HANDICAP (Phase C). `ah_line` is the handicap applied to the HOME team
+# (e.g. -0.75 means home must win by 1+ for a full cover, with a half-stake
+# push at a 0-goal margin). Quarter lines (x.25/x.75) split the stake across
+# two adjacent half/whole lines — settlement logic lives in model.py, not here.
+ODDS_AH_CANDIDATES = {
+    "ah_line": ["AHCh", "AHh"],            # closing preferred, opening fallback
+    "ah_line_open": ["AHh"],
+    "ah_odds_h": ["AvgCAHH", "B365CAHH", "PCAHH", "AvgAHH", "B365AHH"],
+    "ah_odds_a": ["AvgCAHA", "B365CAHA", "PCAHA", "AvgAHA", "B365AHA"],
+    "ah_odds_h_open": ["AvgAHH", "B365AHH", "PAHH"],
+    "ah_odds_a_open": ["AvgAHA", "B365AHA", "PAHA"],
+    "ah_odds_h_max": ["MaxCAHH"],
+    "ah_odds_a_max": ["MaxCAHA"],
+    "ah_odds_h_maxopen": ["MaxAHH"],
+    "ah_odds_a_maxopen": ["MaxAHA"],
+}
