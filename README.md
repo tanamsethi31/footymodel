@@ -60,11 +60,72 @@ python -m footymodel.recommend --league E1 --fixtures fixtures.csv
 Every run appends to `data/processed/paper_trades.csv`. Team names must match
 football-data.co.uk spellings (e.g. "Sheffield United", "Nott'm Forest").
 
-> **HONEST STATUS — paper-trade only.** The backtest verdict (`RESULTS.md`) is
-> **no edge**: O/U yield ~−7%, Closing Line Value ~−0.2% (negative). The model is
-> well-calibrated but cannot beat the market on public data. Track live paper
-> results; only consider real money if they turn *positive*, or after adding an
-> information edge the market lacks (injuries, lineups, team news).
+> **HONEST STATUS — paper-trade only.** The goals/xG statistical model shows
+> **no edge** vs. the market (`RESULTS.md`): O/U yield ~−7%, CLV ~−0.2%. The one
+> confirmed exception is the **lineup-aware model** (Phase A below) — knowing the
+> actual starting XI (attack + defence) measurably improves O/U prediction
+> accuracy, replicated significantly across all 5 big-5 leagues (pooled t=3.04).
+> That's an accuracy result, not a profit result yet — see Phase B.
+
+## Phase A — lineup-aware model (CONFIRMED)
+
+`players.py`'s `LineupModel` predicts total goals from the actual starting XI
+(both attack AND defence ratings, not team averages) using scraped Understat
+per-match rosters. This is the single model improvement that has held up under
+rigorous cross-league testing in this project — see `RESULTS.md` for the full
+big-5 confirmation (every league improved in the same direction, unlike an
+earlier half-built version that didn't replicate).
+
+```bash
+python -m footymodel.understat                    # already run — big-5 xG cached
+python scripts/build_players.py E0,SP1,D1,I1,F1    # scrape rosters (slow, cached)
+python scripts/lineup_test.py E0,SP1,D1,I1,F1      # reproduce the t=3.04 confirmation
+```
+
+## Phase B — live pipeline (detection / paper-trade, not execution)
+
+The closing line already prices lineups, so Phase A's edge can't be captured
+in a backtest — it can only exist in the **live window** right after lineups
+are confirmed (~20–40 min pre-kickoff, per API-Football's own docs) and before
+bookmakers re-price. `footymodel/live/` watches upcoming big-5 fixtures,
+detects confirmed lineups, runs the exact same `LineupModel` used in the
+confirmed backtest, fetches best-price O/U odds, and logs a timestamped
+recommendation. **No staking, no order placement — detection/paper-trade only.**
+
+### Setup
+1. Get an API-Football key: https://www.api-football.com/pricing (Free tier —
+   100 req/day — is enough to watch a handful of fixtures/day; Pro is $19/mo
+   for 7,500 req/day if you scale up). Claude cannot create this account for you.
+2. `export API_FOOTBALL_KEY=your_key_here` (add to your shell profile)
+3. **Verify the league IDs before trusting them** — they're the standard
+   documented ones but weren't verified against a live key while building this
+   (a Cloudflare bot-check + this environment's policy blocked the relevant
+   pages). Run once:
+   ```bash
+   python -m footymodel.live.engine --verify-leagues
+   ```
+   This prints what each hardcoded league ID actually resolves to — fix
+   `LEAGUE_API_IDS` in `footymodel/live/engine.py` if anything looks wrong.
+4. Run a poll (checks fixtures kicking off in the next 2h, logs any with
+   confirmed lineups it hasn't seen before):
+   ```bash
+   python -m footymodel.live.engine
+   ```
+5. Schedule it to run every 5–10 minutes during matchdays (e.g. `cron` or
+   macOS `launchd`) so it catches the 20–40 min lineup-confirmation window —
+   a single daily run will miss most fixtures.
+
+Recommendations log to `data/processed/live_recommendations.csv`. Every
+fixture is logged at most once (dedup via `data/processed/live_seen_fixtures.json`).
+
+### Before spending API quota — dry-run test (no key needed)
+```bash
+python scripts/live_dryrun.py
+```
+Runs the full pipeline (team/player matching, lineup parsing, best-price odds
+selection, EV calc) against a mocked API response built from real historical
+rosters. Already run and passing — use it again after any code change to the
+`live/` package.
 
 ## Roadmap
 
@@ -76,3 +137,6 @@ football-data.co.uk spellings (e.g. "Sheffield United", "Nott'm Forest").
 - [x] Phase 4 — O/U market-aware strategy + sweep (`strategy.py`)
 - [x] Phase 5 — staking / bankroll (`staking.py`)
 - [x] Phase 6 — recommender / paper-trade (`recommend.py`)
+- [x] Phase A — lineup-aware model (`players.py`) → **confirmed edge, t=3.04**
+- [x] Phase B — live lineup pipeline (`live/`) → built, dry-run validated,
+      **needs a real API-Football key to run live** (user action required)
