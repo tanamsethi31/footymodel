@@ -154,3 +154,8 @@ rosters. Already run and passing — use it again after any code change to the
 - [x] Phase A — lineup-aware model (`players.py`) → **confirmed edge, t=3.04**
 - [x] Phase B — live lineup pipeline (`live/`) → built, dry-run validated,
       **needs a real API-Football key to run live** (user action required)
+- [x] Phase C — Asian Handicap, all 7 leagues (`model.py` `predict_ah`,
+      `scripts/ah_backtest.py`) → **no edge** (best config: +2.05% yield but
+      CLV −1.52%, the "positive yield/negative CLV = noise" trap). Mid-tier
+      lineup extension via FBref researched and confirmed not viable (no
+      per-player xG for Championship/Eredivisie) — see RESULTS.md.

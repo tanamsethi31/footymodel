@@ -287,3 +287,69 @@ real, replicated evidence rather than an unconfirmed hunch.
 - **FBref xG on mid-tier leagues.** But xG bought only ~1pt on the big-5, and
   CLV is already negative on every mid-tier league here — so better inputs are
   unlikely to flip the sign. Recommendation: **accept the no-go.**
+
+---
+
+# Phase C — Asian Handicap (a new market, all 7 leagues)
+
+With ~2-3 weeks of runway before the season starts, tested a genuinely new
+market rather than more modelling on 1X2/O-U. football-data.co.uk's cached
+CSVs turned out to already contain full AH odds (`AHh`/`AHCh` line, `Avg`/`Max`
+`AHH`/`AHA` opening+closing) that this project had never touched — no new
+scraping needed.
+
+**Mid-tier lineup extension via FBref — researched and dropped, confirmed not
+viable.** Checked FBref match reports directly for Eredivisie and the
+Championship (our best-performing league): both have **no `xg` column at all**
+in the player-stats table, only basic box-score stats. FBref's per-player
+expected-goals data is restricted to the big-5 (+ a short list of others).
+Per the plan's stated fallback, this path was dropped rather than forced with
+a weaker proxy — Asian Handicap absorbed the "mid-tier depth" goal instead,
+since testing it properly means running across all 7 leagues anyway.
+
+## Implementation
+- `_ah_home_outcome()` (model.py): vectorized settlement for whole/half/quarter
+  lines (push, half-win, half-loss), unit-verified against 16 hand-computed
+  cases + an away-mirror symmetry check (`scripts/ah_settlement_test.py`) —
+  caught one wrong hand-computed *test* expectation (not a code bug) before all
+  checks passed.
+- `DixonColes.predict_ah()`: 5-bucket outcome probabilities from the existing
+  score matrix; verified probabilities sum to exactly 1.0000 on real fixtures.
+- `scripts/ah_backtest.py`: walk-forward across all 7 leagues, both value and
+  confidence-selection strategies (both previously shown to matter for O/U),
+  both average and best-price odds regimes, and genuine open→close CLV
+  (computed only on the 60.9% of fixtures where the line didn't move — AH
+  lines can shift, unlike O/U's fixed threshold, so this project doesn't mix
+  apples and oranges to get a number).
+
+## Results (pooled, 7 leagues, 2022-07 → 2025-06)
+
+| Strategy | Odds | Bets | Yield | t-stat | CLV n | CLV | Beat-close |
+|----------|-----:|-----:|------:|-------:|------:|----:|-----------:|
+| Confidence | avg | 3683 | −1.57% | −1.10 | 2133 | −0.77% | 38.8% |
+| **Confidence** | **max (best price)** | 3683 | **+2.05%** | 1.38 | **−1.52%** | **34.8%** |
+| Value | avg | 4808 | −3.47% | **−2.75 (significant)** | 2831 | −1.82% | 30.7% |
+| Value | max (best price) | 6079 | −0.20% | −0.17 | 3646 | −2.39% | 28.7% |
+
+Per-league (confidence @ best price): B1 +4.2%, E1 +4.5%, G1 +6.2%, N1 +3.5%
+(positive) vs. E0 −1.8%, P1 −0.1%, T1 −1.8% (negative/flat) — mixed, no
+individual t-stat exceeds 1.5, no consistent direction.
+
+## Verdict: no edge — the best-looking number is exactly the trap this
+## project's methodology exists to catch
+
+The single best config (confidence-selection @ best price, +2.05% yield) has
+**negative CLV (−1.52%) and a 34.8% beat-close rate** — well under the 50% a
+real edge needs. This is the identical diagnostic pattern used earlier in this
+project to correctly reject the half-lineup PL-only result as noise (before
+the full-lineup version replicated cleanly cross-league with *positive*,
+consistent improvement in every league). Here there's no such consistency:
+per-league yields scatter with no common direction, and CLV points the wrong
+way. **Positive yield + negative CLV = favourable variance in this sample, not
+edge.** Value-betting at average odds is unambiguously worse — a
+**statistically significant loss** (t=−2.75).
+
+**Asian Handicap joins 1X2 and Over/Under: a well-built model matches the
+market's fair line on this market too, but does not beat it.** Public data
+continues to hit the same ceiling regardless of which market is tested — the
+fourth confirmation of the project's central finding.
