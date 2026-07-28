@@ -96,24 +96,28 @@ recommendation. **No staking, no order placement — detection/paper-trade only.
 1. Get an API-Football key: https://www.api-football.com/pricing (Free tier —
    100 req/day — is enough to watch a handful of fixtures/day; Pro is $19/mo
    for 7,500 req/day if you scale up). Claude cannot create this account for you.
-2. `export API_FOOTBALL_KEY=your_key_here` (add to your shell profile)
-3. **Verify the league IDs before trusting them** — they're the standard
-   documented ones but weren't verified against a live key while building this
-   (a Cloudflare bot-check + this environment's policy blocked the relevant
-   pages). Run once:
-   ```bash
-   python -m footymodel.live.engine --verify-leagues
-   ```
-   This prints what each hardcoded league ID actually resolves to — fix
-   `LEAGUE_API_IDS` in `footymodel/live/engine.py` if anything looks wrong.
+2. Put the key in a local `.env` file at the repo root (gitignored, never
+   committed): `API_FOOTBALL_KEY=your_key_here`. `live/client.py` loads it
+   automatically.
+3. League IDs are VERIFIED against a live key (2026-07-28) — all 5 correct:
+   PL=39, La Liga=140, Bundesliga=78, Serie A=135, Ligue 1=61. Re-run
+   `python -m footymodel.live.engine --verify-leagues` any time to re-check.
 4. Run a poll (checks fixtures kicking off in the next 2h, logs any with
    confirmed lineups it hasn't seen before):
    ```bash
    python -m footymodel.live.engine
    ```
+   **CONFIRMED live constraint (Free tier):** fixture queries filtered by
+   `league`+`season` are blocked for the current season ("try from 2022 to
+   2024"). The engine works around this by querying by DATE ONLY (works fine)
+   and filtering by league id client-side — already fixed and verified working.
+   There's also a separate per-minute rate limit (not just the 100/day quota);
+   the client retries with backoff automatically.
 5. Schedule it to run every 5–10 minutes during matchdays (e.g. `cron` or
    macOS `launchd`) so it catches the 20–40 min lineup-confirmation window —
-   a single daily run will miss most fixtures.
+   a single daily run will miss most fixtures. Nothing to log yet in late July
+   (big-5 season starts mid-August) — "No new confirmed-lineup fixtures this
+   poll" is the correct, expected output until then.
 
 Recommendations log to `data/processed/live_recommendations.csv`. Every
 fixture is logged at most once (dedup via `data/processed/live_seen_fixtures.json`).
