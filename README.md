@@ -113,11 +113,21 @@ recommendation. **No staking, no order placement — detection/paper-trade only.
    and filtering by league id client-side — already fixed and verified working.
    There's also a separate per-minute rate limit (not just the 100/day quota);
    the client retries with backoff automatically.
-5. Schedule it to run every 5–10 minutes during matchdays (e.g. `cron` or
-   macOS `launchd`) so it catches the 20–40 min lineup-confirmation window —
-   a single daily run will miss most fixtures. Nothing to log yet in late July
-   (big-5 season starts mid-August) — "No new confirmed-lineup fixtures this
-   poll" is the correct, expected output until then.
+5. **Cron schedule installed** (`crontab -l` to view): every 20 minutes,
+   10:00–22:59 daily —
+   ```
+   */20 10-22 * * * cd /Users/tanamsethi/footymodel && /Users/tanamsethi/footymodel/.venv/bin/python -m footymodel.live.engine >> /Users/tanamsethi/footymodel/data/logs/live_poll.log 2>&1
+   ```
+   **Why not every 5 min around the clock:** the lineup window (20-40 min) only
+   needs ≤20min polling to guarantee a catch, but 24/7 polling at that rate would
+   burn 576 requests/day against the 100/day Free-tier quota. Concentrating ~39
+   polls/day (78 baseline requests) into realistic match hours leaves headroom
+   for the extra lineup+odds calls each detected fixture adds. Check
+   `data/logs/live_poll.log` for output; nothing to log yet in late July (big-5
+   season starts mid-August) — "No new confirmed-lineup fixtures this poll" is
+   the correct, expected output until then. Adjust the cron window once you
+   know actual kickoff times, or bump to Pro ($19/mo, 7,500 req/day) to poll
+   more aggressively/around the clock.
 
 Recommendations log to `data/processed/live_recommendations.csv`. Every
 fixture is logged at most once (dedup via `data/processed/live_seen_fixtures.json`).
