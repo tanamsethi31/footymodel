@@ -7,5 +7,6 @@ data/processed/
 .DS_Store
 .ipynb_checkpoints/
 .env
+data/logs/
 
 data/processed/paper_trades.csv
