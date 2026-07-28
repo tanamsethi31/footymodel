@@ -48,6 +48,47 @@ def _tau(x, y, lam, mu, rho):
     return out
 
 
+# --- Asian Handicap settlement (Phase C) -------------------------------------
+# `line` is the handicap added to the HOME side's goal margin (negative = home
+# favoured). Whole lines can push (stake refunded); half lines never push;
+# quarter lines (x.25/x.75) split the stake across the two adjacent lines and
+# settle each independently, which is what produces "half win"/"half loss".
+
+def _settle_one(margin, subline):
+    """Home-side outcome (+1 win / 0 push / -1 loss) for a single whole/half
+    sub-line. `margin` is always an integer, so push only fires when `subline`
+    is itself a whole number and exactly cancels the margin."""
+    adjusted = margin + subline
+    return np.where(adjusted > 1e-9, 1.0, np.where(adjusted < -1e-9, -1.0, 0.0))
+
+
+def _ah_home_outcome(margin, line: float):
+    """Home-side settlement outcome in {-1, -0.5, 0, 0.5, 1}, vectorized over
+    `margin` (integer goal-difference array). Quarter lines average the two
+    adjacent sub-line settlements (standard Asian Handicap mechanics)."""
+    frac = round((line * 4)) % 4
+    if frac in (1, 3):  # x.25 or x.75 — split across two adjacent lines
+        lo, hi = line - 0.25, line + 0.25
+        return (_settle_one(margin, lo) + _settle_one(margin, hi)) / 2.0
+    return _settle_one(margin, line)
+
+
+def ah_expected_value(buckets: dict, odds_h: float, odds_a: float) -> tuple:
+    """Expected profit per unit stake for backing home/away at the given AH
+    odds, using the exact 5-bucket breakdown from `DixonColes.predict_ah()` —
+    this correctly prices half-win/half-loss (quarter lines), unlike collapsing
+    to a single win probability first."""
+    ev_h = (buckets["p_home_full_win"] * (odds_h - 1)
+           + buckets["p_home_half_win"] * 0.5 * (odds_h - 1)
+           + buckets["p_home_half_loss"] * -0.5
+           + buckets["p_home_full_loss"] * -1.0)
+    ev_a = (buckets["p_home_full_loss"] * (odds_a - 1)  # away full win = home full loss
+           + buckets["p_home_half_loss"] * 0.5 * (odds_a - 1)
+           + buckets["p_home_half_win"] * -0.5
+           + buckets["p_home_full_win"] * -1.0)
+    return float(ev_h), float(ev_a)
+
+
 @dataclass
 class DixonColes:
     """A Dixon-Coles model fitted to one competition's matches."""
@@ -189,6 +230,37 @@ class DixonColes:
             "p_under25": float(m[total < 2.5].sum()),
             "p_btts_yes": float(m[1:, 1:].sum()),
             "p_btts_no": float(m[0, :].sum() + m[:, 0].sum() - m[0, 0]),
+        }
+
+    def predict_ah(self, home: str, away: str, line: float) -> dict:
+        """Asian Handicap outcome-probability buckets for the HOME side at
+        `line` (the handicap added to home's goal margin: negative = home
+        favoured). Derived from score_matrix() — no odds needed here.
+
+        Returns the 5 discrete settlement buckets (full/half win, push,
+        half/full loss) rather than a single win probability, because quarter
+        lines (x.25/x.75) split the stake across two adjacent lines and can
+        produce half-win/half-loss outcomes that a single probability can't
+        represent correctly. Away-side buckets are the exact mirror of home's
+        (home half-win <-> away half-loss, etc.) since AH is a zero-sum
+        two-way split — see `ah_expected_value()` for turning this into EV.
+        """
+        if home not in self.attack or away not in self.attack:
+            raise KeyError(f"Unknown team(s): {home!r} / {away!r} not in fitted model")
+        m = self.score_matrix(home, away)
+        n = m.shape[0]
+        margin = np.arange(n)[:, None] - np.arange(n)[None, :]
+        outcome = _ah_home_outcome(margin, line)  # vectorized over the (i,j) grid
+
+        def mass(val):
+            return float(m[np.isclose(outcome, val)].sum())
+
+        p_fw, p_hw, p_push, p_hl, p_fl = (mass(1.0), mass(0.5), mass(0.0),
+                                          mass(-0.5), mass(-1.0))
+        return {
+            "p_home_full_win": p_fw, "p_home_half_win": p_hw, "p_push": p_push,
+            "p_home_half_loss": p_hl, "p_home_full_loss": p_fl,
+            "p_home_cover": p_fw + p_hw, "p_away_cover": p_fl + p_hl,
         }
 
     def ratings_table(self) -> pd.DataFrame:
