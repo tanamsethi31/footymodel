@@ -44,20 +44,45 @@ def load_players() -> pd.DataFrame:
     return df
 
 
-def build_team_xg(players: pd.DataFrame) -> pd.DataFrame:
-    """Aggregate player-match rows to team-match xG for/against (for defence)."""
+def build_team_xg(players: pd.DataFrame, stat_col: str = "xg") -> pd.DataFrame:
+    """Aggregate player-match rows to team-match `stat_col` for/against (e.g.
+    xG for defence ratings, or `shots` for opponent shot-suppression)."""
+    for_col, against_col = f"{stat_col}_for", f"{stat_col}_against"
     tm = players.groupby(["match_id", "date", "league", "team_us", "side"], as_index=False).agg(
-        xg_for=("xg", "sum"))
+        **{for_col: (stat_col, "sum")})
     opp = tm.copy()
     opp["side"] = opp["side"].map({"h": "a", "a": "h"})
-    opp = opp.rename(columns={"xg_for": "xg_against", "team_us": "opp"})[
-        ["match_id", "side", "xg_against"]]
+    opp = opp.rename(columns={for_col: against_col, "team_us": "opp"})[
+        ["match_id", "side", against_col]]
     tm = tm.merge(opp, on=["match_id", "side"])
     return tm.rename(columns={"team_us": "team"})
 
 
 def _ou_prob_over25(total_mean: float) -> float:
     return float(1.0 - poisson.cdf(2, total_mean))
+
+
+def _decayed_rate(df: pd.DataFrame, stat_col: str, as_of: pd.Timestamp,
+                  decay_xi: float, prior_90s: float, id_col: str = "player_id"
+                  ) -> tuple[dict, float]:
+    """Time-decayed, shrunk per-90 rate for `stat_col`, keyed by `id_col`.
+    Shared by attack/defence/shots ratings — same shrinkage-toward-league-mean
+    formula, just a different target stat. Returns (rates_dict, league_mean)."""
+    w = np.exp(-decay_xi * (as_of - df["date"]).dt.days.clip(lower=0))
+    nineties = df["minutes"] / 90.0
+    league_mean = df[stat_col].sum() / nineties.sum()
+    g = pd.DataFrame({"id": df[id_col].values,
+                     "w_stat": (w * df[stat_col]).values,
+                     "w90": (w * nineties).values}).groupby("id").sum()
+    rates = (g["w_stat"] + prior_90s * league_mean) / (g["w90"] + prior_90s)
+    return rates.to_dict(), league_mean
+
+
+def prob_over(rate_per_90: float, minutes_expected: float, line: float) -> float:
+    """P(count >= line+1) i.e. P(over `line`) for a Poisson count stat (shots,
+    SOT, ...) given a per-90 rate and expected minutes played."""
+    lam = rate_per_90 * minutes_expected / 90.0
+    return float(1.0 - poisson.cdf(np.floor(line), lam))
 
 
 @dataclass
@@ -73,12 +98,15 @@ class LineupModel:
 
     attack_ratings: dict = field(default_factory=dict, repr=False)
     defence_ratings: dict = field(default_factory=dict, repr=False)
+    shots_ratings: dict = field(default_factory=dict, repr=False)
     att_fac: dict = field(default_factory=dict, repr=False)
     def_fac: dict = field(default_factory=dict, repr=False)
+    opp_shots_fac: dict = field(default_factory=dict, repr=False)
     lg_team_xg: float = 1.35
     home_mult: float = 1.0
     attack_fallback: float = 0.0
     defence_fallback: float = 0.0
+    shots_fallback: float = 0.0
     n_past_matches: int = 0
 
     @classmethod
@@ -101,16 +129,19 @@ class LineupModel:
         if past.empty or past_team_xg.empty:
             return m  # caller should check n_past_matches before trusting predictions
 
-        # Attack ratings.
-        w = np.exp(-DECAY_XI * (as_of - past["date"]).dt.days.clip(lower=0))
-        contrib = past["xg"] + xa_weight * past["xa"]
-        nineties = past["minutes"] / 90.0
-        lm_c90 = contrib.sum() / nineties.sum()
-        g = pd.DataFrame({"pid": past["player_id"].values,
-                         "wc": (w * contrib).values, "w90": (w * nineties).values}
-                        ).groupby("pid").sum()
-        m.attack_ratings = ((g["wc"] + prior_90s * lm_c90) / (g["w90"] + prior_90s)).to_dict()
-        m.attack_fallback = lm_c90
+        # Attack ratings (time-decayed, shrunk xG+xA per-90).
+        past = past.assign(_contrib=past["xg"] + xa_weight * past["xa"])
+        m.attack_ratings, m.attack_fallback = _decayed_rate(
+            past, "_contrib", as_of, DECAY_XI, prior_90s)
+
+        # Shots ratings (same formula, raw shots count instead of xG+xA).
+        m.shots_ratings, m.shots_fallback = _decayed_rate(
+            past, "shots", as_of, DECAY_XI, prior_90s)
+
+        # Opponent shot-suppression: team shots conceded vs league avg.
+        past_team_shots = build_team_xg(past, stat_col="shots")
+        m.opp_shots_fac = (past_team_shots.groupby("team")["shots_against"].mean()
+                          / past_team_shots["shots_against"].mean()).to_dict()
 
         # Team factors (attack/defence multipliers, league avg xG).
         m.lg_team_xg = past_team_xg["xg_for"].mean()
@@ -119,6 +150,8 @@ class LineupModel:
                     / past_team_xg["xg_against"].mean()).to_dict()
 
         # Defence ratings (proxy: team xGA in matches played, minutes-weighted).
+        w = np.exp(-DECAY_XI * (as_of - past["date"]).dt.days.clip(lower=0))
+        nineties = past["minutes"] / 90.0
         lm_dc90 = past["xg_against"].fillna(m.lg_team_xg).mean()
         gd = pd.DataFrame({"pid": past["player_id"].values,
                           "wxga": (w * past["xg_against"] * nineties).values,
@@ -160,6 +193,21 @@ class LineupModel:
             "p_over25_blend": _ou_prob_over25(exp_blend),
         }
 
+    def predict_player_shots(self, player_id, opponent_team: str,
+                             minutes_expected: float, line: float) -> float:
+        """P(player's shots in this match > `line`), from the player's own
+        decayed shot rate adjusted for the opponent's shot-suppression.
+
+        "Team playing style" is already baked into the player's own rate
+        (a winger on a possession-heavy team already shows a higher decayed
+        rate) — no separate style factor needed. Rest days / fitness are NOT
+        modeled (no data source for either); if you have a specific
+        adjustment, scale `minutes_expected` or the returned rate yourself.
+        """
+        rate = self.shots_ratings.get(player_id, self.shots_fallback)
+        rate *= self.opp_shots_fac.get(opponent_team, 1.0)
+        return prob_over(rate, minutes_expected, line)
+
 
 def accuracy_test(test_start: str = "2022-07-01", league: str = "E0",
                   xa_weight: float = XA_WEIGHT, prior_90s: float = PRIOR_90S,
@@ -197,3 +245,20 @@ def accuracy_test(test_start: str = "2022-07-01", league: str = "E0",
             rows.append({"date": d, "match_id": m.match_id, "over_won": bool(m.total > 2.5),
                         "exp_team": pred["exp_team"], "exp_full": pred["exp_full"]})
     return pd.DataFrame(rows)
+
+
+if __name__ == "__main__":
+    # Self-check: player-shots probability should behave sanely — more
+    # expected minutes -> higher P(over), and a known high-shot-volume
+    # attacker should clear a modest line more often than not.
+    players = load_players()
+    model = LineupModel.fit(players, "E0", pd.Timestamp("2024-01-01"))
+    top_shooter = max(model.shots_ratings, key=model.shots_ratings.get)
+    rate = model.shots_ratings[top_shooter]
+    p_60 = model.predict_player_shots(top_shooter, "Everton", 60, 1.5)
+    p_90 = model.predict_player_shots(top_shooter, "Everton", 90, 1.5)
+    print(f"top shot-rate player {top_shooter}: {rate:.2f} shots/90")
+    print(f"P(shots > 1.5 | 60 min) = {p_60:.3f}   P(shots > 1.5 | 90 min) = {p_90:.3f}")
+    assert 0 <= p_60 <= 1 and 0 <= p_90 <= 1
+    assert p_90 > p_60, "more minutes should raise P(over) for a fixed line"
+    print("OK")

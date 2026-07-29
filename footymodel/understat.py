@@ -139,6 +139,7 @@ def fetch_match_players(match_id: str, refresh: bool = False) -> list[dict]:
                 "player_id": p["player_id"], "player": p["player"],
                 "position": p["position"], "positionOrder": int(p.get("positionOrder", 0)),
                 "minutes": int(p["time"]), "goals": int(p["goals"]),
+                "shots": int(p.get("shots", 0)),
                 "xg": float(p["xG"]), "xa": float(p["xA"]),
                 "xgchain": float(p["xGChain"]), "xgbuildup": float(p["xGBuildup"]),
             })
