@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
-from scipy.stats import poisson
+from scipy.stats import nbinom, poisson
 
 from .understat import PLAYER_OUTPUT
 
@@ -35,6 +35,12 @@ DECAY_XI = 0.0018  # per-day time decay, matching the team model
 # Confirmed best blend from the big-5 test (RESULTS.md): 25% team-average +
 # 75% full-lineup. blend_w is the TEAM weight.
 BEST_BLEND_W = 0.25
+
+# Shots calibration (5-league walk-forward, scripts/shots_calibration_test.py):
+# a point-estimate Poisson was confirmed too sharp-tailed (persistent 5-11pt
+# overconfidence at 50-90% predicted probability, unmoved by more shrinkage).
+# Negative Binomial with this dispersion fixes it (swept 1-15, 3 was the knee).
+SHOTS_DISPERSION = 3.0
 
 
 def load_players() -> pd.DataFrame:
@@ -62,27 +68,68 @@ def _ou_prob_over25(total_mean: float) -> float:
     return float(1.0 - poisson.cdf(2, total_mean))
 
 
+# Understat position codes -> coarse group. A single league-wide shrinkage
+# prior badly overestimates low-volume players (keepers/defenders shrunk
+# toward a mean dominated by attackers) - confirmed empirically: it broke
+# calibration specifically at low shot-count lines. group_col in
+# _decayed_rate() shrinks each player toward their OWN group's mean instead.
+POSITION_GROUPS = {
+    "GK": "GK",
+    "DC": "DEF", "DL": "DEF", "DR": "DEF",
+    "DMC": "DMF", "DML": "DMF", "DMR": "DMF",
+    "MC": "MID", "ML": "MID", "MR": "MID",
+    "AMC": "AM", "AML": "AM", "AMR": "AM",
+    "FW": "FWD", "FWL": "FWD", "FWR": "FWD",
+}
+
+
 def _decayed_rate(df: pd.DataFrame, stat_col: str, as_of: pd.Timestamp,
-                  decay_xi: float, prior_90s: float, id_col: str = "player_id"
-                  ) -> tuple[dict, float]:
+                  decay_xi: float, prior_90s: float, id_col: str = "player_id",
+                  group_col: str | None = None) -> tuple[dict, float]:
     """Time-decayed, shrunk per-90 rate for `stat_col`, keyed by `id_col`.
-    Shared by attack/defence/shots ratings — same shrinkage-toward-league-mean
-    formula, just a different target stat. Returns (rates_dict, league_mean)."""
+    Shared by attack/defence/shots ratings — same shrinkage-toward-mean
+    formula, just a different target stat and (optionally) shrinkage target.
+
+    `group_col`: if given, shrink each player toward THEIR group's mean
+    (e.g. position) instead of one global mean — see POSITION_GROUPS above.
+    Returns (rates_dict, overall_league_mean) either way; the overall mean is
+    only used as a last-resort fallback for a player with no group info."""
     w = np.exp(-decay_xi * (as_of - df["date"]).dt.days.clip(lower=0))
     nineties = df["minutes"] / 90.0
-    league_mean = df[stat_col].sum() / nineties.sum()
+    overall_mean = df[stat_col].sum() / nineties.sum()
+
+    if group_col is not None:
+        gg = df.groupby(group_col).agg(_s=(stat_col, "sum"), _m=("minutes", "sum"))
+        grp_mean = gg["_s"] / (gg["_m"] / 90.0)
+        prior_mean = df[group_col].map(grp_mean).values
+    else:
+        prior_mean = overall_mean  # scalar broadcasts
+
     g = pd.DataFrame({"id": df[id_col].values,
                      "w_stat": (w * df[stat_col]).values,
-                     "w90": (w * nineties).values}).groupby("id").sum()
-    rates = (g["w_stat"] + prior_90s * league_mean) / (g["w90"] + prior_90s)
-    return rates.to_dict(), league_mean
+                     "w90": (w * nineties).values,
+                     "prior_mean": prior_mean}
+                    ).groupby("id").agg(w_stat=("w_stat", "sum"), w90=("w90", "sum"),
+                                        prior_mean=("prior_mean", "first"))
+    rates = (g["w_stat"] + prior_90s * g["prior_mean"]) / (g["w90"] + prior_90s)
+    return rates.to_dict(), overall_mean
 
 
-def prob_over(rate_per_90: float, minutes_expected: float, line: float) -> float:
-    """P(count >= line+1) i.e. P(over `line`) for a Poisson count stat (shots,
-    SOT, ...) given a per-90 rate and expected minutes played."""
+def prob_over(rate_per_90: float, minutes_expected: float, line: float,
+             dispersion: float | None = None) -> float:
+    """P(count > line) for a count stat (shots, SOT, ...) given a per-90 rate
+    and expected minutes played.
+
+    `dispersion` (None = Poisson): real shot counts are overdispersed (a
+    point-estimate Poisson is confirmed too sharp-tailed - calibration test
+    showed persistent overconfidence in the 50-90% probability range that MORE
+    shrinkage didn't fix). With a value, uses Negative Binomial instead
+    (variance = lam + lam^2/dispersion; smaller dispersion = fatter tails)."""
     lam = rate_per_90 * minutes_expected / 90.0
-    return float(1.0 - poisson.cdf(np.floor(line), lam))
+    if dispersion is None:
+        return float(1.0 - poisson.cdf(np.floor(line), lam))
+    n, p = dispersion, dispersion / (dispersion + lam)
+    return float(1.0 - nbinom.cdf(np.floor(line), n, p))
 
 
 @dataclass
@@ -112,7 +159,8 @@ class LineupModel:
     @classmethod
     def fit(cls, players: pd.DataFrame, league: str, as_of: pd.Timestamp,
            xa_weight: float = XA_WEIGHT, prior_90s: float = PRIOR_90S,
-           blend_w: float = BEST_BLEND_W) -> "LineupModel":
+           blend_w: float = BEST_BLEND_W, shots_prior_90s: float | None = None
+           ) -> "LineupModel":
         players = players[players["league"] == league]
         team_xg = build_team_xg(players)
         players = players.merge(
@@ -134,9 +182,17 @@ class LineupModel:
         m.attack_ratings, m.attack_fallback = _decayed_rate(
             past, "_contrib", as_of, DECAY_XI, prior_90s)
 
-        # Shots ratings (same formula, raw shots count instead of xG+xA).
+        # Shots ratings, shrunk toward each player's OWN position group's mean
+        # (not the whole-league mean — confirmed necessary, see POSITION_GROUPS).
+        non_sub = past[past["position"] != "Sub"]
+        pos_by_player = (non_sub.groupby("player_id")["position"]
+                        .agg(lambda s: s.mode().iat[0])
+                        .map(POSITION_GROUPS).fillna("MID"))
+        past = past.assign(
+            pos_group=past["player_id"].map(pos_by_player).fillna("MID"))
         m.shots_ratings, m.shots_fallback = _decayed_rate(
-            past, "shots", as_of, DECAY_XI, prior_90s)
+            past, "shots", as_of, DECAY_XI, shots_prior_90s or prior_90s,
+            group_col="pos_group")
 
         # Opponent shot-suppression: team shots conceded vs league avg.
         past_team_shots = build_team_xg(past, stat_col="shots")
@@ -194,7 +250,8 @@ class LineupModel:
         }
 
     def predict_player_shots(self, player_id, opponent_team: str,
-                             minutes_expected: float, line: float) -> float:
+                             minutes_expected: float, line: float,
+                             dispersion: float | None = SHOTS_DISPERSION) -> float:
         """P(player's shots in this match > `line`), from the player's own
         decayed shot rate adjusted for the opponent's shot-suppression.
 
@@ -203,10 +260,12 @@ class LineupModel:
         rate) — no separate style factor needed. Rest days / fitness are NOT
         modeled (no data source for either); if you have a specific
         adjustment, scale `minutes_expected` or the returned rate yourself.
+        `dispersion`: see prob_over() — defaults to the confirmed NB fit;
+        pass None for plain Poisson.
         """
         rate = self.shots_ratings.get(player_id, self.shots_fallback)
         rate *= self.opp_shots_fac.get(opponent_team, 1.0)
-        return prob_over(rate, minutes_expected, line)
+        return prob_over(rate, minutes_expected, line, dispersion)
 
 
 def accuracy_test(test_start: str = "2022-07-01", league: str = "E0",
