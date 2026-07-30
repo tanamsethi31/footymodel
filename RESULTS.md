@@ -422,14 +422,17 @@ model, not just a like-for-like swap:
   true position group is recovered the same way `players.py` already does it
   elsewhere - from that player's own starts elsewhere in the season.
 
-Scraped one season (PL 2023/24): **284/380 matches** (75%) before the
-in-tab async loop degraded from Chrome's background-tab timer throttling once
-other work took focus away from the tab - not a site block (the page loaded
-fine throughout; leaked `<iframe>`s from a few early timeouts also piled up
-and made it worse until cleaned up mid-run). Remaining ~96 matches deferred,
-same discipline as the FBref rate limit before it - a partial season is enough
-to validate calibration; filling the gap is a mechanical rerun, not a design
-question.
+Scraped one season (PL 2023/24) in two passes: **284/380** first (stopped when
+the in-tab async loop degraded from Chrome's background-tab timer throttling
+once other work took focus off the tab - not a site block, the page loaded
+fine throughout), then **326/380 matches (86%)** after a follow-up pass. The
+follow-up surfaced a real WhoScored rate limit, confirmed properly this time:
+a match that had scraped cleanly hours earlier started failing too, ruling out
+"just these specific pages are slow" and confirming session-wide throttling -
+same pattern as the FBref 429s in Phase D. Stopped there rather than hammer a
+blocked endpoint. Remaining 54 matches deferred, same discipline as before - a
+partial season is enough to validate calibration; filling the gap later is a
+mechanical rerun, not a design question.
 
 ## Calibration result
 
@@ -440,24 +443,25 @@ per-match minutes fed in as the exposure instead of a flat constant, for
 
 | Stat | Line | n | Base rate | Brier (Poisson) | Brier (NB disp=3) |
 |-----:|-----:|--:|----------:|----------------:|-------------------:|
-| shots | 0.5 | 5405 | 49.1% | 0.1795 | 0.1805 |
-| shots | 1.5 | 5405 | 24.4% | 0.1263 | 0.1277 |
-| shots | 2.5 | 5405 | 12.2% | 0.0792 | 0.0796 |
-| sot | 0.5 | 5405 | 25.5% | 0.1507 | 0.1515 |
-| sot | 1.5 | 5405 | 7.0% | 0.0535 | 0.0536 |
+| shots | 0.5 | 6662 | 49.0% | 0.1774 | 0.1787 |
+| shots | 1.5 | 6662 | 24.1% | 0.1259 | 0.1272 |
+| shots | 2.5 | 6662 | 12.0% | 0.0787 | 0.0791 |
+| sot | 0.5 | 6662 | 25.4% | 0.1511 | 0.1517 |
+| sot | 1.5 | 6662 | 6.8% | 0.0536 | 0.0536 |
 
-Gaps stay mostly within ±0.07 in populated buckets (n≥100) for every line,
-plain Poisson included. Notably **plain Poisson is now competitive with (and
-often tighter than) NB(disp=3)** across the board - the NB dispersion was
-tuned to correct for the flat-85-minutes assumption's unmodeled variance; real
-per-player minutes already remove a chunk of that variance, so the extra
-fat-tail correction isn't pulling as much weight anymore. Worth re-sweeping the
-dispersion constant (or dropping NB back to Poisson) once the full season is
-in, rather than assuming the old constant still applies to a different
-exposure model.
+Gaps tightened further with more data - mostly within ±0.04 in populated
+buckets (n≥100) for every line, plain Poisson included. Notably **plain
+Poisson is competitive with (and often tighter than) NB(disp=3)** across the
+board - the NB dispersion was tuned to correct for the flat-85-minutes
+assumption's unmodeled variance; real per-player minutes already remove a
+chunk of that variance, so the extra fat-tail correction isn't pulling as much
+weight anymore. Worth re-sweeping the dispersion constant (or dropping NB back
+to Poisson) once the rest of the season is in, rather than assuming the old
+constant still applies to a different exposure model.
 
-**Status: proof of concept confirmed, real-minutes upgrade validated.** Next
-steps: finish the remaining ~96 matches (rerun the same scrape with the tab
-kept in focus throughout), then decide whether WhoScored fully replaces FBref
-for this pipeline (`footymodel/live/shots_engine.py` currently still imports
-from `footymodel/fbref.py`) or the two are merged/cross-checked.
+**Status: proof of concept confirmed, real-minutes upgrade validated on 86%
+of a season.** Next steps: finish the remaining 54 matches once the rate
+limit clears (mechanical rerun, same script), then decide whether WhoScored
+fully replaces FBref for this pipeline
+(`footymodel/live/shots_engine.py` currently still imports from
+`footymodel/fbref.py`) or the two are merged/cross-checked.
