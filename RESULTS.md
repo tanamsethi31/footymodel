@@ -522,3 +522,23 @@ asserts `P(shots > line | home) > P(shots > line | away)`.
 
 **Status: confirmed and shipped.** Next candidate from the prioritized list:
 rest days / fixture congestion (also free — dates are already in the data).
+
+# Phase F (continued) — Rest days / fixture congestion: NO SIGNAL
+
+Tested both framings on WhoScored PL 2023/24: player-level (days since *that
+player's* last appearance) and team-level (days since the team's last
+fixture, the more literal "congestion" reading).
+
+| Measure | corr w/ shots/90 | corr w/ SOT/90 |
+|---|---:|---:|
+| Player-level rest days | -0.036 | -0.034 |
+| Team-level rest days | -0.004 | -0.008 |
+
+Both are indistinguishable from noise, and bucketed breakdowns aren't even
+monotonic (the 5-8 day bucket outperforms both the congested *and* the
+well-rested buckets in both framings) — the signature of arbitrary-binning
+noise, not a real effect. Compare to the venue factor above: a clean,
+monotonic ~26%/22% split, consistent across 17/19 teams.
+
+**Not added.** Same disciplined stop as every other no-edge result in this
+project — tested against real data, didn't hold up, doesn't ship.
