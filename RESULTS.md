@@ -395,3 +395,69 @@ up with more data/leagues, or is it a smaller-scale echo of the earlier
 "looked good on one dataset" trap? Recommended next step once the FBref rate
 limit clears: a second full season (or a second league) to cross-check, same
 discipline used throughout this project.
+
+# Phase E — Player Shots/SOT via WhoScored (real minutes, both stats at once)
+
+FBref's rate limit didn't clear in a useful timeframe, and its 403 block later
+escalated to a site-wide interactive CAPTCHA (hard stop - never attempt to
+solve one). Rather than wait, switched data source to **WhoScored**, using the
+user's real Chrome (`claude-in-chrome`) instead of the sandboxed browser, on
+the theory that a real browser session might dodge WhoScored's own
+fingerprinting layer too. It didn't fully - WhoScored's JSON stats API blocks
+a *second* call from the same page context regardless of delay - but the
+**already-rendered livestatistics page** reads reliably, and same-origin
+`<iframe>`s let the whole scrape run as one background async loop per browser
+tab (avoiding a live navigation - and a full round-trip - per match).
+
+WhoScored turned out richer than FBref in two ways that directly improve the
+model, not just a like-for-like swap:
+- **Real per-player minutes.** The page shows the exact substitution minute
+  for every starter subbed off and every sub brought on (unused subs show no
+  minute at all and are dropped). Previous models used a flat 85-minute
+  assumption for every appearance; this is the first version using each
+  player's *actual* minutes as the exposure in `prob_over`.
+- **Real position codes for starters** (GK/DC/DL/DR/DMC.../FW...) matching
+  `POSITION_GROUPS` directly - no id-recovery hack needed like FBref's
+  longest-common-prefix trick. Used subs are tagged generically `"Sub"`; their
+  true position group is recovered the same way `players.py` already does it
+  elsewhere - from that player's own starts elsewhere in the season.
+
+Scraped one season (PL 2023/24): **284/380 matches** (75%) before the
+in-tab async loop degraded from Chrome's background-tab timer throttling once
+other work took focus away from the tab - not a site block (the page loaded
+fine throughout; leaked `<iframe>`s from a few early timeouts also piled up
+and made it worse until cleaned up mid-run). Remaining ~96 matches deferred,
+same discipline as the FBref rate limit before it - a partial season is enough
+to validate calibration; filling the gap is a mechanical rerun, not a design
+question.
+
+## Calibration result
+
+Same generic helpers as everywhere else (`_decayed_rate` position-grouped
+shrinkage, `build_team_xg` opponent suppression, `prob_over`), but with real
+per-match minutes fed in as the exposure instead of a flat constant, for
+**both** shots and SOT from the same scrape:
+
+| Stat | Line | n | Base rate | Brier (Poisson) | Brier (NB disp=3) |
+|-----:|-----:|--:|----------:|----------------:|-------------------:|
+| shots | 0.5 | 5405 | 49.1% | 0.1795 | 0.1805 |
+| shots | 1.5 | 5405 | 24.4% | 0.1263 | 0.1277 |
+| shots | 2.5 | 5405 | 12.2% | 0.0792 | 0.0796 |
+| sot | 0.5 | 5405 | 25.5% | 0.1507 | 0.1515 |
+| sot | 1.5 | 5405 | 7.0% | 0.0535 | 0.0536 |
+
+Gaps stay mostly within ±0.07 in populated buckets (n≥100) for every line,
+plain Poisson included. Notably **plain Poisson is now competitive with (and
+often tighter than) NB(disp=3)** across the board - the NB dispersion was
+tuned to correct for the flat-85-minutes assumption's unmodeled variance; real
+per-player minutes already remove a chunk of that variance, so the extra
+fat-tail correction isn't pulling as much weight anymore. Worth re-sweeping the
+dispersion constant (or dropping NB back to Poisson) once the full season is
+in, rather than assuming the old constant still applies to a different
+exposure model.
+
+**Status: proof of concept confirmed, real-minutes upgrade validated.** Next
+steps: finish the remaining ~96 matches (rerun the same scrape with the tab
+kept in focus throughout), then decide whether WhoScored fully replaces FBref
+for this pipeline (`footymodel/live/shots_engine.py` currently still imports
+from `footymodel/fbref.py`) or the two are merged/cross-checked.

@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 data/raw/
 data/raw_fbref/
+data/raw_whoscored/
 data/processed/
 *.parquet
 .DS_Store

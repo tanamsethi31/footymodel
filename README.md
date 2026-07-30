@@ -166,3 +166,10 @@ rosters. Already run and passing — use it again after any code change to the
       `fetch()`. Real rate limit under sustained volume (HTTP 429 ~600
       requests/session) — one clean season done, second deferred until it
       clears. See RESULTS.md Phase D.
+- [x] Phase E — Player shots + SOT via WhoScored, real per-player minutes
+      (`footymodel/whoscored.py`, `scripts/whoscored_calibration_test.py`)
+      → **well-calibrated, 284/380 PL 2023/24 matches** (gaps mostly within
+      ±0.07). First version using each player's actual substitution minutes
+      instead of a flat 85-minute assumption. Remaining ~96 matches deferred
+      (Chrome background-tab throttling stalled the scrape, not a site
+      block). See RESULTS.md Phase E.
