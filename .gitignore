@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 data/raw/
+data/raw_fbref/
 data/processed/
 *.parquet
 .DS_Store

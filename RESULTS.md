@@ -353,3 +353,45 @@ edge.** Value-betting at average odds is unambiguously worse — a
 market's fair line on this market too, but does not beat it.** Public data
 continues to hit the same ceiling regardless of which market is tested — the
 fourth confirmation of the project's central finding.
+
+---
+
+# Phase D — Player Shots-on-Target (FBref)
+
+Extended the player-shots probability model (RESULTS.md above: minutes-fix +
+position-grouped shrinkage + Negative Binomial dispersion) to **shots on
+target**, which Understat doesn't track per-player. FBref does, but blocks
+direct HTTP requests (403/Cloudflare) - scraped via the browser's own `fetch()`
+context (piggybacks the browser's passed challenge), parsing FBref's raw HTML
+directly (`footymodel/fbref.py`, `scripts/fbref_ingest_batch.py`). Confirmed a
+real, escalating rate limit under sustained volume (HTTP 429 after ~600
+requests in one session) — not a permanent block, but real: got one full clean
+season (PL 2023/24, 380 matches, 0 errors, 8,360 rows) plus a partial prior
+season (66 matches) before hitting it. Second full season deferred until the
+limit clears.
+
+## Calibration result — well-calibrated from the first pass
+
+Reused the exact generic helpers already proven on the Understat shots model
+(`_decayed_rate` position-grouped shrinkage, `build_team_xg` generalized,
+`prob_over` NB dispersion) — no separate tuning needed, the fixes transferred
+directly:
+
+| Line | n | Base rate | Brier (Poisson) | Brier (NB disp=3) |
+|-----:|--:|----------:|----------------:|-------------------:|
+| 0.5 | 6886 | 28.2% | 0.1639 | 0.1642 |
+| 1.5 | 6886 | 7.9% | 0.0626 | 0.0626 |
+
+Gaps stay within ±0.03 across all well-populated buckets (n≥100) for both
+lines; the larger gaps only appear in tiny tail buckets (n=60, n=2 — noise, not
+signal). Poisson and NB are statistically indistinguishable here — the
+overdispersion fix mattered on the larger, multi-season shots dataset; on this
+smaller single-season sample there isn't enough data to tell them apart, so no
+need to force NB where it isn't shown to help.
+
+**Status: proof of concept confirmed on one league-season.** Same open
+question as the shots model before its own multi-league check: does this hold
+up with more data/leagues, or is it a smaller-scale echo of the earlier
+"looked good on one dataset" trap? Recommended next step once the FBref rate
+limit clears: a second full season (or a second league) to cross-check, same
+discipline used throughout this project.

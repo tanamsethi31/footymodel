@@ -159,3 +159,10 @@ rosters. Already run and passing — use it again after any code change to the
       CLV −1.52%, the "positive yield/negative CLV = noise" trap). Mid-tier
       lineup extension via FBref researched and confirmed not viable (no
       per-player xG for Championship/Eredivisie) — see RESULTS.md.
+- [x] Phase D — Player shots-on-target via FBref (`footymodel/fbref.py`,
+      `scripts/fbref_ingest_batch.py`, `scripts/fbref_sot_calibration_test.py`)
+      → **well-calibrated on one PL season** (gaps within ±0.03 in populated
+      buckets). FBref blocks direct requests; scraped via the browser's own
+      `fetch()`. Real rate limit under sustained volume (HTTP 429 ~600
+      requests/session) — one clean season done, second deferred until it
+      clears. See RESULTS.md Phase D.
