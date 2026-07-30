@@ -479,3 +479,46 @@ Next: decide whether WhoScored fully replaces FBref for this pipeline
 `footymodel/fbref.py`) or the two are merged/cross-checked. A second
 league or season would be the next real robustness check, same discipline
 used throughout this project.
+
+# Phase F — Home/away venue factor for player shots + SOT (CONFIRMED)
+
+Tested the cheapest of the "further build" candidates first: does venue
+(home/away) materially affect a player's shots/SOT rate, independent of
+opponent strength? Checked directly on the WhoScored PL 2023/24 data
+(`side` column, already present, no new data needed):
+
+- **League-wide: home shots rate is ~26% higher than away (1.40 vs 1.11
+  shots/90), home SOT ~22% higher (0.49 vs 0.40 SOT/90).** Consistent
+  across nearly every team (17/19 teams showed a positive home split for
+  shots) — a real, broad effect, not a couple of outlier teams.
+
+Added a league-wide venue multiplier (same precedent as `model.py`'s single
+`home_adv` constant — not per-team, since ~19 matches/team/venue is too
+noisy to split further) and A/B tested it walk-forward in
+`scripts/whoscored_calibration_test.py`:
+
+| Stat | Line | Brier (no venue) | Brier (+venue) |
+|-----:|-----:|------------------:|-----------------:|
+| shots | 0.5 | 0.1764 | 0.1754 |
+| shots | 1.5 | 0.1259 | 0.1242 |
+| shots | 2.5 | 0.0790 | 0.0777 |
+| sot | 0.5 | 0.1500 | 0.1498 |
+| sot | 1.5 | 0.0527 | 0.0525 |
+
+Brier improved on every line for both stats — small but completely
+consistent, no line got worse. The top-confidence bucket (0.9-1.0 predicted)
+also grew (n=28 → n=50 for shots line 1.5) while staying well-calibrated,
+which is the right signature for a genuine signal sharpening real high-
+probability cases, not noise being explained away.
+
+**Integrated into production** (`footymodel/players.py`'s `LineupModel` and
+`footymodel/fbref.py`'s `SOTModel` — the latter is data-source-agnostic, so
+this applies whether the model is eventually fit on FBref or WhoScored data):
+`predict_player_shots()`/`predict_player_sot()` now take a `side` param
+("h"/"a", defaults to "h" for backward compatibility) and multiply by the
+fitted `shots_venue_fac`/`venue_fac`. `footymodel/live/shots_engine.py`
+updated to pass the real side per fixture. Self-check in `players.py`
+asserts `P(shots > line | home) > P(shots > line | away)`.
+
+**Status: confirmed and shipped.** Next candidate from the prioritized list:
+rest days / fixture congestion (also free — dates are already in the data).

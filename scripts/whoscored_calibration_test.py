@@ -38,7 +38,15 @@ def fit_and_predict(players: pd.DataFrame, as_of: pd.Timestamp, stat_col: str):
     against_col = f"{stat_col}_against"
     opp_fac = (team_stat.groupby("team")[against_col].mean()
               / team_stat[against_col].mean()).to_dict()
-    return ratings, fallback, opp_fac
+
+    # League-wide (not per-team - too noisy at ~19 matches/team/venue) home/away
+    # multiplier, same precedent as model.py's single home_adv constant.
+    nineties = past["minutes"] / 90.0
+    side_agg = past.groupby("side").agg(_s=(stat_col, "sum"), _m=("minutes", "sum"))
+    by_side = side_agg["_s"] / (side_agg["_m"] / 90.0)
+    overall_p90 = past[stat_col].sum() / nineties.sum()
+    venue_fac = (by_side / overall_p90).to_dict()
+    return ratings, fallback, opp_fac, venue_fac
 
 
 def evaluate(players: pd.DataFrame, stat_col: str) -> pd.DataFrame:
@@ -49,7 +57,7 @@ def evaluate(players: pd.DataFrame, stat_col: str) -> pd.DataFrame:
         d = pd.Timestamp(d)
         if len(players[players["date"] < d]) < MIN_TRAIN_ROWS:
             continue
-        ratings, fallback, opp_fac = fit_and_predict(players, d, stat_col)
+        ratings, fallback, opp_fac, venue_fac = fit_and_predict(players, d, stat_col)
         day = players[players["date"] == d]
         for match_id, g in day.groupby("match_id"):
             teams = list(dict.fromkeys(g["team_us"]))
@@ -57,8 +65,10 @@ def evaluate(players: pd.DataFrame, stat_col: str) -> pd.DataFrame:
                 continue
             opp_of = {teams[0]: teams[1], teams[1]: teams[0]}
             for r in g.itertuples(index=False):
-                rate = ratings.get(r.player_id, fallback) * opp_fac.get(opp_of[r.team_us], 1.0)
-                rows.append({"rate": rate, "minutes": r.minutes, "actual": getattr(r, stat_col)})
+                base_rate = ratings.get(r.player_id, fallback) * opp_fac.get(opp_of[r.team_us], 1.0)
+                venue_rate = base_rate * venue_fac.get(r.side, 1.0)
+                rows.append({"rate": base_rate, "venue_rate": venue_rate,
+                            "minutes": r.minutes, "actual": getattr(r, stat_col)})
     return pd.DataFrame(rows)
 
 
@@ -69,11 +79,11 @@ for stat_col, lines in STAT_LINES.items():
     evals = evaluate(players, stat_col)
     print(f"##### {stat_col.upper()} — evaluated {len(evals)} player-match predictions #####\n")
     for line in lines:
-        for tag, disp in [("Poisson", None), (f"NB(disp={SHOTS_DISPERSION})", SHOTS_DISPERSION)]:
-            p = np.array([prob_over(r.rate, r.minutes, line, disp) for r in evals.itertuples(index=False)])
+        for rate_col, rate_tag in [("rate", "no venue"), ("venue_rate", "+venue")]:
+            p = np.array([prob_over(r, m, line, None) for r, m in zip(evals[rate_col], evals["minutes"])])
             won = (evals["actual"] > line).values
             brier = np.mean((p - won) ** 2)
-            print(f"=== line {line} [{tag}] — n={len(p)} — base rate {won.mean()*100:.1f}% — Brier {brier:.4f} ===")
+            print(f"=== line {line} [Poisson, {rate_tag}] — n={len(p)} — base rate {won.mean()*100:.1f}% — Brier {brier:.4f} ===")
             print(calibration_table(pd.DataFrame({"p": p, "won": won}))
                   .to_string(index=False, float_format=lambda v: f"{v:.3f}"))
             print()

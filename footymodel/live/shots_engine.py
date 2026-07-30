@@ -67,9 +67,9 @@ class PropsWatcher:
 
         shots_model, sot_model = self._models()
         rows = []
-        for side_l, team_name, team_u, team_f, opp_u, opp_f in [
-            (home_l, teams["home"]["name"], home_u, home_f, away_u, away_f),
-            (away_l, teams["away"]["name"], away_u, away_f, home_u, home_f),
+        for side_l, team_name, team_u, team_f, opp_u, opp_f, side in [
+            (home_l, teams["home"]["name"], home_u, home_f, away_u, away_f, "h"),
+            (away_l, teams["away"]["name"], away_u, away_f, home_u, home_f, "a"),
         ]:
             names = [p["player"]["name"] for p in side_l.get("startXI", [])]
             u_roster = namematch.team_roster_index(self.understat, LEAGUE, team_u) if team_u else {}
@@ -81,11 +81,11 @@ class PropsWatcher:
                       "team": team_name, "player": name}
                 for line in SHOTS_LINES:
                     key = f"p_shots_gt{line}"
-                    row[key] = (round(shots_model.predict_player_shots(u_pid, opp_u, MINUTES_ASSUMED, line), 3)
+                    row[key] = (round(shots_model.predict_player_shots(u_pid, opp_u, MINUTES_ASSUMED, line, side), 3)
                                if u_pid and opp_u else None)
                 for line in SOT_LINES:
                     key = f"p_sot_gt{line}"
-                    row[key] = (round(sot_model.predict_player_sot(f_pid, opp_f, MINUTES_ASSUMED, line), 3)
+                    row[key] = (round(sot_model.predict_player_sot(f_pid, opp_f, MINUTES_ASSUMED, line, side), 3)
                                if f_pid and opp_f else None)
                 rows.append(row)
         return rows

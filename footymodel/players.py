@@ -149,6 +149,7 @@ class LineupModel:
     att_fac: dict = field(default_factory=dict, repr=False)
     def_fac: dict = field(default_factory=dict, repr=False)
     opp_shots_fac: dict = field(default_factory=dict, repr=False)
+    shots_venue_fac: dict = field(default_factory=dict, repr=False)
     lg_team_xg: float = 1.35
     home_mult: float = 1.0
     attack_fallback: float = 0.0
@@ -198,6 +199,15 @@ class LineupModel:
         past_team_shots = build_team_xg(past, stat_col="shots")
         m.opp_shots_fac = (past_team_shots.groupby("team")["shots_against"].mean()
                           / past_team_shots["shots_against"].mean()).to_dict()
+
+        # Home/away venue multiplier for shots (confirmed real: ~26% higher
+        # home shot rate league-wide, WhoScored PL 2023/24 - improved Brier
+        # on every line in the walk-forward test). League-wide, not per-team
+        # (too noisy at ~19 matches/team/venue) - same precedent as home_mult
+        # below being a single league constant, not per-team.
+        side_agg = past.groupby("side").agg(_s=("shots", "sum"), _m=("minutes", "sum"))
+        shots_p90 = past["shots"].sum() / (past["minutes"] / 90.0).sum()
+        m.shots_venue_fac = ((side_agg["_s"] / (side_agg["_m"] / 90.0)) / shots_p90).to_dict()
 
         # Team factors (attack/defence multipliers, league avg xG).
         m.lg_team_xg = past_team_xg["xg_for"].mean()
@@ -251,10 +261,15 @@ class LineupModel:
 
     def predict_player_shots(self, player_id, opponent_team: str,
                              minutes_expected: float, line: float,
+                             side: str = "h",
                              dispersion: float | None = SHOTS_DISPERSION) -> float:
         """P(player's shots in this match > `line`), from the player's own
-        decayed shot rate adjusted for the opponent's shot-suppression.
+        decayed shot rate adjusted for the opponent's shot-suppression and
+        home/away venue.
 
+        `side`: "h" if this player's team is at home, "a" if away — confirmed
+        real (~26% higher home shot rate league-wide); defaults to "h" for
+        backward compatibility, but pass the actual side for live predictions.
         "Team playing style" is already baked into the player's own rate
         (a winger on a possession-heavy team already shows a higher decayed
         rate) — no separate style factor needed. Rest days / fitness are NOT
@@ -265,6 +280,7 @@ class LineupModel:
         """
         rate = self.shots_ratings.get(player_id, self.shots_fallback)
         rate *= self.opp_shots_fac.get(opponent_team, 1.0)
+        rate *= self.shots_venue_fac.get(side, 1.0)
         return prob_over(rate, minutes_expected, line, dispersion)
 
 
@@ -314,10 +330,14 @@ if __name__ == "__main__":
     model = LineupModel.fit(players, "E0", pd.Timestamp("2024-01-01"))
     top_shooter = max(model.shots_ratings, key=model.shots_ratings.get)
     rate = model.shots_ratings[top_shooter]
-    p_60 = model.predict_player_shots(top_shooter, "Everton", 60, 1.5)
-    p_90 = model.predict_player_shots(top_shooter, "Everton", 90, 1.5)
+    p_60 = model.predict_player_shots(top_shooter, "Everton", 60, 1.5, "h")
+    p_90 = model.predict_player_shots(top_shooter, "Everton", 90, 1.5, "h")
+    p_home = model.predict_player_shots(top_shooter, "Everton", 90, 1.5, "h")
+    p_away = model.predict_player_shots(top_shooter, "Everton", 90, 1.5, "a")
     print(f"top shot-rate player {top_shooter}: {rate:.2f} shots/90")
     print(f"P(shots > 1.5 | 60 min) = {p_60:.3f}   P(shots > 1.5 | 90 min) = {p_90:.3f}")
+    print(f"P(shots > 1.5 | home) = {p_home:.3f}   P(shots > 1.5 | away) = {p_away:.3f}")
     assert 0 <= p_60 <= 1 and 0 <= p_90 <= 1
     assert p_90 > p_60, "more minutes should raise P(over) for a fixed line"
+    assert p_home > p_away, "home venue should raise P(over) given the confirmed home shot-rate edge"
     print("OK")
