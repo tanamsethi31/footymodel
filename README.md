@@ -168,9 +168,10 @@ rosters. Already run and passing — use it again after any code change to the
       clears. See RESULTS.md Phase D.
 - [x] Phase E — Player shots + SOT via WhoScored, real per-player minutes
       (`footymodel/whoscored.py`, `scripts/whoscored_calibration_test.py`)
-      → **well-calibrated, 326/380 PL 2023/24 matches (86%)** (gaps mostly
-      within ±0.04 in populated buckets). First version using each player's
+      → **well-calibrated, full 380/380 PL 2023/24 season** (gaps mostly
+      within ±0.03 in populated buckets). First version using each player's
       actual substitution minutes instead of a flat 85-minute assumption.
-      Remaining 54 matches deferred - a real WhoScored rate limit confirmed
-      (a previously-successful match started failing too), same pattern as
-      the FBref 429s in Phase D. See RESULTS.md Phase E.
+      Hit a real WhoScored rate limit mid-scrape (confirmed properly: a
+      previously-successful match started failing too), same pattern as the
+      FBref 429s in Phase D - waited it out and finished the season once it
+      cleared. See RESULTS.md Phase E.

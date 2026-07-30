@@ -422,17 +422,31 @@ model, not just a like-for-like swap:
   true position group is recovered the same way `players.py` already does it
   elsewhere - from that player's own starts elsewhere in the season.
 
-Scraped one season (PL 2023/24) in two passes: **284/380** first (stopped when
-the in-tab async loop degraded from Chrome's background-tab timer throttling
-once other work took focus off the tab - not a site block, the page loaded
-fine throughout), then **326/380 matches (86%)** after a follow-up pass. The
-follow-up surfaced a real WhoScored rate limit, confirmed properly this time:
-a match that had scraped cleanly hours earlier started failing too, ruling out
-"just these specific pages are slow" and confirming session-wide throttling -
-same pattern as the FBref 429s in Phase D. Stopped there rather than hammer a
-blocked endpoint. Remaining 54 matches deferred, same discipline as before - a
-partial season is enough to validate calibration; filling the gap later is a
-mechanical rerun, not a design question.
+Scraped the full season (PL 2023/24, all 380 matches) across three passes,
+stopping and resuming as real obstacles came up rather than forcing through
+them:
+1. **284/380** - the in-tab async loop degraded from Chrome's background-tab
+   timer throttling once other work took focus off the tab (not a site block,
+   the page loaded fine throughout).
+2. **326/380** - a follow-up pass surfaced a real WhoScored rate limit,
+   confirmed properly: a match that had scraped cleanly hours earlier started
+   failing too, ruling out "just these specific pages are slow" and
+   confirming session-wide throttling - same pattern as the FBref 429s in
+   Phase D. Stopped rather than hammer a blocked endpoint.
+3. **380/380** - retried after the rate limit cleared (~30+ min later, at the
+   user's prompt); the remaining 54 matches scraped cleanly in one pass with
+   zero errors, confirming the earlier failures really were rate-limiting,
+   not a permanent block or a data-quality problem with those specific
+   matches. The `<iframe>`-leak bug from pass 1 was also fixed (always
+   `.remove()` in a `finally` block) before this run.
+
+One real bug surfaced only at full-season scale and is worth naming: five
+matches ended up with a **cross-product row explosion** (1.8M rows instead of
+~11k) the first time `whoscored.py`'s date-join ran, because the per-side
+`home`/`away` frames used for matching against football-data.co.uk weren't
+deduplicated by `match_id` before merging - every home player row joined
+against every away player row. Fixed with `.drop_duplicates("match_id")`
+before the merge (`footymodel/whoscored.py`).
 
 ## Calibration result
 
@@ -443,25 +457,25 @@ per-match minutes fed in as the exposure instead of a flat constant, for
 
 | Stat | Line | n | Base rate | Brier (Poisson) | Brier (NB disp=3) |
 |-----:|-----:|--:|----------:|----------------:|-------------------:|
-| shots | 0.5 | 6662 | 49.0% | 0.1774 | 0.1787 |
-| shots | 1.5 | 6662 | 24.1% | 0.1259 | 0.1272 |
-| shots | 2.5 | 6662 | 12.0% | 0.0787 | 0.0791 |
-| sot | 0.5 | 6662 | 25.4% | 0.1511 | 0.1517 |
-| sot | 1.5 | 6662 | 6.8% | 0.0536 | 0.0536 |
+| shots | 0.5 | 8206 | 48.9% | 0.1764 | 0.1777 |
+| shots | 1.5 | 8206 | 24.0% | 0.1259 | 0.1270 |
+| shots | 2.5 | 8206 | 11.9% | 0.0790 | 0.0792 |
+| sot | 0.5 | 8206 | 25.3% | 0.1500 | 0.1506 |
+| sot | 1.5 | 8206 | 6.7% | 0.0527 | 0.0527 |
 
-Gaps tightened further with more data - mostly within ±0.04 in populated
-buckets (n≥100) for every line, plain Poisson included. Notably **plain
-Poisson is competitive with (and often tighter than) NB(disp=3)** across the
-board - the NB dispersion was tuned to correct for the flat-85-minutes
-assumption's unmodeled variance; real per-player minutes already remove a
-chunk of that variance, so the extra fat-tail correction isn't pulling as much
-weight anymore. Worth re-sweeping the dispersion constant (or dropping NB back
-to Poisson) once the rest of the season is in, rather than assuming the old
-constant still applies to a different exposure model.
+Gaps tightened further with the complete season - mostly within ±0.03 in
+populated buckets (n≥100) for every line, plain Poisson included. Notably
+**plain Poisson is competitive with (and often tighter than) NB(disp=3)**
+across the board - the NB dispersion was tuned to correct for the
+flat-85-minutes assumption's unmodeled variance; real per-player minutes
+already remove a chunk of that variance, so the extra fat-tail correction
+isn't pulling as much weight anymore. Worth re-sweeping the dispersion
+constant (or dropping NB back to Poisson) as the default, now that a full
+season confirms this isn't a small-sample artifact.
 
-**Status: proof of concept confirmed, real-minutes upgrade validated on 86%
-of a season.** Next steps: finish the remaining 54 matches once the rate
-limit clears (mechanical rerun, same script), then decide whether WhoScored
-fully replaces FBref for this pipeline
+**Status: confirmed on a complete season, real-minutes upgrade validated.**
+Next: decide whether WhoScored fully replaces FBref for this pipeline
 (`footymodel/live/shots_engine.py` currently still imports from
-`footymodel/fbref.py`) or the two are merged/cross-checked.
+`footymodel/fbref.py`) or the two are merged/cross-checked. A second
+league or season would be the next real robustness check, same discipline
+used throughout this project.
