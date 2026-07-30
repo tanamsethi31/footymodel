@@ -10,10 +10,12 @@ scripts/fbref_ingest_batch.py).
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass, field
 
 import pandas as pd
 
 from .data import ROOT
+from .players import DECAY_XI, POSITION_GROUPS, SHOTS_DISPERSION, build_team_xg, _decayed_rate, prob_over
 
 RAW = ROOT / "data" / "raw_fbref" / "player_match.jsonl"
 
@@ -51,3 +53,77 @@ def load_players() -> pd.DataFrame:
     df["side"] = df.apply(lambda r: side_map.get((r["match_url"], r["team_id"])), axis=1)
     df = df.dropna(subset=["side"])
     return df.rename(columns={"match_url": "match_id", "team_id": "team_us"}).reset_index(drop=True)
+
+
+def team_display_names(players: pd.DataFrame) -> dict:
+    """FBref's team_us is an opaque hex id (from the table's id="stats_XXXX_..."),
+    not a name — we never scraped a name field directly. Recover one from the
+    match URL slugs: for each team's HOME appearances, the longest common
+    prefix across multiple different-opponent slugs isolates the team's own
+    name (opponent names vary, so they diverge right after it). FBref's
+    "-Derby-" special-named rivalry matches (e.g. "North-London-Derby-...")
+    break this and are excluded. Returns {team_us: "Real Name"}."""
+    home = players[players["side"] == "h"][["team_us", "match_id"]].drop_duplicates()
+
+    def slug(url: str) -> str:
+        tail = url.rstrip("/").split("/")[-1]
+        m = _DATE_RE.search(tail)
+        return tail[: m.start()] if m else tail
+
+    home = home.assign(slug=home["match_id"].apply(slug))
+    home = home[~home["slug"].str.contains("Derby")]
+
+    names = {}
+    for tid, g in home.groupby("team_us"):
+        slugs = g["slug"].tolist()
+        common = slugs[0]
+        for s in slugs[1:]:
+            i = 0
+            while i < min(len(common), len(s)) and common[i] == s[i]:
+                i += 1
+            common = common[:i]
+        names[tid] = common.rstrip("-").replace("-", " ")
+    return names
+
+
+@dataclass
+class SOTModel:
+    """Shots-on-target rate model — same shrinkage/suppression math already
+    confirmed on the Understat shots model (RESULTS.md Phase D: well-calibrated
+    from the first pass, gaps within +-0.03). Mirrors LineupModel's
+    predict_player_shots() API for consistency.
+    """
+    league: str
+    as_of: pd.Timestamp
+    ratings: dict = field(default_factory=dict, repr=False)
+    fallback: float = 0.0
+    opp_fac: dict = field(default_factory=dict, repr=False)
+    n_past_matches: int = 0
+
+    @classmethod
+    def fit(cls, players: pd.DataFrame, league: str, as_of: pd.Timestamp,
+           prior_90s: float = 6.0) -> "SOTModel":
+        as_of = pd.Timestamp(as_of)
+        past = players[(players["league"] == league) & (players["date"] < as_of)]
+        m = cls(league=league, as_of=as_of, n_past_matches=past["match_id"].nunique())
+        if past.empty:
+            return m
+
+        pos_by_player = (past.groupby("player_id")["position"]
+                        .agg(lambda s: s.mode().iat[0])
+                        .map(POSITION_GROUPS).fillna("MID"))
+        past = past.assign(pos_group=past["player_id"].map(pos_by_player).fillna("MID"))
+        m.ratings, m.fallback = _decayed_rate(past, "sot", as_of, DECAY_XI, prior_90s,
+                                              group_col="pos_group")
+        team_sot = build_team_xg(past, stat_col="sot")
+        m.opp_fac = (team_sot.groupby("team")["sot_against"].mean()
+                    / team_sot["sot_against"].mean()).to_dict()
+        return m
+
+    def predict_player_sot(self, player_id, opponent_team: str,
+                           minutes_expected: float, line: float,
+                           dispersion: float | None = SHOTS_DISPERSION) -> float:
+        """P(player's shots-on-target in this match > `line`)."""
+        rate = self.ratings.get(player_id, self.fallback)
+        rate *= self.opp_fac.get(opponent_team, 1.0)
+        return prob_over(rate, minutes_expected, line, dispersion)
