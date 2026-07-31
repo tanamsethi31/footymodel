@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Compile-check every module (catches syntax/import errors)
+        run: python -m compileall -q footymodel scripts
+      - name: Asian Handicap settlement logic (pure, data-free)
+        run: python scripts/ah_settlement_test.py
+      - name: Live player-prop odds parser (pure, data-free)
+        run: python scripts/props_odds_parse_test.py

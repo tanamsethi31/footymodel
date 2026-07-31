@@ -1,9 +1,49 @@
-# footymodel
+# ⚽ footymodel
 
-A football betting model built on a stats-first hybrid approach. Goal: positive
-expected value (ROI) vs. bookmaker closing odds — **not** a high win rate.
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![CI](https://github.com/tanamsethi31/footymodel/actions/workflows/ci.yml/badge.svg)
+![Status](https://img.shields.io/badge/status-research%20%2F%20paper--trading-yellow)
+![License](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)
 
-See the full plan: `~/.claude/plans/okay-so-i-wanna-snug-sky.md`.
+A stats-first football betting research project: does **positive expected
+value (ROI) vs. bookmaker closing odds** exist anywhere in these markets, and
+if so, where exactly? Not "does this predict football well" — a model can be
+accurate and still lose money once the market's own margin is priced in.
+
+Every claimed edge here has been walk-forward backtested (never trained on
+future data) and calibration-checked before being trusted. Most markets
+tested show **no edge**, and that's reported just as loudly as the ones that
+do — see [Results at a glance](#results-at-a-glance) and the full
+[`RESULTS.md`](RESULTS.md).
+
+## Table of contents
+
+- [Results at a glance](#results-at-a-glance)
+- [Core idea](#core-idea)
+- [Architecture](#architecture)
+- [Layout](#layout)
+- [Setup](#setup)
+- [Phase 1 usage](#phase-1-usage)
+- [Betting tool — weekly workflow (Over/Under)](#betting-tool--weekly-workflow-overunder)
+- [Phase A — lineup-aware model](#phase-a--lineup-aware-model-confirmed)
+- [Phase B — live pipeline](#phase-b--live-pipeline-detection--paper-trade-not-execution)
+- [Roadmap](#roadmap)
+- [Testing](#testing)
+- [License](#license)
+
+## Results at a glance
+
+| Market / feature | Verdict | Key number |
+|---|---|---|
+| Over/Under, 1X2 (goals model) | ❌ No edge | CLV ≈ −0.2%, yield ≈ −7% |
+| Asian Handicap (all 7 leagues) | ❌ No edge | best config +2.05% yield but −1.52% CLV — the "positive yield, negative CLV" noise trap |
+| Lineup-aware total-goals accuracy | ✅ Confirmed | pooled t = 3.04 across all big-5 leagues |
+| Lineup-edge → live profit | ⏳ Untested | can only exist in the pre-kickoff window; live paper-trade starts when the season kicks off |
+| Player shots/SOT calibration | ✅ Well-calibrated | gaps mostly within ±0.03, full PL + Bundesliga seasons |
+| Player shots/SOT → live profit | ⏳ Untested | no historical odds archive reachable; live paper-trade only |
+
+Full detail, per-league tables, and every rejected hypothesis (rest-days,
+mid-tier lineup extension, etc.) are in [`RESULTS.md`](RESULTS.md).
 
 ## Core idea
 
@@ -11,6 +51,37 @@ Betting favorites gives a high hit rate and negative returns. We optimize for
 **edge vs. the bookmaker's margin-stripped ("fair") probability**. Profit comes
 from calibration + value detection + staking discipline, on top of a principled
 statistical core (Dixon-Coles / Poisson).
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Sources
+        FD[football-data.co.uk<br/>results + odds]
+        US[Understat<br/>xG + rosters]
+        FB[FBref<br/>player SOT]
+        WS[WhoScored<br/>player shots/SOT,<br/>real minutes]
+        AF[API-Football<br/>live fixtures/lineups/odds]
+    end
+
+    FD --> DC[Dixon-Coles goals engine]
+    US --> DC
+    DC --> BT[Walk-forward backtest + CLV harness]
+
+    US --> LM[LineupModel]
+    WS --> LM
+    FB --> SM[SOTModel]
+    WS --> SM
+
+    AF --> RA[live/run_all.py<br/>one shared poll]
+    LM --> RA
+    SM --> RA
+    RA --> LOG1[(live_recommendations.csv)]
+    RA --> LOG2[(live_player_props.csv)]
+```
+
+One shared fetch per poll drives both live engines (goals + player props) —
+see [Phase H](#roadmap) for why that matters on a 100-req/day free API tier.
 
 ## Layout
 
@@ -29,7 +100,7 @@ data/
 cd ~/footymodel
 python3 -m venv .venv
 . .venv/bin/activate
-pip install pandas numpy scipy matplotlib requests
+pip install -r requirements.txt
 ```
 
 ## Phase 1 usage
@@ -219,3 +290,25 @@ change to the `live/` package.
       third-party historical player-prop odds vendors — The Odds API is
       paid-plan-only for this, OddsPapi's free-tier/coverage claims couldn't
       be verified against real docs.
+
+## Testing
+
+Most of this project's real correctness checks are backtests, not unit
+tests — a walk-forward calibration table catches more than an assert would.
+But a handful of non-trivial, data-independent logic paths (Asian Handicap
+settlement, the live player-prop odds parser) do have standalone pure-Python
+checks, run on every push via [GitHub Actions](.github/workflows/ci.yml):
+
+```bash
+python scripts/ah_settlement_test.py
+python scripts/props_odds_parse_test.py
+```
+
+Everything under `live/` additionally has a dry-run mode (mocked API
+responses, no key or quota spent) — see
+[Before spending API quota](#before-spending-api-quota--dry-run-tests-no-key-needed) above.
+
+## License
+
+Copyright © 2026 Tanam Sethi. All rights reserved. No license is granted to
+copy, modify, or redistribute this code or its contents.
