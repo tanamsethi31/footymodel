@@ -108,7 +108,19 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD) -> tuple[list[dict], list[d
 
 
 if __name__ == "__main__":
+    import traceback
+
     print("!" * 72)
     print("PAPER-TRADE / PREDICTION MODE. No bets placed, no money at risk.")
     print("!" * 72)
-    run_once()
+    try:
+        run_once()
+    except Exception:
+        # Cron output only goes to a log file nobody watches live - make a
+        # crash impossible to miss (grep-able marker) rather than a bare
+        # traceback indistinguishable from a normal quiet poll.
+        print("!" * 72)
+        print("CRON RUN FAILED - nothing was logged this poll. Traceback:")
+        print("!" * 72)
+        traceback.print_exc()
+        raise

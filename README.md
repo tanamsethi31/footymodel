@@ -27,6 +27,7 @@ do — see [Results at a glance](#results-at-a-glance) and the full
 - [Betting tool — weekly workflow (Over/Under)](#betting-tool--weekly-workflow-overunder)
 - [Phase A — lineup-aware model](#phase-a--lineup-aware-model-confirmed)
 - [Phase B — live pipeline](#phase-b--live-pipeline-detection--paper-trade-not-execution)
+- [Checking performance once real data is logged](#checking-performance-once-real-data-is-logged)
 - [Roadmap](#roadmap)
 - [Testing](#testing)
 - [License](#license)
@@ -227,6 +228,15 @@ All three run the pipeline (team/player matching, lineup parsing, best-price
 odds selection, EV calc) against a mocked API response built from real
 historical rosters. Already run and passing — use them again after any code
 change to the `live/` package.
+
+### Checking performance once real data is logged
+```bash
+python scripts/live_summary.py
+```
+Grades goals/O-U recommendations against real final scores (re-fetched from
+API-Football by date) and reports running yield. Player-prop rows are listed
+but NOT graded — that needs actual match shots/SOT stats, only available
+once WhoScored/FBref/Understat are re-scraped after the fact (manual step).
 
 ## Roadmap
 
