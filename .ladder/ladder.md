@@ -32,6 +32,14 @@ version: 1
   - [ ] Lineup model (Understat), one more big-5 season (pushed back on - that edge is bottlenecked by "closing odds already price lineups," not backtest sample size)
   - Blocked by: ~none~
   - Status: in_progress
+  - Note: Match list (380/380) built and committed. Scraping in progress via
+    browser DOM-extraction (same technique as Phase E/G) - 33/380 matches
+    checkpointed to data/raw_whoscored/ws_scrape_export_E0_2025-2026.tsv.
+    Progress slowed sharply mid-scrape (WhoScored rate-limiting, same pattern
+    documented in Phase E) - each match now taking near the full per-request
+    timeout instead of ~1s. Checkpointing to disk incrementally now (an
+    earlier browser-session interruption lost ~144 unsaved matches before
+    this pattern was adopted).
 
 - [ ] **R005** — Referee-tendency data for cards markets → *medium*
   - Why: Card counts correlate with individual refs; not pulled at all currently, would pair with a cards model
