@@ -1,16 +1,17 @@
 """Single cron entry point driving BOTH the goals/O-U engine and the player
-shots/SOT engine off ONE shared fixtures + lineups fetch per poll.
+shots/SOT engine off ONE shared fixtures + lineups + odds fetch per poll.
 
 Why this exists instead of two separate cron jobs: each watcher independently
-fetching fixtures-by-date and lineups-per-fixture would roughly double
-API-Football usage for identical data (the free tier's ~78 baseline
-requests/day from `engine.py`'s cron comment would become ~156 just for
-fixture lookups, before any lineup/odds calls - already over the 100/day
-free-tier quota). Fetching once and handing the same lineups to both
-watchers keeps the request count exactly where it was with one engine.
+fetching fixtures-by-date, lineups-per-fixture, and now odds-per-fixture
+would roughly double API-Football usage for identical data (the free tier's
+~78 baseline requests/day from `engine.py`'s cron comment would become ~156
+just for fixture lookups, before any lineup/odds calls - already over the
+100/day free-tier quota). Fetching once and handing the same lineups/odds to
+both watchers keeps the request count exactly where it was with one engine.
 
-PAPER-TRADE / PREDICTION ONLY for both - no staking, no odds fetched for
-props (see RESULTS.md Phase D).
+PAPER-TRADE / PREDICTION ONLY for both - no staking. Player-prop EV (Phase I)
+is naive (model_prob * odd - 1), not margin-adjusted - see shots_engine.py
+docstring for why.
 """
 from __future__ import annotations
 
@@ -65,7 +66,13 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD) -> tuple[list[dict], list[d
               f"{fx['teams']['away']['name']} (kickoff in {mins_to_ko:.0f}min)")
 
         try:
-            goal_row = goals.process_fixture(div, fx, lineups)
+            odds_resp = client.odds(fid)
+        except ApiFootballError as e:
+            print(f"  ! odds fetch failed for fixture {fid}: {e}")
+            odds_resp = []
+
+        try:
+            goal_row = goals.process_fixture(div, fx, lineups, odds_resp)
         except Exception as e:
             print(f"  ! goals-engine error: {e}")
             goal_row = None
@@ -75,7 +82,7 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD) -> tuple[list[dict], list[d
         # Player-props engine is E0-only for now (see shots_engine.py docstring).
         if div == PROPS_LEAGUE:
             try:
-                prop_rows.extend(props.player_rows_for_fixture(fx, lineups))
+                prop_rows.extend(props.player_rows_for_fixture(fx, lineups, odds_resp))
             except Exception as e:
                 print(f"  ! props-engine error: {e}")
 

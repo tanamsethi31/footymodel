@@ -41,8 +41,12 @@ mock_lineups = [
     {"team": {"id": 50, "name": home_us}, "startXI": [{"player": {"name": n}} for n in home_names]},
     {"team": {"id": 29, "name": away_us}, "startXI": [{"player": {"name": n}} for n in away_names]},
 ]
-mock_odds = [{"bookmakers": [{"bets": [{"name": "Over/Under",
-             "values": [{"value": "Over 2.5", "odd": "1.9"}, {"value": "Under 2.5", "odd": "1.9"}]}]}]}]
+mock_odds = [{"bookmakers": [{"bets": [
+    {"name": "Over/Under",
+     "values": [{"value": "Over 2.5", "odd": "1.9"}, {"value": "Under 2.5", "odd": "1.9"}]},
+    {"name": "Home Player Shots",
+     "values": [{"value": f"{home_names[0]} - 1+", "odd": "1.75"}]},
+]}]}]
 
 mock_client = MagicMock()
 mock_client.fixtures_by_date.side_effect = lambda date_str: [fixture]
@@ -55,11 +59,15 @@ goal_rows, prop_rows = run_all.run_once()
 
 print(f"fixtures_by_date calls: {mock_client.fixtures_by_date.call_count} (expect 2 — today+tomorrow)")
 print(f"lineups calls: {mock_client.lineups.call_count} (expect 1 — SHARED across both engines)")
+print(f"odds calls: {mock_client.odds.call_count} (expect 1 — SHARED across both engines)")
 print(f"goal_rows: {len(goal_rows)} (expect 1)")
 print(f"prop_rows: {len(prop_rows)} (expect 22)")
 
 assert mock_client.fixtures_by_date.call_count == 2
 assert mock_client.lineups.call_count == 1, "lineups must be fetched ONCE and shared, not once per engine"
+assert mock_client.odds.call_count == 1, "odds must be fetched ONCE and shared, not once per engine"
 assert len(goal_rows) == 1
 assert len(prop_rows) == 22
+sample_row = [r for r in prop_rows if r["player"] == home_names[0]][0]
+assert sample_row["odds_shots_gt0.5"] == 1.75, "expected mocked player-shots odds to reach the props row"
 print("\nALL CHECKS PASSED — shared fetch confirmed, no duplicate API-Football calls.")

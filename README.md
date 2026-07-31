@@ -205,3 +205,17 @@ change to the `live/` package.
       usage past the Free-tier daily quota. Also fixed a latent dedup bug in
       `shots_engine.py` (it had none — would have logged duplicate prop rows
       every poll before kickoff).
+- [x] Phase I — Player-prop odds wired into `shots_engine.py`, same
+      API-Football key as everything else (no new vendor). No historical
+      odds archive is reachable (Free tier blocks past-season lookups —
+      confirmed live), so this is **forward paper-trade only**: real EV data
+      starts accumulating once the season kicks off. Verified against a real
+      fixture that only two bet markets ("Player Shots On Target", "Home/Away
+      Player Shots") reliably use a clean per-player "{name} - N+" line
+      format — other shots-named markets seen in practice are team totals or
+      single-price outrights and are deliberately not parsed. These are
+      one-sided lines with no Over/Under complement, so EV is the **naive**
+      `model_prob * odd - 1`, not margin-adjusted. Considered (and rejected)
+      third-party historical player-prop odds vendors — The Odds API is
+      paid-plan-only for this, OddsPapi's free-tier/coverage claims couldn't
+      be verified against real docs.

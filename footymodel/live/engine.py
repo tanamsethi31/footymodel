@@ -109,10 +109,13 @@ class LiveWatcher:
             print(f"    ! unmatched players for {team_us}: {unmatched}")
         return ids
 
-    def process_fixture(self, league: str, fixture: dict, lineups: list[dict]) -> dict | None:
-        """`lineups` is fetched by the caller (run_all.py shares one fetch
-        across the goals and player-props watchers, so running both doesn't
-        double API-Football usage) — empty/short list means not confirmed yet."""
+    def process_fixture(self, league: str, fixture: dict, lineups: list[dict],
+                        odds_resp: list[dict] | None = None) -> dict | None:
+        """`lineups` (and, if given, `odds_resp`) are fetched by the caller
+        (run_all.py shares one fetch across the goals and player-props
+        watchers, so running both doesn't double API-Football usage) —
+        empty/short lineups list means not confirmed yet. `odds_resp=None`
+        fetches it here instead, for standalone use."""
         fx = fixture["fixture"]
         teams = fixture["teams"]
         fixture_id = fx["id"]
@@ -149,11 +152,12 @@ class LiveWatcher:
         model = self._model_for(league)
         pred = model.predict(home_ids, away_ids, home_us, away_us)
 
-        try:
-            odds_resp = self.client.odds(fixture_id)
-        except ApiFootballError as e:
-            print(f"  ! odds fetch failed: {e}")
-            odds_resp = []
+        if odds_resp is None:
+            try:
+                odds_resp = self.client.odds(fixture_id)
+            except ApiFootballError as e:
+                print(f"  ! odds fetch failed: {e}")
+                odds_resp = []
         over_odds, under_odds = _best_over_under_odds(odds_resp)
 
         row = {

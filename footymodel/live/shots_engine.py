@@ -1,8 +1,19 @@
 """Live player shots/SOT props — reuses Phase B's fixture/lineup detection and
 name-matching (client.py, namematch.py) unchanged, retargeted to output one
 row PER STARTING PLAYER (shots + SOT probabilities) instead of one row per
-fixture (goals/O-U). PREDICTION ONLY — no odds, no staking; see RESULTS.md
-Phase D for why (no reachable historical odds archive for this market).
+fixture (goals/O-U).
+
+Odds are wired in (Phase I) via the SAME API-Football key already used for
+lineups/goals-odds — no new vendor. No historical archive is reachable (Free
+tier blocks past-season fixture/odds lookups), so this is forward paper-trade
+only: real EV data accumulates once the season starts, same as the goals
+engine. Only two bet markets verified to reliably use a clean per-player
+"{name} - N+" line format (checked against real bookmaker data): "Player
+Shots On Target" and "Home/Away Player Shots". Other shots-named markets seen
+in practice are inconsistent (team totals, single-price outrights) and are
+deliberately NOT parsed. These are one-sided "N+" lines, not paired
+Over/Under, so there's no complement to strip margin from — EV below is the
+NAIVE model_prob * odd - 1, uncorrected for bookmaker overround.
 
 E0-only for now: SOT (FBref) is PL-only; shots (Understat) covers all big-5
 but there's no reason to run it standalone here — SOT is the harder-to-get
@@ -11,6 +22,7 @@ half, so scope matches what we can actually deliver both stats for.
 from __future__ import annotations
 
 import json
+import re
 
 import pandas as pd
 
@@ -31,6 +43,53 @@ PROPS_LOG = PROCESSED_DIR / "live_player_props.csv"
 # Standalone-run dedup only (run_all.py shares engine.py's seen-fixtures file
 # instead, since it drives both watchers off one fetch per fixture).
 PROPS_SEEN_FILE = PROCESSED_DIR / "live_props_seen_fixtures.json"
+
+# API-Football bet-market names verified (2026-07-31, live key) to use a clean
+# "{player} - N+" value format. "Player Shots On Target" (242) mixes both
+# teams' players in one list; the home/away shots split (240/241) is already
+# per-side. Threshold N maps directly onto our existing 0.5/1.5/2.5 lines.
+_SHOTS_BET_NAMES = {"Home Player Shots", "Away Player Shots"}
+_SOT_BET_NAMES = {"Player Shots On Target"}
+_LINE_BY_THRESHOLD = {1: 0.5, 2: 1.5, 3: 2.5}
+_PLAYER_LINE_RE = re.compile(r"^(.*) - (\d+)\+$")
+
+
+def _parse_player_line_odds(odds_response: list[dict], bet_names: set[str]) -> dict:
+    """Best (max) odd per (player_name_lower, line) across all bookmakers, for
+    the given bet market name(s). Silently skips any value that doesn't match
+    the expected "{name} - N+" shape rather than guessing."""
+    best: dict[tuple[str, float], float] = {}
+    for entry in odds_response:
+        for bm in entry.get("bookmakers", []):
+            for bet in bm.get("bets", []):
+                if bet.get("name") not in bet_names:
+                    continue
+                for v in bet.get("values", []):
+                    m = _PLAYER_LINE_RE.match(str(v.get("value", "")))
+                    if not m:
+                        continue
+                    line = _LINE_BY_THRESHOLD.get(int(m.group(2)))
+                    if line is None:
+                        continue
+                    odd = float(v.get("odd", 0) or 0)
+                    if not odd:
+                        continue
+                    key = (m.group(1).strip().lower(), line)
+                    if key not in best or odd > best[key]:
+                        best[key] = odd
+    return best
+
+
+def _lookup_player_odd(odds_by_key: dict, player_name: str, line: float) -> float | None:
+    """Exact (lowercased) match first; falls back to fuzzy match scoped to the
+    other names already seen at this line, since odds-feed spelling doesn't
+    always match the lineup-feed spelling for the same player."""
+    key = (player_name.lower(), line)
+    if key in odds_by_key:
+        return odds_by_key[key]
+    candidates = [n for (n, l) in odds_by_key if l == line]
+    match = namematch.best_match(player_name, candidates, threshold=0.7)
+    return odds_by_key.get((match, line)) if match else None
 
 
 def _load_seen() -> set:
@@ -68,13 +127,25 @@ class PropsWatcher:
         f_id = self.fbref_name_to_id.get(f_match) if f_match else None
         return u_match, f_id
 
-    def player_rows_for_fixture(self, fixture: dict, lineups: list[dict]) -> list[dict]:
-        """`lineups` is fetched by the caller (run_all.py shares one fetch
-        across the goals and player-props watchers, so running both doesn't
-        double API-Football usage) — empty/short list means not confirmed yet."""
+    def player_rows_for_fixture(self, fixture: dict, lineups: list[dict],
+                                odds_resp: list[dict] | None = None) -> list[dict]:
+        """`lineups` (and, if given, `odds_resp`) are fetched by the caller
+        (run_all.py shares one fetch across the goals and player-props
+        watchers, so running both doesn't double API-Football usage) — empty/
+        short lineups list means not confirmed yet. `odds_resp=None` fetches
+        it here instead, for standalone use."""
         fx, teams = fixture["fixture"], fixture["teams"]
         if len(lineups) < 2:
             return []
+
+        if odds_resp is None:
+            try:
+                odds_resp = self.client.odds(fx["id"])
+            except ApiFootballError as e:
+                print(f"  ! odds fetch failed: {e}")
+                odds_resp = []
+        shots_odds = _parse_player_line_odds(odds_resp, _SHOTS_BET_NAMES)
+        sot_odds = _parse_player_line_odds(odds_resp, _SOT_BET_NAMES)
 
         home_u, home_f = self._match_team(teams["home"]["name"])
         away_u, away_f = self._match_team(teams["away"]["name"])
@@ -98,13 +169,19 @@ class PropsWatcher:
                 row = {"fixture_id": fx["id"], "kickoff": fx["date"],
                       "team": team_name, "player": name}
                 for line in SHOTS_LINES:
-                    key = f"p_shots_gt{line}"
-                    row[key] = (round(shots_model.predict_player_shots(u_pid, opp_u, MINUTES_ASSUMED, line, side), 3)
-                               if u_pid and opp_u else None)
+                    p = (round(shots_model.predict_player_shots(u_pid, opp_u, MINUTES_ASSUMED, line, side), 3)
+                        if u_pid and opp_u else None)
+                    odd = _lookup_player_odd(shots_odds, name, line)
+                    row[f"p_shots_gt{line}"] = p
+                    row[f"odds_shots_gt{line}"] = odd
+                    row[f"ev_shots_gt{line}"] = round(p * odd - 1.0, 3) if (p is not None and odd) else None
                 for line in SOT_LINES:
-                    key = f"p_sot_gt{line}"
-                    row[key] = (round(sot_model.predict_player_sot(f_pid, opp_f, MINUTES_ASSUMED, line, side), 3)
-                               if f_pid and opp_f else None)
+                    p = (round(sot_model.predict_player_sot(f_pid, opp_f, MINUTES_ASSUMED, line, side), 3)
+                        if f_pid and opp_f else None)
+                    odd = _lookup_player_odd(sot_odds, name, line)
+                    row[f"p_sot_gt{line}"] = p
+                    row[f"odds_sot_gt{line}"] = odd
+                    row[f"ev_sot_gt{line}"] = round(p * odd - 1.0, 3) if (p is not None and odd) else None
                 rows.append(row)
         return rows
 
@@ -149,6 +226,6 @@ class PropsWatcher:
 
 if __name__ == "__main__":
     print("!" * 72)
-    print("PREDICTION ONLY. No odds, no bets, no money at risk.")
+    print("PAPER-TRADE / PREDICTION MODE. No bets placed, no money at risk.")
     print("!" * 72)
     PropsWatcher().run_once()
