@@ -32,14 +32,20 @@ version: 1
   - [ ] Lineup model (Understat), one more big-5 season (pushed back on - that edge is bottlenecked by "closing odds already price lineups," not backtest sample size)
   - Blocked by: ~none~
   - Status: in_progress
-  - Note: Match list (380/380) built and committed. Scraping in progress via
-    browser DOM-extraction (same technique as Phase E/G) - 33/380 matches
-    checkpointed to data/raw_whoscored/ws_scrape_export_E0_2025-2026.tsv.
-    Progress slowed sharply mid-scrape (WhoScored rate-limiting, same pattern
-    documented in Phase E) - each match now taking near the full per-request
-    timeout instead of ~1s. Checkpointing to disk incrementally now (an
-    earlier browser-session interruption lost ~144 unsaved matches before
-    this pattern was adopted).
+  - Note: Match list (380/380) built and committed
+    (data/raw_whoscored/match_list_E0_2025-2026.csv). Scraping PAUSED at
+    72/380 matches, checkpointed and verified clean (no dupes/bad lines) in
+    data/raw_whoscored/ws_scrape_export_E0_2025-2026.tsv (gitignored, local
+    only). WhoScored rate-limiting intensified mid-session (error rate climbed
+    to ~11%, throughput collapsed to near-zero) - same pattern documented in
+    Phase E, paused per user decision rather than grinding through a worsening
+    limit. Resume by re-running the same hidden-iframe DOM-extraction harness
+    (browser tool, `/livestatistics/` match pages, `#top-player-stats-summary-grid`
+    tables) starting from match_list index 72 - all code/technique is proven,
+    just needs to pick back up once the rate limit clears. An earlier browser-
+    session interruption also lost ~144 unsaved matches before incremental
+    disk-checkpointing was adopted - checkpoint every ~20-30 matches, not just
+    at the end.
 
 - [ ] **R005** — Referee-tendency data for cards markets → *medium*
   - Why: Card counts correlate with individual refs; not pulled at all currently, would pair with a cards model
