@@ -17,12 +17,26 @@ football-data.co.uk season (each pair plays at home exactly once a season).
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 
 from .data import ROOT, PROCESSED_DIR
 from .live import namematch
 
-RAW = ROOT / "data" / "raw_whoscored" / "ws_scrape_export.tsv"
+RAW_DIR = ROOT / "data" / "raw_whoscored"
+# E0's raw file predates the multi-league convention - keep its bare name for
+# backward compat; every other league gets a suffixed file.
+_RAW_FILENAMES = {"E0": "ws_scrape_export.tsv"}
+
+# Big-5 leagues only have football-data.co.uk match dates in matches_xg.parquet
+# (Understat join, see understat.py); DEFAULT_LEAGUES (mid-tier + E0) are in
+# matches.parquet. E0 exists in both - matches.parquet is the proven path.
+_BIG5_DATE_SOURCE = {"D1", "SP1", "I1", "F1"}
+
+
+def _raw_path(league: str) -> Path:
+    return RAW_DIR / _RAW_FILENAMES.get(league, f"ws_scrape_export_{league}.tsv")
 
 
 def _minutes_played(pos: str, subm: str) -> float:
@@ -31,9 +45,9 @@ def _minutes_played(pos: str, subm: str) -> float:
     return 90.0 if subm == "" else float(subm)
 
 
-def _load_raw_rows() -> pd.DataFrame:
+def _load_raw_rows(league: str) -> pd.DataFrame:
     rows = []
-    with open(RAW) as f:
+    with open(_raw_path(league)) as f:
         for line in f:
             line = line.rstrip("\n")
             if "\t" not in line:
@@ -64,7 +78,8 @@ def _load_raw_rows() -> pd.DataFrame:
 
 
 def _attach_dates(df: pd.DataFrame, league: str, season: str) -> pd.DataFrame:
-    matches = pd.read_parquet(PROCESSED_DIR / "matches.parquet")
+    source = "matches_xg.parquet" if league in _BIG5_DATE_SOURCE else "matches.parquet"
+    matches = pd.read_parquet(PROCESSED_DIR / source)
     fd = matches[(matches["league"] == league) & (matches["season"] == season)]
     fd_teams = sorted(set(fd["home_team"]) | set(fd["away_team"]))
 
@@ -88,7 +103,7 @@ def load_players(league: str = "E0", season: str = "2023/24") -> pd.DataFrame:
     already expect (match_id, date, league, team_us, side, player_id, player,
     position, minutes, shots, sot) - `team_us` is the plain team name here
     (WhoScored gives real names directly, no opaque-id recovery needed)."""
-    df = _load_raw_rows()
+    df = _load_raw_rows(league)
     df = _attach_dates(df, league, season)
     df["league"] = league
     df["date"] = pd.to_datetime(df["date"]).dt.normalize()

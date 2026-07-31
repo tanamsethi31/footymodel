@@ -542,3 +542,45 @@ monotonic ~26%/22% split, consistent across 17/19 teams.
 
 **Not added.** Same disciplined stop as every other no-edge result in this
 project — tested against real data, didn't hold up, doesn't ship.
+
+# Phase G — Second-league robustness check: Bundesliga (CONFIRMED)
+
+Everything in Phase E/F was proven on one league-season (PL 2023/24). The
+open question was whether it's a real, general pattern or a "looked good on
+one dataset" artifact. Picked Bundesliga deliberately (stylistically
+different from PL - higher tempo, more open play) rather than a similar
+league, as the stronger test, and already have Understat xG data for it for
+future cross-checks. Same scraping mechanics (WhoScored iframe DOM-extraction)
+transferred directly - no new engineering, just a second full-season run
+(306/306 matches, zero errors after the same rate-limit-and-resume pattern
+as PL). `footymodel/whoscored.py` generalized to support multiple leagues
+(picks `matches.parquet` vs `matches_xg.parquet` for date-joining depending
+on league; E0 behavior verified unchanged).
+
+**Home venue effect replicated - and is even larger:**
+
+| League | Home shots edge | Home SOT edge |
+|---|---:|---:|
+| PL (E0) | +26.5% | +22.1% |
+| Bundesliga (D1) | +27.9% | +28.8% |
+
+**Calibration replicated with zero re-tuning** (same model code, same
+constants, no Bundesliga-specific fitting):
+
+| Stat | Line | Brier (no venue) | Brier (+venue) |
+|-----:|-----:|------------------:|-----------------:|
+| shots | 0.5 | 0.1837 | 0.1824 |
+| shots | 1.5 | 0.1313 | 0.1303 |
+| shots | 2.5 | 0.0710 | 0.0698 |
+| sot | 0.5 | 0.1459 | 0.1452 |
+| sot | 1.5 | 0.0470 | 0.0464 |
+
+Venue factor improves every line for both stats, exactly like PL - no
+regressions. Calibration gaps in populated buckets (n≥100) are mostly within
+±0.03-0.05, comparable to PL's ±0.03.
+
+**Status: robustness check passed.** The position-grouped shrinkage,
+opponent-suppression, real-minutes, and venue-factor approach is not a
+PL-specific artifact - it generalizes to a second, stylistically different
+big-5 league without any re-tuning. `scripts/whoscored_calibration_test.py`
+now takes `--league`/`--season` flags for testing further leagues.

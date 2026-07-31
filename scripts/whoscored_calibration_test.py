@@ -7,6 +7,7 @@ prob_over (Negative Binomial dispersion). Walk-forward, no lookahead.
 """
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -72,8 +73,13 @@ def evaluate(players: pd.DataFrame, stat_col: str) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-players = load_players()
-print(f"Loaded {len(players)} player-match rows across {players['match_id'].nunique()} matches\n")
+parser = argparse.ArgumentParser()
+parser.add_argument("--league", default="E0")
+parser.add_argument("--season", default="2023/24")
+args = parser.parse_args()
+
+players = load_players(league=args.league, season=args.season)
+print(f"[{args.league} {args.season}] Loaded {len(players)} player-match rows across {players['match_id'].nunique()} matches\n")
 
 for stat_col, lines in STAT_LINES.items():
     evals = evaluate(players, stat_col)
