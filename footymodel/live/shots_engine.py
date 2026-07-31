@@ -10,6 +10,8 @@ half, so scope matches what we can actually deliver both stats for.
 """
 from __future__ import annotations
 
+import json
+
 import pandas as pd
 
 from ..data import PROCESSED_DIR
@@ -26,6 +28,20 @@ SHOTS_LINES = [0.5, 1.5, 2.5]
 SOT_LINES = [0.5, 1.5]
 MINUTES_ASSUMED = 85  # measured league-avg starter minutes — see RESULTS.md
 PROPS_LOG = PROCESSED_DIR / "live_player_props.csv"
+# Standalone-run dedup only (run_all.py shares engine.py's seen-fixtures file
+# instead, since it drives both watchers off one fetch per fixture).
+PROPS_SEEN_FILE = PROCESSED_DIR / "live_props_seen_fixtures.json"
+
+
+def _load_seen() -> set:
+    if PROPS_SEEN_FILE.exists():
+        return set(json.loads(PROPS_SEEN_FILE.read_text()))
+    return set()
+
+
+def _save_seen(seen: set) -> None:
+    PROPS_SEEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+    PROPS_SEEN_FILE.write_text(json.dumps(sorted(seen)))
 
 
 class PropsWatcher:
@@ -52,9 +68,11 @@ class PropsWatcher:
         f_id = self.fbref_name_to_id.get(f_match) if f_match else None
         return u_match, f_id
 
-    def player_rows_for_fixture(self, fixture: dict) -> list[dict]:
+    def player_rows_for_fixture(self, fixture: dict, lineups: list[dict]) -> list[dict]:
+        """`lineups` is fetched by the caller (run_all.py shares one fetch
+        across the goals and player-props watchers, so running both doesn't
+        double API-Football usage) — empty/short list means not confirmed yet."""
         fx, teams = fixture["fixture"], fixture["teams"]
-        lineups = self.client.lineups(fx["id"])
         if len(lineups) < 2:
             return []
 
@@ -91,6 +109,7 @@ class PropsWatcher:
         return rows
 
     def run_once(self, hours_ahead: int = 2) -> list[dict]:
+        seen = _load_seen()
         now = pd.Timestamp.now(tz="UTC")
         api_id = LEAGUE_API_IDS[LEAGUE]
         all_rows = []
@@ -103,13 +122,19 @@ class PropsWatcher:
             for fx in fixtures:
                 if fx["league"]["id"] != api_id:
                     continue
+                fid = fx["fixture"]["id"]
+                if fid in seen:
+                    continue
                 kickoff = pd.Timestamp(fx["fixture"]["date"])
                 mins_to_ko = (kickoff - now).total_seconds() / 60
                 if not (0 <= mins_to_ko <= hours_ahead * 60):
                     continue
                 print(f"  checking {fx['teams']['home']['name']} v {fx['teams']['away']['name']}")
-                rows = self.player_rows_for_fixture(fx)
-                all_rows.extend(rows)
+                lineups = self.client.lineups(fid)
+                rows = self.player_rows_for_fixture(fx, lineups)
+                if rows:
+                    all_rows.extend(rows)
+                    seen.add(fid)
 
         if all_rows:
             df = pd.DataFrame(all_rows)
@@ -118,6 +143,7 @@ class PropsWatcher:
             print(f"Logged {len(all_rows)} player-prop rows -> {PROPS_LOG}")
         else:
             print("No new confirmed-lineup fixtures this poll.")
+        _save_seen(seen)
         return all_rows
 
 

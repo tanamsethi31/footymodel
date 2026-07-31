@@ -109,12 +109,14 @@ class LiveWatcher:
             print(f"    ! unmatched players for {team_us}: {unmatched}")
         return ids
 
-    def process_fixture(self, league: str, fixture: dict) -> dict | None:
+    def process_fixture(self, league: str, fixture: dict, lineups: list[dict]) -> dict | None:
+        """`lineups` is fetched by the caller (run_all.py shares one fetch
+        across the goals and player-props watchers, so running both doesn't
+        double API-Football usage) — empty/short list means not confirmed yet."""
         fx = fixture["fixture"]
         teams = fixture["teams"]
         fixture_id = fx["id"]
 
-        lineups = self.client.lineups(fixture_id)
         if len(lineups) < 2:
             return None  # not confirmed yet — caller will retry on next poll
 
@@ -203,7 +205,8 @@ class LiveWatcher:
             print(f"  checking {fx['teams']['home']['name']} v "
                   f"{fx['teams']['away']['name']} (kickoff in {mins_to_ko:.0f}min)")
             try:
-                row = self.process_fixture(div, fx)
+                lineups = self.client.lineups(fid)
+                row = self.process_fixture(div, fx, lineups)
             except Exception as e:
                 print(f"  ! error processing fixture {fid}: {e}")
                 continue

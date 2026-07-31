@@ -36,7 +36,7 @@ mock_lineups = [
 watcher.client = MagicMock()
 watcher.client.lineups.return_value = mock_lineups
 
-rows = watcher.player_rows_for_fixture(fixture)
+rows = watcher.player_rows_for_fixture(fixture, mock_lineups)
 print(f"\n{len(rows)} player rows (expect 22)\n")
 df = pd.DataFrame(rows)
 print(df.to_string(index=False))

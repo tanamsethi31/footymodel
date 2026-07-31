@@ -48,7 +48,7 @@ mock_client.lineups.return_value = mock_lineups
 mock_client.odds.return_value = mock_odds
 
 watcher = LiveWatcher(client=mock_client)
-row = watcher.process_fixture("E0", fixture)
+row = watcher.process_fixture("E0", fixture, mock_lineups)
 
 print("\n=== process_fixture() result ===")
 if row is None:

@@ -1,0 +1,107 @@
+"""Single cron entry point driving BOTH the goals/O-U engine and the player
+shots/SOT engine off ONE shared fixtures + lineups fetch per poll.
+
+Why this exists instead of two separate cron jobs: each watcher independently
+fetching fixtures-by-date and lineups-per-fixture would roughly double
+API-Football usage for identical data (the free tier's ~78 baseline
+requests/day from `engine.py`'s cron comment would become ~156 just for
+fixture lookups, before any lineup/odds calls - already over the 100/day
+free-tier quota). Fetching once and handing the same lineups to both
+watchers keeps the request count exactly where it was with one engine.
+
+PAPER-TRADE / PREDICTION ONLY for both - no staking, no odds fetched for
+props (see RESULTS.md Phase D).
+"""
+from __future__ import annotations
+
+import pandas as pd
+
+from ..data import PROCESSED_DIR
+from .client import ApiFootballClient, ApiFootballError
+from .engine import (LEAGUE_API_IDS, LIVE_LOG, DEFAULT_HOURS_AHEAD,
+                     LiveWatcher, _load_seen, _save_seen)
+from .shots_engine import LEAGUE as PROPS_LEAGUE
+from .shots_engine import PROPS_LOG, PropsWatcher
+
+
+def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD) -> tuple[list[dict], list[dict]]:
+    client = ApiFootballClient()
+    goals = LiveWatcher(client)
+    props = PropsWatcher(client)
+
+    seen = _load_seen()
+    now = pd.Timestamp.now(tz="UTC")
+    api_id_to_div = {v: k for k, v in LEAGUE_API_IDS.items()}
+
+    all_fixtures = []
+    for date_str in {now.strftime("%Y-%m-%d"), (now + pd.Timedelta(days=1)).strftime("%Y-%m-%d")}:
+        try:
+            all_fixtures.extend(client.fixtures_by_date(date_str))
+        except ApiFootballError as e:
+            print(f"! fixtures fetch failed for {date_str}: {e}")
+
+    goal_rows, prop_rows = [], []
+    for fx in all_fixtures:
+        div = api_id_to_div.get(fx["league"]["id"])
+        if div is None:
+            continue  # not one of our confirmed-model leagues
+        fid = fx["fixture"]["id"]
+        if fid in seen:
+            continue
+        kickoff = pd.Timestamp(fx["fixture"]["date"])
+        mins_to_ko = (kickoff - now).total_seconds() / 60
+        if not (0 <= mins_to_ko <= hours_ahead * 60):
+            continue
+
+        try:
+            lineups = client.lineups(fid)
+        except ApiFootballError as e:
+            print(f"  ! lineups fetch failed for fixture {fid}: {e}")
+            continue
+        if len(lineups) < 2:
+            continue  # not confirmed yet — caller will retry on next poll
+
+        print(f"  confirmed lineups: {fx['teams']['home']['name']} v "
+              f"{fx['teams']['away']['name']} (kickoff in {mins_to_ko:.0f}min)")
+
+        try:
+            goal_row = goals.process_fixture(div, fx, lineups)
+        except Exception as e:
+            print(f"  ! goals-engine error: {e}")
+            goal_row = None
+        if goal_row is not None:
+            goal_rows.append(goal_row)
+
+        # Player-props engine is E0-only for now (see shots_engine.py docstring).
+        if div == PROPS_LEAGUE:
+            try:
+                prop_rows.extend(props.player_rows_for_fixture(fx, lineups))
+            except Exception as e:
+                print(f"  ! props-engine error: {e}")
+
+        seen.add(fid)
+
+    if goal_rows:
+        df = pd.DataFrame(goal_rows)
+        LIVE_LOG.parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(LIVE_LOG, mode="a", header=not LIVE_LOG.exists(), index=False)
+        print(f"Logged {len(goal_rows)} new goals recommendation(s) -> {LIVE_LOG}")
+
+    if prop_rows:
+        df = pd.DataFrame(prop_rows)
+        PROPS_LOG.parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(PROPS_LOG, mode="a", header=not PROPS_LOG.exists(), index=False)
+        print(f"Logged {len(prop_rows)} player-prop rows -> {PROPS_LOG}")
+
+    if not goal_rows and not prop_rows:
+        print("No new confirmed-lineup fixtures this poll.")
+
+    _save_seen(seen)
+    return goal_rows, prop_rows
+
+
+if __name__ == "__main__":
+    print("!" * 72)
+    print("PAPER-TRADE / PREDICTION MODE. No bets placed, no money at risk.")
+    print("!" * 72)
+    run_once()

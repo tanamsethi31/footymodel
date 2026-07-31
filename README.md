@@ -103,9 +103,12 @@ recommendation. **No staking, no order placement — detection/paper-trade only.
    PL=39, La Liga=140, Bundesliga=78, Serie A=135, Ligue 1=61. Re-run
    `python -m footymodel.live.engine --verify-leagues` any time to re-check.
 4. Run a poll (checks fixtures kicking off in the next 2h, logs any with
-   confirmed lineups it hasn't seen before):
+   confirmed lineups it hasn't seen before). `run_all.py` drives BOTH the
+   goals/O-U engine and the player shots/SOT props engine off one shared
+   fixtures+lineups fetch per poll (see below for why this matters) —
+   `engine.py` also still runs standalone (goals only) for manual testing:
    ```bash
-   python -m footymodel.live.engine
+   python -m footymodel.live.run_all
    ```
    **CONFIRMED live constraint (Free tier):** fixture queries filtered by
    `league`+`season` are blocked for the current season ("try from 2022 to
@@ -116,8 +119,15 @@ recommendation. **No staking, no order placement — detection/paper-trade only.
 5. **Cron schedule installed** (`crontab -l` to view): every 20 minutes,
    10:00–22:59 daily —
    ```
-   */20 10-22 * * * cd /Users/tanamsethi/footymodel && /Users/tanamsethi/footymodel/.venv/bin/python -m footymodel.live.engine >> /Users/tanamsethi/footymodel/data/logs/live_poll.log 2>&1
+   */20 10-22 * * * cd /Users/tanamsethi/footymodel && /Users/tanamsethi/footymodel/.venv/bin/python -m footymodel.live.run_all >> /Users/tanamsethi/footymodel/data/logs/live_poll.log 2>&1
    ```
+   **Why `run_all.py` and not two separate cron entries for goals + props:**
+   each watcher independently fetching fixtures + lineups would roughly double
+   API-Football usage for identical data — the ~78 baseline requests/day below
+   would become ~156 just for fixture lookups, already over the 100/day
+   Free-tier quota before any lineup/odds calls. `run_all.py` fetches once per
+   poll and shares it across both engines, so running both costs the same as
+   running one.
    **Why not every 5 min around the clock:** the lineup window (20-40 min) only
    needs ≤20min polling to guarantee a catch, but 24/7 polling at that rate would
    burn 576 requests/day against the 100/day Free-tier quota. Concentrating ~39
@@ -129,17 +139,23 @@ recommendation. **No staking, no order placement — detection/paper-trade only.
    know actual kickoff times, or bump to Pro ($19/mo, 7,500 req/day) to poll
    more aggressively/around the clock.
 
-Recommendations log to `data/processed/live_recommendations.csv`. Every
-fixture is logged at most once (dedup via `data/processed/live_seen_fixtures.json`).
+Goals recommendations log to `data/processed/live_recommendations.csv`; player
+shots/SOT props log to `data/processed/live_player_props.csv`. Every fixture is
+logged at most once per engine (dedup via `data/processed/live_seen_fixtures.json`,
+shared by `run_all.py` across both engines; `shots_engine.py` also has its own
+`live_props_seen_fixtures.json` for standalone runs).
 
-### Before spending API quota — dry-run test (no key needed)
+### Before spending API quota — dry-run tests (no key needed)
 ```bash
-python scripts/live_dryrun.py
+python scripts/live_dryrun.py        # goals engine only
+python scripts/shots_live_dryrun.py  # props engine only
+python scripts/run_all_dryrun.py     # both, via run_all.py — asserts lineups
+                                     # are fetched ONCE and shared, not per-engine
 ```
-Runs the full pipeline (team/player matching, lineup parsing, best-price odds
-selection, EV calc) against a mocked API response built from real historical
-rosters. Already run and passing — use it again after any code change to the
-`live/` package.
+All three run the pipeline (team/player matching, lineup parsing, best-price
+odds selection, EV calc) against a mocked API response built from real
+historical rosters. Already run and passing — use them again after any code
+change to the `live/` package.
 
 ## Roadmap
 
@@ -175,3 +191,17 @@ rosters. Already run and passing — use it again after any code change to the
       previously-successful match started failing too), same pattern as the
       FBref 429s in Phase D - waited it out and finished the season once it
       cleared. See RESULTS.md Phase E.
+- [x] Phase F — Home/away venue factor for shots/SOT → **confirmed real**
+      (~26%/22% higher home shots/SOT rate league-wide on PL). Integrated
+      into `LineupModel`/`fbref.SOTModel`. Rest-days/fixture-congestion also
+      tested — no signal, not added. See RESULTS.md Phase F.
+- [x] Phase G — Second-league robustness check (Bundesliga) → venue effect
+      and calibration **both replicate with zero re-tuning** (Bundesliga home
+      edge even larger: +28%/29%). `whoscored.py` generalized to support
+      multiple leagues. See RESULTS.md Phase G.
+- [x] Phase H — Merged live cron entry point (`live/run_all.py`) → goals and
+      player-props engines now share ONE fixtures+lineups fetch per poll
+      instead of two independent ones, which would have doubled API-Football
+      usage past the Free-tier daily quota. Also fixed a latent dedup bug in
+      `shots_engine.py` (it had none — would have logged duplicate prop rows
+      every poll before kickoff).
