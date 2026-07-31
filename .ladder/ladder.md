@@ -24,8 +24,14 @@ version: 1
 - [ ] **R003** — Corners/cards betting market → *large*
   - Why: HC/AC/HY/AY/HR/AR already scraped into every match row, unused by any model - softer/less efficient market than 1X2/O-U/AH, genuinely untested
 
-- [ ] **R004** — Second full season of player-level scraping → *medium*
-  - Why: Entire lineup-aware edge (t=3.04) rests on one PL season + one Bundesliga check; RESULTS.md already flags this as the deferred next step once FBref rate limit clears
+- [▶] **R004** — Second full season of player-level scraping → *medium*
+  - Context: WhoScored shots/SOT calibration (Phase E-G) is well-calibrated but only proven on one season each (PL 2023/24, Bundesliga 2023/24) - the thinnest evidence base in the project. (Corrected: the t=3.04 lineup-edge stat belongs to the separate Understat/big-5 goals-lineup model, which already has 3 seasons - not this one.)
+  - Why: Tests whether the venue effect and calibration hold across TIME, not just across leagues, before trusting them into a live season
+  - [x] WhoScored shots/SOT, PL only, 2025/26 season (most recently completed - closer roster continuity to the upcoming live season than reaching back further)
+  - [ ] WhoScored shots/SOT, PL + Bundesliga, 2025/26 season
+  - [ ] Lineup model (Understat), one more big-5 season (pushed back on - that edge is bottlenecked by "closing odds already price lineups," not backtest sample size)
+  - Blocked by: ~none~
+  - Status: in_progress
 
 - [ ] **R005** — Referee-tendency data for cards markets → *medium*
   - Why: Card counts correlate with individual refs; not pulled at all currently, would pair with a cards model
