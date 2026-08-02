@@ -33,21 +33,27 @@ version: 1
   - Blocked by: ~none~
   - Status: in_progress
   - Note: Match list (380/380) built and committed
-    (data/raw_whoscored/match_list_E0_2025-2026.csv). Resumed scraping,
-    reached 109/380 checkpointed and verified clean in
+    (data/raw_whoscored/match_list_E0_2025-2026.csv). Reached 145/380 (38%)
+    checkpointed and verified clean in
     data/raw_whoscored/ws_scrape_export_E0_2025-2026.tsv (gitignored, local
-    only). Rate limiting recurred mid-session (error rate climbed to ~22%,
-    throughput dropped to near-zero) - same intermittent pattern as before;
-    it eased once already after a pause, so likely cyclical rather than
-    permanent. Resume by re-running the same hidden-iframe DOM-extraction
-    harness (browser tool, `/livestatistics/` match pages,
-    `#top-player-stats-summary-grid` tables) - load the harness JS, load
-    remaining match_list entries (skip IDs already in the TSV), call
-    `window.__runBatch(start, end)` in small batches, checkpoint to disk
-    every ~20-30 matches via the dump+dedupe-merge pattern (see recent
-    session for the exact python merge script). Earlier interruptions lost
-    unsaved progress before incremental checkpointing was adopted - always
-    checkpoint frequently, never rely on browser memory persisting.
+    only). Discovered the "stuck" pattern is actually the BACKGROUND BROWSER
+    TAB'S JS TIMERS BEING THROTTLED, not just WhoScored rate-limiting -
+    taking a `computer` screenshot action forces a repaint/wake and reliably
+    un-sticks a fully-stalled batch (confirmed repeatedly this session).
+    Error rate hovers ~20-26% (some matches genuinely lack full stats
+    coverage - not all errors are throttling). Resume pattern: rebuild the
+    harness JS (iframe + extractMatch + scrapeOne + runBatch - see
+    shots_engine/whoscored.py conventions for schema), load remaining
+    match_list entries (skip IDs already in the TSV - 145 done so far),
+    call `window.__runBatch(start, end)` in small batches (4-8), and
+    whenever a batch times out with zero progress, take a `computer`
+    screenshot before retrying rather than immediately re-running - this
+    single trick recovered progress every time it stalled this session.
+    Checkpoint to disk every ~20-30 matches via the dump+dedupe-merge
+    pattern (decode with json.JSONDecoder().raw_decode to handle the tool's
+    trailing footer text, dedupe by match_id against what's already on
+    disk). Never rely on browser memory persisting across a session
+    boundary - always checkpoint before ending.
 
 - [ ] **R005** — Referee-tendency data for cards markets → *medium*
   - Why: Card counts correlate with individual refs; not pulled at all currently, would pair with a cards model
