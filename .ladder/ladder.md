@@ -24,36 +24,16 @@ version: 1
 - [ ] **R003** — Corners/cards betting market → *large*
   - Why: HC/AC/HY/AY/HR/AR already scraped into every match row, unused by any model - softer/less efficient market than 1X2/O-U/AH, genuinely untested
 
-- [▶] **R004** — Second full season of player-level scraping → *medium*
-  - Context: WhoScored shots/SOT calibration (Phase E-G) is well-calibrated but only proven on one season each (PL 2023/24, Bundesliga 2023/24) - the thinnest evidence base in the project. (Corrected: the t=3.04 lineup-edge stat belongs to the separate Understat/big-5 goals-lineup model, which already has 3 seasons - not this one.)
-  - Why: Tests whether the venue effect and calibration hold across TIME, not just across leagues, before trusting them into a live season
-  - [x] WhoScored shots/SOT, PL only, 2025/26 season (most recently completed - closer roster continuity to the upcoming live season than reaching back further)
-  - [ ] WhoScored shots/SOT, PL + Bundesliga, 2025/26 season
-  - [ ] Lineup model (Understat), one more big-5 season (pushed back on - that edge is bottlenecked by "closing odds already price lineups," not backtest sample size)
+- [ ] **R004** — 3-season WhoScored scrape: PL + Bundesliga (2023/24 done, 2024/25 + 2025/26 needed) → *large*
+  - Context: Shots/SOT calibration proven on PL 2023/24 + Bundesliga 2023/24. Goal is 3 consecutive seasons per league — rotation players accumulate enough minutes for reliable shrinkage and we can distinguish consistent shot-takers from one-season noise.
+  - Why: 3 seasons per league is the minimum for stable player-level priors before Phase B live pipeline
+  - [x] PL 2025/26 — 380/380 complete, 0 malformed rows, checkpointed in data/raw_whoscored/ws_scrape_export_E0_2025-2026.tsv (gitignored, local)
+  - [ ] Bundesliga 2025/26 — not started (~306 matches)
+  - [ ] PL 2024/25 — not started (~380 matches) — missing middle season
+  - [ ] Bundesliga 2024/25 — not started (~306 matches)
   - Blocked by: ~none~
+  - Note: PL 2025/26 done via iframe-based scrape harness (extractMatch reads tbody rows off the livestatistics page's two summary tables, player_id from the /players/ link, shots/ShotsOT columns by header index, sub-minute from the 3rd player-meta-data span) driven from a single foreground tab so background-tab JS throttling never triggers. Batches of 8 downloaded as a Blob to ~/Downloads then merged+deduped into the TSV by match_id. Recurring "CDP Runtime.evaluate timed out" on the await call is just the response reporting hanging — the page-side loop keeps running; poll `Object.keys(window.__results).length` and/or take a `computer` screenshot to unstick the connection, don't re-run the batch. One session saw a real interruption: an ad hijacked the foreground tab to a random whoscored.com page mid-batch, which resets all injected JS state — recovery is to recompute the remaining match_ids from the on-disk TSV (source of truth, not the in-memory index) and reinstall the whole harness fresh. Next up: same harness, swap in the Bundesliga 2025/26 match_list.
   - Status: in_progress
-  - Note: Match list (380/380) built and committed
-    (data/raw_whoscored/match_list_E0_2025-2026.csv). Reached 145/380 (38%)
-    checkpointed and verified clean in
-    data/raw_whoscored/ws_scrape_export_E0_2025-2026.tsv (gitignored, local
-    only). Discovered the "stuck" pattern is actually the BACKGROUND BROWSER
-    TAB'S JS TIMERS BEING THROTTLED, not just WhoScored rate-limiting -
-    taking a `computer` screenshot action forces a repaint/wake and reliably
-    un-sticks a fully-stalled batch (confirmed repeatedly this session).
-    Error rate hovers ~20-26% (some matches genuinely lack full stats
-    coverage - not all errors are throttling). Resume pattern: rebuild the
-    harness JS (iframe + extractMatch + scrapeOne + runBatch - see
-    shots_engine/whoscored.py conventions for schema), load remaining
-    match_list entries (skip IDs already in the TSV - 145 done so far),
-    call `window.__runBatch(start, end)` in small batches (4-8), and
-    whenever a batch times out with zero progress, take a `computer`
-    screenshot before retrying rather than immediately re-running - this
-    single trick recovered progress every time it stalled this session.
-    Checkpoint to disk every ~20-30 matches via the dump+dedupe-merge
-    pattern (decode with json.JSONDecoder().raw_decode to handle the tool's
-    trailing footer text, dedupe by match_id against what's already on
-    disk). Never rely on browser memory persisting across a session
-    boundary - always checkpoint before ending.
 
 - [ ] **R005** — Referee-tendency data for cards markets → *medium*
   - Why: Card counts correlate with individual refs; not pulled at all currently, would pair with a cards model
@@ -69,3 +49,12 @@ version: 1
 
 - [ ] **R009** — Extend WhoScored-only shots/SOT to non-big-5 leagues → *medium*
   - Why: Phase C ruled out lineup-xG extension to Championship/Eredivisie due to no Understat xG there, but WhoScored raw shots/SOT doesn't need xG at all - that constraint may not actually block this
+
+- [ ] **R010** — Where to push coverage next: league tier vs. new markets → *medium*
+  - Context: Brainstormed after R004 status review: more scraping, other leagues, which tier (mid vs top-5), and whether to hunt more betting markets
+  - Why: Big-5 O/U/1X2/AH are proven efficient (no edge) - more top-5 coverage of the same markets won't surface edge; mid-tier leagues and softer markets are the two levers that could
+  - [ ] More top-5 leagues (La Liga, Serie A, Ligue 1) on the existing goals/O-U/1X2 model — low new-code cost but tests an already-efficient market, unlikely to surface edge
+  - [ ] Drop down a tier (Championship, Eredivisie, etc.) and re-test the already-rejected 1X2/O-U/AH markets there — thinner books, less sharp money, real shot at reopening a "no edge" verdict
+  - [ ] New softer markets on existing big-5 data (BTTS, correct score, team totals) — same league tier, different market efficiency profile; corners/cards is already scoped separately as R003
+  - Related: R003 (corners/cards market), R009 (extend shots/SOT to non-big-5) — both are specific instances of the levers above, not blockers
+  - Blocked by: ~none~
