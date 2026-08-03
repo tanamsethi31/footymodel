@@ -4,7 +4,8 @@ doesn't - see RESULTS.md). Superset of FBref's Phase D data: real per-player
 minutes (actual substitution minute, not a flat assumption) and direct
 position codes matching POSITION_GROUPS already, no group-mapping hack needed.
 
-Raw cache: data/raw_whoscored/ws_scrape_export.tsv - tab-separated
+Raw cache: data/raw_whoscored/ws_scrape_export[_{league}][_{season}].tsv, one
+file per (league, season) pair - see `_raw_path`. Tab-separated
 `match_id<TAB>data`, one line per match, where `data` is
 'HomeTeam@rows||AwayTeam@rows' and each row is
 player_id^name^age^position^subMinute^shots^sot. subMinute is empty for a
@@ -25,9 +26,11 @@ from .data import ROOT, PROCESSED_DIR
 from .live import namematch
 
 RAW_DIR = ROOT / "data" / "raw_whoscored"
-# E0's raw file predates the multi-league convention - keep its bare name for
-# backward compat; every other league gets a suffixed file.
-_RAW_FILENAMES = {"E0": "ws_scrape_export.tsv"}
+# The first season scraped for each league (2023/24) predates the
+# league+season-suffixed convention and keeps its original bare/league-only
+# name; every season scraped since gets `ws_scrape_export_{league}_{season}.tsv`.
+_LEGACY_SEASON = "2023/24"
+_LEGACY_RAW_FILENAMES = {"E0": "ws_scrape_export.tsv", "D1": "ws_scrape_export_D1.tsv"}
 
 # Big-5 leagues only have football-data.co.uk match dates in matches_xg.parquet
 # (Understat join, see understat.py); DEFAULT_LEAGUES (mid-tier + E0) are in
@@ -35,8 +38,16 @@ _RAW_FILENAMES = {"E0": "ws_scrape_export.tsv"}
 _BIG5_DATE_SOURCE = {"D1", "SP1", "I1", "F1"}
 
 
-def _raw_path(league: str) -> Path:
-    return RAW_DIR / _RAW_FILENAMES.get(league, f"ws_scrape_export_{league}.tsv")
+def _season_suffix(season: str) -> str:
+    """'2024/25' -> '2024-2025' (matches the multi-season file naming)."""
+    start = int(season.split("/")[0])
+    return f"{start}-{start + 1}"
+
+
+def _raw_path(league: str, season: str) -> Path:
+    if season == _LEGACY_SEASON and league in _LEGACY_RAW_FILENAMES:
+        return RAW_DIR / _LEGACY_RAW_FILENAMES[league]
+    return RAW_DIR / f"ws_scrape_export_{league}_{_season_suffix(season)}.tsv"
 
 
 def _minutes_played(pos: str, subm: str) -> float:
@@ -45,9 +56,9 @@ def _minutes_played(pos: str, subm: str) -> float:
     return 90.0 if subm == "" else float(subm)
 
 
-def _load_raw_rows(league: str) -> pd.DataFrame:
+def _load_raw_rows(league: str, season: str) -> pd.DataFrame:
     rows = []
-    with open(_raw_path(league)) as f:
+    with open(_raw_path(league, season)) as f:
         for line in f:
             line = line.rstrip("\n")
             if "\t" not in line:
@@ -103,7 +114,7 @@ def load_players(league: str = "E0", season: str = "2023/24") -> pd.DataFrame:
     already expect (match_id, date, league, team_us, side, player_id, player,
     position, minutes, shots, sot) - `team_us` is the plain team name here
     (WhoScored gives real names directly, no opaque-id recovery needed)."""
-    df = _load_raw_rows(league)
+    df = _load_raw_rows(league, season)
     df = _attach_dates(df, league, season)
     df["league"] = league
     df["date"] = pd.to_datetime(df["date"]).dt.normalize()
