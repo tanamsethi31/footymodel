@@ -1,0 +1,4 @@
+date,league,home,away,market,odds,model_p,fair_p,edge_ev,kelly_full,stake
+2025-05-03,E1,Derby,Stoke,under25,1.47,0.629,0.675,-0.075,-0.16,1.0
+2025-05-03,E1,Burnley,Millwall,under25,2.07,0.722,0.479,0.495,0.462,1.0
+2025-05-03,E1,West Brom,Luton,under25,1.86,0.624,0.534,0.16,0.186,1.0

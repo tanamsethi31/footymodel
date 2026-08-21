@@ -42,6 +42,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
 
 - [ ] **R006** — Per-league xi and blend-weight sweep → *small*
   - Why: xi=0.0018 and BEST_BLEND_W=0.25 are global constants tuned once on big-5; backtest.py already accepts --xi so a sweep is cheap
+  - Context: PL season kicks off in 3 days, live pipeline already running via cron; question is whether to re-tune before or after the season starts feeding Phase J live-validation data
+  - [ ] Sweep now, before kickoff — cheap, could improve live numbers from day one
+  - [ ] Leave on current global constants, sweep later with a season of fresh data — avoids confounding the Phase J live-validation read (recommended: re-tuning right before the exact window being validated muddies whether results reflect the model or the retune)
+  - Blocked by: ~none~
 
 - [ ] **R007** — Ensemble goals+lineup+SOT models → *large*
   - Why: Three models run as independent tracks with no combined signal; real upside but real risk of adding noise if blended carelessly
@@ -69,3 +73,18 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Predictive ML last (XGBoost/LightGBM on a consolidated feature store, Phase M/N) — held to the same walk-forward + CLV bar that already killed the O/U and AH "edges"; only worth it once a feature store (Phase L) makes it cheap to test honestly
   - Blocked by: ~none~
   - Note: full writeup in VISION.md §5
+
+- [ ] **R012** — Track CLAUDE.md, VISION.md, .claude/ in git → *small*
+  - Context: "open our footymodel project to get working" session — found these three untracked in `git status` despite being established project files referenced elsewhere (VISION.md linked from roadmap discussion, CLAUDE.md is the ladder-tracking contract itself)
+  - Why: untracked project files mean a fresh clone or collaborator loses the vision doc and ladder-tracking setup silently
+  - [ ] `git add` + commit all three now
+  - [ ] Leave untracked intentionally (e.g. CLAUDE.md/.claude/ meant to stay local-only tooling, not shipped)
+  - Blocked by: ~none~
+
+- [ ] **R013** — Live poller barely running: laptop sleep is killing cron coverage → *medium*
+  - Context: PL season already ~2 weeks in (user asked for a status update); investigated why `live_seen_fixtures.json` had only 1 fixture ID and no CSVs existed after 349 logged cron runs
+  - Why: Verified the code live against the real API — league IDs (39/140/78/135/61) resolve correctly, no pagination bug (paging 1/1, PL fixtures present in date-only queries), quota healthy (16/100 used). The pipeline logic works. `pmset -g log` shows the machine cycling into real `Sleep` every ~10-15min all day (not just brief DarkWake) — plain crontab doesn't run/complete jobs while asleep, so nearly every 20-min poll window across 11+ days of live PL/La Liga/Bundesliga/Serie A/Ligue 1 fixtures was silently skipped. Phase J (live validation — the one thing that actually matters right now) has collected almost no data as a result, not because the edge doesn't exist but because the poller isn't actually running when it needs to.
+  - [ ] Move the poller to a GitHub Actions scheduled workflow — repo already has Actions/CI wired up (`.github/workflows/ci.yml`), zero cost, always-on, removes the laptop-sleep dependency entirely (recommended)
+  - [ ] Keep it local, use `caffeinate`/`pmset repeat wake` scheduled around known kickoff windows — fragile, still tied to the laptop being physically available at the right times
+  - [ ] Cheap always-on VPS or Raspberry Pi cron — more control, more to maintain for a research project
+  - Blocked by: ~none~

@@ -4,11 +4,19 @@ __pycache__/
 data/raw/
 data/raw_fbref/
 data/raw_whoscored/
-data/processed/
+data/processed/*
 *.parquet
 .DS_Store
 .ipynb_checkpoints/
 .env
 data/logs/
 
-data/processed/paper_trades.csv
+# Tracked exceptions: state the live GitHub Actions poller needs checked out
+# (model inputs) and writes back (recommendation logs) each run.
+!data/processed/paper_trades.csv
+!data/processed/matches.parquet
+!data/processed/matches_xg.parquet
+!data/processed/player_match.parquet
+!data/processed/live_recommendations.csv
+!data/processed/live_player_props.csv
+!data/processed/live_seen_fixtures.json

@@ -1,0 +1,46 @@
+name: Live poll
+
+on:
+  schedule:
+    # UTC. Kickoffs across PL/La Liga/Bundesliga/Serie A/Ligue 1 run roughly
+    # 11:00-20:30 UTC — poll every 20min with margin on both ends so the
+    # live engine's 2hr pre-kickoff lookback window always gets covered.
+    - cron: "*/20 9-21 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: live-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - name: Run live poller (goals + player-prop engines, paper-trade only)
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python -m footymodel.live.run_all
+
+      - name: Commit + push any new recommendations/state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for f in data/processed/live_seen_fixtures.json \
+                   data/processed/live_recommendations.csv \
+                   data/processed/live_player_props.csv; do
+            [ -f "$f" ] && git add "$f"
+          done
+          git diff --cached --quiet && exit 0
+          git commit -m "live poll: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git push
