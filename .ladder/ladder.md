@@ -81,10 +81,21 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Leave untracked intentionally (e.g. CLAUDE.md/.claude/ meant to stay local-only tooling, not shipped)
   - Blocked by: ~none~
 
-- [ ] **R013** — Live poller barely running: laptop sleep is killing cron coverage → *medium*
+- [x] **R013** — Live poller barely running: laptop sleep is killing cron coverage → *medium*
   - Context: PL season already ~2 weeks in (user asked for a status update); investigated why `live_seen_fixtures.json` had only 1 fixture ID and no CSVs existed after 349 logged cron runs
   - Why: Verified the code live against the real API — league IDs (39/140/78/135/61) resolve correctly, no pagination bug (paging 1/1, PL fixtures present in date-only queries), quota healthy (16/100 used). The pipeline logic works. `pmset -g log` shows the machine cycling into real `Sleep` every ~10-15min all day (not just brief DarkWake) — plain crontab doesn't run/complete jobs while asleep, so nearly every 20-min poll window across 11+ days of live PL/La Liga/Bundesliga/Serie A/Ligue 1 fixtures was silently skipped. Phase J (live validation — the one thing that actually matters right now) has collected almost no data as a result, not because the edge doesn't exist but because the poller isn't actually running when it needs to.
-  - [ ] Move the poller to a GitHub Actions scheduled workflow — repo already has Actions/CI wired up (`.github/workflows/ci.yml`), zero cost, always-on, removes the laptop-sleep dependency entirely (recommended)
+  - [x] Move the poller to a GitHub Actions scheduled workflow — repo already has Actions/CI wired up (`.github/workflows/ci.yml`), zero cost, always-on, removes the laptop-sleep dependency entirely (recommended)
   - [ ] Keep it local, use `caffeinate`/`pmset repeat wake` scheduled around known kickoff windows — fragile, still tied to the laptop being physically available at the right times
   - [ ] Cheap always-on VPS or Raspberry Pi cron — more control, more to maintain for a research project
   - Blocked by: ~none~
+  - Note: Also found a second bug while building this — local cron's 10am-10pm window was in IST (04:30-16:30 UTC), which misses most actual kickoff times (11:00-20:30 UTC across the 5 leagues). New workflow (`.github/workflows/live_poll.yml`) polls 09:00-21:40 UTC every 20min instead. Tracks matches/matches_xg/player_match parquet + live CSVs/seen-fixtures JSON via .gitignore exceptions so the Actions runner has the model inputs and commits results back. Committed locally (9e22c27); not yet pushed, and the `API_FOOTBALL_KEY` repo secret still needs to be set by the user (can't be done on their behalf).
+  - Status: done — verified green end-to-end (run 32498185226). Manually triggering + watching the first three Actions runs caught two CI-only gaps a local test never would: `pyarrow` was installed in the local venv but missing from requirements.txt (parquet reads failed), and `data/raw_fbref/player_match.jsonl` (fbref.py's SOTModel input) was fully gitignored, same dir/* traversal issue as the parquet files. Both fixed and pushed (4d8699e, 4e00de2). Poller now runs clean, correctly logs "no new confirmed-lineup fixtures" when nothing's in the pre-kickoff window.
+
+- [x] **R014** — Local crontab: remove now, or leave running alongside Actions? → *small*
+  - Context: R013 moved the live poller to GitHub Actions; the local crontab entry (`*/20 10-22 * * *` -> `footymodel.live.run_all`) is still installed
+  - Why: if both run, they build divergent local vs. Actions-checkout `live_seen_fixtures.json` state and can race pushing to the same file — local writes aren't synced with Actions' commits, so a local run could push a conflicting version or silently diverge with no push at all
+  - [x] Remove the local crontab entry now — Actions is the sole poller, no race risk
+  - [ ] Leave it running as a redundant local fallback — accepts the divergence/race risk in exchange for a second data source if Actions has an outage
+  - Blocked by: ~none~
+  - Note: R013's push landed on origin/main (9e22c27) and `API_FOOTBALL_KEY` repo secret confirmed set (`gh secret list`). Local crontab removed. Live poller is now Actions-only.
+  - Status: done
