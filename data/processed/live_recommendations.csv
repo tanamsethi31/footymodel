@@ -1,0 +1,4 @@
+logged_at,fixture_id,league,kickoff,home,away,n_home_starters_matched,n_away_starters_matched,model_p_over25,exp_total_goals,odds_over25,odds_under25
+2026-08-23T12:52:28.290505,1552729,F1,2026-08-23T13:00:00+00:00,Angers,Lille,8,10,0.37,2.17,,
+2026-08-23T12:52:30.502161,1557373,E0,2026-08-23T13:00:00+00:00,Brighton,Aston Villa,10,10,0.442,2.44,,
+2026-08-23T12:52:32.613799,1557374,E0,2026-08-23T13:00:00+00:00,Manchester City,Bournemouth,10,10,0.605,3.13,,
