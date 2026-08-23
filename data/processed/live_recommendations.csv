@@ -3,3 +3,4 @@ logged_at,fixture_id,league,kickoff,home,away,n_home_starters_matched,n_away_sta
 2026-08-23T12:52:30.502161,1557373,E0,2026-08-23T13:00:00+00:00,Brighton,Aston Villa,10,10,0.442,2.44,,
 2026-08-23T12:52:32.613799,1557374,E0,2026-08-23T13:00:00+00:00,Manchester City,Bournemouth,10,10,0.605,3.13,,
 2026-08-23T14:32:28.197773,1570344,SP1,2026-08-23T15:00:00+00:00,Atletico Madrid,Villarreal,10,11,0.56,2.92,,
+2026-08-23T17:29:49.583615,1570348,SP1,2026-08-23T17:30:00+00:00,Getafe,Racing Santander,8,11,0.38,2.21,,
