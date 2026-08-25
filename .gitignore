@@ -4,6 +4,7 @@ __pycache__/
 data/raw/
 data/raw_fbref/*
 data/raw_whoscored/
+data/raw_understat_matches/
 data/processed/*
 *.parquet
 .DS_Store
@@ -20,5 +21,6 @@ data/logs/
 !data/processed/live_recommendations.csv
 !data/processed/live_player_props.csv
 !data/processed/live_seen_fixtures.json
+!data/processed/sofascore_seen_fixtures.json
 !data/raw_fbref/player_match.jsonl
 .superpowers/

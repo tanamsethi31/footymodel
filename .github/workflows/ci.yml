@@ -19,3 +19,5 @@ jobs:
         run: python scripts/ah_settlement_test.py
       - name: Live player-prop odds parser (pure, data-free)
         run: python scripts/props_odds_parse_test.py
+      - name: SofaScore odds parser (pure, data-free)
+        run: python scripts/sofascore_odds_parse_test.py

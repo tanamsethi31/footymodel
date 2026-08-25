@@ -27,10 +27,24 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+
+      - name: Install Playwright chromium (for the SofaScore engine)
+        run: playwright install --with-deps chromium
+
       - name: Run live poller (goals + player-prop engines, paper-trade only)
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python -m footymodel.live.run_all
+
+      - name: Run SofaScore goals engine (API-Football fallback, paper-trade only)
+        continue-on-error: true  # newer/less-proven than the API-Football path - a crash
+                                 # here shouldn't block committing whatever else succeeded
+        run: python -m footymodel.live.sofascore_engine
 
       - name: Commit + push any new recommendations/state
         run: |
@@ -38,7 +52,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for f in data/processed/live_seen_fixtures.json \
                    data/processed/live_recommendations.csv \
-                   data/processed/live_player_props.csv; do
+                   data/processed/live_player_props.csv \
+                   data/processed/sofascore_seen_fixtures.json; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --cached --quiet && exit 0
