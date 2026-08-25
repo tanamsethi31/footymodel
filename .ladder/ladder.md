@@ -162,3 +162,20 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Both in parallel — submit support request now, scope scraping as a fallback independent of the response
   - Blocked by: ~none~
   - Note: user is submitting the support request themselves; I have live-session access via claude-in-chrome if they want help drafting/sending it, but haven't been asked to yet — send only on explicit request (sending messages on the user's behalf needs it).
+  - Note: sent the support message via the user's real dashboard session (claude-in-chrome) at their explicit request. It hit an AI FAQ bot, not a human directly, but the bot confirmed messages through that chat interface get auto-forwarded to the human support team. No ticket number, no ETA. As of the next check, account was still suspended.
+
+- [x] **R021** — SofaScore-based goals engine, built and shipped → *large*
+  - Context: R020 chose "build the SofaScore path"; verified live (tournament IDs, lineups, Match-goals O/U odds all real and working from a browser context) before writing code
+  - Why: API-Football suspension had no ETA; SofaScore had confirmed lineups + real 2.5-line odds for free, matching what the goals engine needs (props still has no free path anywhere - confirmed again, permanent conclusion)
+  - Built: `footymodel/live/sofascore_client.py` (Playwright-based - plain HTTP 403s, needs a real browser), `sofascore_engine.py` (same LineupModel/namematch/EV logic as engine.py, new data source), `scripts/sofascore_odds_parse_test.py` (fractional->decimal + 2.5-line lookup, added to CI). Wired into `live_poll.yml` with Playwright install + browser cache, `continue-on-error` since it's the newer/less-proven path. Pushed (e0660ff).
+  - **Critical finding, same session**: mid-build, this sandbox's IP got 403'd by SofaScore (confirmed via two independent browser contexts) - the same bot-detection cat-and-mouse already documented for WhoScored/FBref, but immediate rather than eventual. Triggered a real GitHub Actions run (32904932028) to check if a different IP would fare better: **also 403'd**. This means it's very likely blocking cloud/datacenter IP ranges categorically (standard Cloudflare-style behavior), not a single flagged IP - a structural blocker for any cloud CI environment, not something better code or backoff logic fixes.
+  - Status: code shipped and correct, but **not currently usable in production** - every fixtures-fetch call from GH Actions 403s. Effectively dead until/unless proven otherwise. Also gitignored `data/raw_understat_matches/` (474MB/12k-file cache, never tracked) caught before being accidentally committed.
+  - Blocked by: needs a fresh decision on next steps (see R022)
+
+- [ ] **R022** — SofaScore is blocked from cloud CI: what now? → *small*
+  - Context: R021's SofaScore path is code-complete but non-functional in production - confirmed blocked from both this sandbox and real GitHub Actions runners
+  - Why: the free-odds search has now hit two structural dead ends independently (no free API bundles lineups+odds; the one working scrape source blocks cloud/datacenter IPs) - worth deciding deliberately rather than continuing to burn effort chasing the next option
+  - [ ] Keep waiting on API-Football support (recommended) — leave the SofaScore code in place harmlessly (already `continue-on-error`, costs nothing to leave failing silently) in case their blocking policy ever changes; focus effort on the one lever that's actually proven to work before (a human at API-Football lifting the suspension)
+  - [ ] Route SofaScore requests through a residential/rotating proxy service — could plausibly work (real user IPs aren't datacenter-flagged) but reintroduces a paid third-party dependency, defeating the original "find something free" motivation, plus no guarantee it beats other detection signals (TLS fingerprint, request patterns)
+  - [ ] Stop here — accept live validation is fully paused until API-Football responds, remove/disable the now-dead SofaScore CI step to stop it running for nothing every 20min
+  - Blocked by: ~none~
