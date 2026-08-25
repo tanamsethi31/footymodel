@@ -110,3 +110,36 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Note: decoupled as planned. Refresh done and pushed (840e422): 377,678 rows (was 322,832), max date now 2026-08-22, Hull/Sunderland/Coventry all confirmed present. Per-match data for 2019-2025 was already cached locally (from the original Jul 29 build plus a killed earlier attempt this session) so only ~16 fresh 2026/27 matches needed real network fetches - fast. Could NOT do a live end-to-end confirmation against a real fixture: triggering a manual Actions run (32597493534) hit `You have reached the request limit for the day` on API-Football's free 100-req/day tier - partly the normal 20-min cadence, partly my own repeated manual workflow_dispatch test triggers today. Self-resolving at UTC midnight reset; not a bug, nothing to fix. The "automate the refresh" sub-decision is still genuinely open.
   - Pending: scheduled a one-time cloud routine (trig_01WYsi7AwZcBJHALg7FZ3cmJ) for 2026-08-23T00:30Z, 30min after the expected quota reset, to (1) confirm the goals engine actually logs real rows now with no more team-match-failure errors, and (2) return a concrete recommendation on the "fix now AND automate" vs. "leave manual" choice above based on that evidence. Resolve those two checkboxes once it reports back — don't decide blind before then.
   - Related finding (user asked "what was our prediction for Hull v Man Utd" — checked live_player_props.csv): same root cause showed up a second place. `shots_engine.py`'s `player_rows_for_fixture` requires BOTH teams to resolve against the Understat/fbref rosters before computing any probability (`if u_pid and opp_u`, `if f_pid and opp_f`) — Hull being unmatched at request time meant even Man Utd's players logged blank `p_shots_gt*`/`p_sot_gt*`, only odds got captured, for all 22 rows. Fixture 1557368 is in `seen_fixtures.json` so this is permanent, not retryable. Unverified: whether `data/raw_fbref/player_match.jsonl` (the SOT half) has the same promoted-team gap Understat had — if so, Sunderland/Coventry fixtures could hit this same blank-prediction outcome even after today's fix. Worth checking before the next promoted-team fixture, not urgent right now.
+
+## product
+
+- [x] **R016** — Public dashboard hosting platform → *medium*
+  - Context: user wants a "fancy proper dashboard" that auto-updates before match time with key predictive-analysis outcomes (Phase P in VISION.md) — brainstorming via superpowers:brainstorming, visual companion running at http://localhost:58090
+  - Why: matches the VISION.md §9 motive (CV/portfolio surface, "something explainable end-to-end in a product/business conversation") — where it lives affects how it reads in that context
+  - [x] Vercel-hosted site — real deployed URL, auto-redeploys from GitHub, best portfolio fit, CLI/plugin already set up
+  - [ ] GitHub Pages — zero extra infra, static-only, less flashy
+  - [ ] Claude Artifact — instant, no deploy step, claude.ai-hosted rather than a standalone project URL
+  - Blocked by: ~none~
+
+- [x] **R017** — Dashboard scope: picks only, or also a graded track record? → *large*
+  - Context: follow-up to R016 during brainstorming
+  - Why: a track record (hit rate, realized CLV once matches finish) is far more portfolio-worthy than a live picks list alone, but requires a new results-grading step that doesn't exist anywhere in the codebase yet — genuinely bigger scope, not a UI-only decision
+  - [ ] Upcoming picks only — today's/this week's confirmed-lineup fixtures with model prob, odds, EV; no new backend logic beyond reading existing CSVs
+  - [x] Upcoming picks + running track record — needs a new grading step: fetch final results for previously-logged predictions, compare to the pick, aggregate hit rate/CLV
+  - Blocked by: ~none~
+  - Note: grading scope itself needs its own decision (goals-only vs. goals+props) — see next rung.
+
+- [x] **R018** — Prop-grading scope: verify player-stats endpoint first, or build blind? → *small*
+  - Context: follow-up to R017 (chose "grade both from day one") — goals grading is easy (final score, already fetched), props grading needs an unverified player-match-stats API endpoint
+  - Why: don't want to design/build a props-grading feature around an endpoint that turns out to be Pro-tier-only or shaped differently than assumed
+  - [x] Verify the endpoint against a real completed fixture before designing the props-grading feature
+  - Blocked by: ~none~
+  - Status: blocked — attempted verification, discovered the API-Football account itself is suspended (see R019), not just an endpoint-availability question. Re-attempt once R019 clears.
+
+## infra
+
+- [ ] **R019** — API-Football account suspended → *unknown*
+  - Context: discovered while trying to verify the player-stats endpoint for R018. `c.status()` (normally free/uncounted) now returns `{'access': 'Your account is suspended, check on https://dashboard.api-football.com.'}` — a harder failure than the daily-quota exhaustion seen earlier this week
+  - Why: blocks everything — live poller (R013/R015's whole point), R018's endpoint check, and by extension R017's "grade both" dashboard scope. Traced via Actions logs: last known-good run was 13:25 UTC 2026-08-24 (`No new confirmed-lineup fixtures`, no error); first suspended run was 15:22 UTC 2026-08-24 (32744344728). Every run since has failed the same way — ~18hrs and counting as of this check (09:27 UTC 2026-08-25), zero new predictions logged by either engine in that window.
+  - [ ] User checks dashboard.api-football.com for the actual reason (billing/plan issue vs. an automated abuse flag, plausibly from repeated daily-quota hits including manual testing this week) and resolves it — this is account/billing-level, not something fixable from code
+  - Blocked by: ~none~ (blocks R013 live validation, R017/R018 dashboard scope)
