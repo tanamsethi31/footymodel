@@ -194,6 +194,22 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
 - [ ] **R024** — RapidAPI "Free API Live Football Data": pay for Pro, or stay free and wait? → *medium*
   - Context: user pointed at a specific RapidAPI listing (Creativesdev/free-api-live-football-data) and asked to try it with their logged-in RapidAPI session
   - Why: verified via curl with the user's real API key — real, rich lineup data (e.g. Feyenoord full squad w/ stats) and fixtures with timestamps matching SofaScore's down to the second (likely the same underlying data, proxied through RapidAPI's own infra) - Lineups, Odds, Fixtures, Statistics all included on every plan, and critically no bot-block risk since it's a proper API gateway, not a scraped site directly. But the free "Basic" plan is a hard 100 requests/MONTH limit - nowhere near enough for a 20-min cron (would exhaust it in a day or two). Pro tier is $9.99/mo for 20,000 requests/month, comfortably enough (~3,600/mo worst case) - cheaper and more complete than the residential-proxy idea from R022, since it solves both lineups AND odds for both engines in one place
-  - [ ] Don't pay — confirms free truly doesn't work here either (same as every other candidate checked); return fully to waiting on API-Football support
+  - [x] Don't pay — confirms free truly doesn't work here either (same as every other candidate checked); return fully to waiting on API-Football support
   - [ ] Pay $9.99/mo for Pro and build the integration — verified data first this time (learned from the SofaScore false start), real ongoing cost though small
   - Blocked by: ~none~
+  - Status: done — user chose free (Basic, $0) over paying. Started building `rapidapi_client.py` against it (plain `requests` works, no browser needed, real lineup+odds data confirmed via curl) before hitting a new problem — see R025.
+
+- [ ] **R025** — RapidAPI free-tier lineups have no confirmed/predicted flag → *small*
+  - Context: found while building the free-tier client (R024) — checked both the lineup endpoint and the match-list endpoint for any signal distinguishing an official confirmed XI from FotMob's own prediction; neither has one (unlike SofaScore's explicit `confirmed:true/false`, or API-Football which simply returns empty until confirmed)
+  - Why: the goals model's statistical validity (t=3.04) rests specifically on CONFIRMED lineups — silently treating a predicted XI as confirmed would corrupt predictions without any error signal. Also burned ~8-9 of the 100 monthly calls on verification, some wastefully duplicated
+  - [ ] Build with a timing heuristic — only fetch within ~20-30min of kickoff, assume that close in it's very likely the real XI (not guaranteed, but the budget doesn't support re-checking anyway)
+  - [ ] Don't use it for the goals engine — too risky for the core mechanic; explore for something lower-stakes or stop here
+  - Blocked by: ~none~
+  - Note: user didn't pick either option directly — redirected to try Sportmonks instead (see R026) before this got resolved. Still genuinely open if we come back to the RapidAPI free tier.
+
+- [x] **R026** — Sportmonks with user's real API token → *small*
+  - Context: user supplied a real Sportmonks v3 API token and asked to try it, as a possible way around R025's confirmed-flag gap
+  - Why: earlier research (R020, web-search-only) claimed Sportmonks' free tier covers only Danish Superliga + Scottish Premiership - worth re-verifying against the user's actual account rather than trusting secondhand blog claims, especially since a real token might mean a paid plan
+  - Tested: `GET /v3/football/leagues?api_token=...` (correct path is `/v3/football/leagues`, not `/v3/my/enabled-leagues` which 404'd) — one clean call, no guessing needed after that
+  - Result: confirmed directly against the real account — exactly 4 leagues in this subscription: Danish Superliga, Scottish Premiership, and their playoffs. None of our 5 target leagues. Same conclusion as the earlier web research, now verified rather than assumed.
+  - Status: done — ruled out immediately, no need to check lineups/odds since league coverage fails at the first gate.
