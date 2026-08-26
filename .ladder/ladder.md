@@ -180,3 +180,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Stop here — accept live validation is fully paused until API-Football responds, remove/disable the now-dead SofaScore CI step to stop it running for nothing every 20min
   - Blocked by: ~none~
   - Status: done — confirmed with user ("sofascore continue" -> clarified as "leave code as-is, no proxy"). SofaScore engine stays wired into live_poll.yml as a dormant no-cost fallback; no new spend, no further build. Next real move is still whatever comes back from API-Football support.
+
+- [ ] **R023** — FlashScore as another free scrape source: dig deeper, build with risk, or stop? → *medium*
+  - Context: user still wanted "any other free alternative" after checking dashboard.api-football.com and finding it still suspended; researched FlashScore as a second scrape candidate after SofaScore's cloud-IP block killed R021
+  - Why: FlashScore fixtures + 1X2 odds both confirmed working via plain `curl` — no bot-block hit, no browser/Playwright needed at all, which would avoid the exact structural problem that killed the SofaScore build. But the decisive piece (pre-match lineups) is unconfirmed: a match a few days out showed no Lineups tab in the nav, and guessed lineups URLs 404'd. Don't want to repeat the SofaScore mistake of building a full client+engine before confirming the one requirement that actually matters
+  - [ ] Keep digging now — wait for/find a match in its actual pre-kickoff lineup window, confirm the real lineups URL/routing before writing any code
+  - [ ] Build it anyway on the fixtures+odds evidence alone, treat lineup availability as a risk to discover during testing
+  - [ ] Stop here too — two dead-end/uncertain scrape attempts (SofaScore blocked, FlashScore lineups unconfirmed) is enough signal; go back to just waiting on API-Football
+  - Blocked by: ~none~
