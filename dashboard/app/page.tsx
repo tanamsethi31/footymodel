@@ -1,4 +1,4 @@
-import { getGoalsPicks, getPropsPicks } from "@/lib/data";
+import { getGoalsPicks, getPropsPicks, getGradedResults } from "@/lib/data";
 import SubscribeButton from "@/components/SubscribeButton";
 
 export const revalidate = 60;
@@ -49,7 +49,25 @@ const SOURCE_LABEL: Record<string, string> = {
 };
 
 export default async function Home() {
-  const [goals, props] = await Promise.all([getGoalsPicks(), getPropsPicks()]);
+  const [goals, props, graded] = await Promise.all([
+    getGoalsPicks(),
+    getPropsPicks(),
+    getGradedResults(),
+  ]);
+
+  const gradedBets = graded.filter((g) => g.betSide !== null);
+  const accuracy =
+    graded.length > 0
+      ? graded.filter((g) => g.modelCorrect).length / graded.length
+      : null;
+  const betWinRate =
+    gradedBets.length > 0
+      ? gradedBets.filter((g) => g.betWon).length / gradedBets.length
+      : null;
+  const cumulativeReturn = gradedBets.reduce(
+    (sum, g) => sum + (g.realizedReturn ?? 0),
+    0
+  );
 
   // Group props rows by fixture so each match renders as one card.
   const propsByFixture = new Map<string, typeof props>();
@@ -72,6 +90,96 @@ export default async function Home() {
         </div>
         <SubscribeButton />
       </header>
+
+      <section className="mb-14">
+        <h2 className="text-lg font-semibold mb-1">Track record</h2>
+        <p className="text-sm text-neutral-500 mb-5">
+          Goals predictions only (v1) — graded against real results once a
+          match finishes. &quot;Bet&quot; means the model showed positive
+          EV on a side at the time it was logged; still paper-trade, no
+          real money moved.
+        </p>
+        {graded.length === 0 ? (
+          <p className="text-sm text-neutral-500">
+            No graded results yet — predictions get graded the day after
+            they&apos;re logged, once the match has finished.
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+                <div className="text-neutral-500 text-xs">Model accuracy</div>
+                <div className="text-xl font-mono mt-1">{pct(accuracy)}</div>
+                <div className="text-xs text-neutral-400 mt-0.5">
+                  {graded.length} graded
+                </div>
+              </div>
+              <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+                <div className="text-neutral-500 text-xs">Bets placed</div>
+                <div className="text-xl font-mono mt-1">{gradedBets.length}</div>
+                <div className="text-xs text-neutral-400 mt-0.5">
+                  positive EV at the time
+                </div>
+              </div>
+              <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+                <div className="text-neutral-500 text-xs">Bet win rate</div>
+                <div className="text-xl font-mono mt-1">{pct(betWinRate)}</div>
+              </div>
+              <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+                <div className="text-neutral-500 text-xs">Cumulative return</div>
+                <div className="mt-1">
+                  <EvBadge ev={gradedBets.length > 0 ? cumulativeReturn : null} />
+                </div>
+                <div className="text-xs text-neutral-400 mt-0.5">
+                  in stake units
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {graded.map((g) => (
+                <div
+                  key={g.fixtureId}
+                  className="rounded-lg border border-neutral-200 dark:border-neutral-800 px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap text-sm"
+                >
+                  <div>
+                    <span className="font-medium">
+                      {g.home} {g.actualHomeGoals}-{g.actualAwayGoals} {g.away}
+                    </span>
+                    <span className="text-neutral-400 ml-2">
+                      {formatKickoff(g.kickoff)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 font-mono text-xs">
+                    <span
+                      className={
+                        g.modelCorrect
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-red-500 dark:text-red-400"
+                      }
+                    >
+                      model {g.modelCorrect ? "✓" : "✗"}
+                    </span>
+                    {g.betSide && (
+                      <span
+                        className={
+                          g.betWon
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-500 dark:text-red-400"
+                        }
+                      >
+                        bet {g.betSide} @ {odds(g.betOdds)}{" "}
+                        {g.realizedReturn !== null &&
+                          `(${g.realizedReturn > 0 ? "+" : ""}${g.realizedReturn.toFixed(2)})`}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
 
       <section className="mb-14">
         <h2 className="text-lg font-semibold mb-1">Goals — Over/Under 2.5</h2>

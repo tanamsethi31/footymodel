@@ -1,0 +1,42 @@
+name: Grade results
+
+on:
+  schedule:
+    # Once daily, well after any reasonable match day is over. Separate
+    # from live_poll.yml so grading never competes with RapidAPI's scarce
+    # 100/month budget - this only uses API-Football, already reactivated.
+    - cron: "30 6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: grade-results
+  cancel-in-progress: false
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - name: Grade past predictions against real results (goals only, v1)
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python -m footymodel.live.grade_results
+
+      - name: Commit + push any newly graded results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          [ -f data/processed/graded_results.csv ] && git add data/processed/graded_results.csv
+          git diff --cached --quiet && exit 0
+          git commit -m "grade results: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git push

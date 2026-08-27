@@ -25,6 +25,24 @@ export type GoalsPick = {
   evUnder25: number | null;
 };
 
+export type GradedResult = {
+  fixtureId: string;
+  home: string;
+  away: string;
+  kickoff: string;
+  actualHomeGoals: number;
+  actualAwayGoals: number;
+  actualTotalGoals: number;
+  actualOverWon: boolean;
+  modelPOver25: number;
+  modelCorrect: boolean;
+  betSide: "over" | "under" | null;
+  betOdds: number | null;
+  betWon: boolean | null;
+  realizedReturn: number | null;
+  gradedAt: string;
+};
+
 export type PropsPick = {
   fixtureId: string;
   kickoff: string;
@@ -51,6 +69,14 @@ function num(v: unknown): number | null {
   if (v === undefined || v === null || v === "") return null;
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
+}
+
+// pandas' to_csv writes Python bools as "True"/"False" (capitalized), not
+// JSON-style "true"/"false".
+function bool(v: unknown): boolean | null {
+  if (v === "True") return true;
+  if (v === "False") return false;
+  return null;
 }
 
 async function fetchCsv(name: string): Promise<Record<string, string>[]> {
@@ -145,5 +171,32 @@ export async function getPropsPicks(): Promise<PropsPick[]> {
       evSotGt15: num(r["ev_sot_gt1.5"]),
     }))
     .filter((p) => p.fixtureId)
+    .sort((a, b) => (a.kickoff < b.kickoff ? 1 : -1));
+}
+
+export async function getGradedResults(): Promise<GradedResult[]> {
+  const rows = await fetchCsv("graded_results.csv");
+  return rows
+    .map((r) => ({
+      fixtureId: r.fixture_id,
+      home: r.home,
+      away: r.away,
+      kickoff: r.kickoff,
+      actualHomeGoals: num(r.actual_home_goals) ?? 0,
+      actualAwayGoals: num(r.actual_away_goals) ?? 0,
+      actualTotalGoals: num(r.actual_total_goals) ?? 0,
+      actualOverWon: bool(r.actual_over_won) ?? false,
+      modelPOver25: num(r.model_p_over25) ?? 0,
+      modelCorrect: bool(r.model_correct) ?? false,
+      betSide: (r.bet_side === "over" || r.bet_side === "under" ? r.bet_side : null) as
+        | "over"
+        | "under"
+        | null,
+      betOdds: num(r.bet_odds),
+      betWon: bool(r.bet_won),
+      realizedReturn: num(r.realized_return),
+      gradedAt: r.graded_at,
+    }))
+    .filter((r) => r.fixtureId)
     .sort((a, b) => (a.kickoff < b.kickoff ? 1 : -1));
 }

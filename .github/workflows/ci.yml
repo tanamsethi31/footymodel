@@ -25,3 +25,5 @@ jobs:
         run: python scripts/sofascore_odds_parse_test.py
       - name: RapidAPI odds parser (pure, data-free)
         run: python scripts/rapidapi_odds_parse_test.py
+      - name: Grade-results mixed-format kickoff parsing (pure, data-free)
+        run: python scripts/grade_results_datetime_test.py
