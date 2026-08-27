@@ -242,3 +242,14 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Keep all 5 — trust the pooled stat as the real signal, no code change
   - Blocked by: ~none~
   - Implemented: `LEAGUE_API_IDS` (engine.py), `TOURNAMENT_IDS` (sofascore_engine.py), `LEAGUE_IDS` (rapidapi_engine.py) all trimmed to `{"E0": ...}` only. `shots_engine.py` (props) was already E0-only by design, unaffected. Full local CI suite re-verified green after the change.
+
+## product
+
+- [x] **R030** — Public dashboard, resumed and rescoped → *large*
+  - Context: picks back up R016-R018 (paused when the API-Football suspension crisis hit) with a concrete, expanded spec: goals O/U AND player shots/SOT (both backtested markets, both E0-only per R029), hosted on Vercel, with free push notifications to the user's phone the moment a new prediction is logged
+  - Why: R016 already settled on Vercel hosting; this adds the notification requirement and confirms scope explicitly covers both markets, not just goals
+  - Stack decided: Next.js on Vercel, reads `live_recommendations.csv`/`live_player_props.csv` directly from the GitHub repo (no duplicate DB for prediction data), Web Push + VAPID (genuinely free, no Firebase/OneSignal) with subscriptions in Upstash Redis (free tier via Vercel Marketplace), triggered instantly by extending `live_poll.yml`'s existing commit step rather than polling
+  - [x] Picks-only view (Recommended) — no graded track record yet, matches what was literally asked (predictive analysis output, not historical performance)
+  - [ ] Also build graded track record (R017's original bigger-scope option) in the same pass — deferred, not chosen this time
+  - Blocked by: ~none~
+  - Note: flagged one real platform limitation up front - iOS Safari requires "Add to Home Screen" before web push works at all (OS restriction, not something buildable around). User proceeded aware of this.
