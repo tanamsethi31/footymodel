@@ -224,3 +224,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Wired into `live_poll.yml` (`continue-on-error`, same as SofaScore's step) — needs the user to set the `RAPIDAPI_KEY` repo secret before it can run in Actions (same as R013's `API_FOOTBALL_KEY` flow).
   - Blocked by: ~none~
   - Status: done — pushed (18ea82b), `RAPIDAPI_KEY` secret set, verified GREEN in real GitHub Actions (run 33100490609): key loaded, budget correctly reused the committed cache (stayed 1/90, no wasted re-scan on a fresh checkout), clean exit. Third engine now genuinely live in production, not just locally — unlike R021's SofaScore build, this one actually works end to end.
+
+- [ ] **R028** — Odds fetch silently failing across all 8 logged predictions → *small*
+  - Context: user asked to check `live_recommendations.csv` post-reactivation; the 8 rows found (all from 2026-08-23, pre-suspension) are real model predictions, but every single row has empty `odds_over25`/`odds_under25`
+  - Why: `engine.py`'s `process_fixture` only adds `fair_p_over25`/`ev_over25`/`ev_under25` when `over_odds and under_odds` are both truthy — since that's never happened once across 8 fixtures, EV has never actually been computed for any live prediction so far, only the bare model probability. A real, previously-unnoticed gap in the one thing (EV vs. market) this whole project is meant to test
+  - [ ] Dig into it now — check whether the odds fetch is erroring (network/API issue), returning an unexpected shape, or genuinely finding no Over/Under market for these specific fixtures
+  - [ ] Leave it — fresh fixtures will flow now that the account's reactivated; revisit if the gap persists on new data too
+  - Blocked by: ~none~
