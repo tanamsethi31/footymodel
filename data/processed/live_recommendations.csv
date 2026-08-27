@@ -7,3 +7,4 @@ logged_at,fixture_id,league,kickoff,home,away,n_home_starters_matched,n_away_sta
 2026-08-23T18:35:02.166633,1550088,I1,2026-08-23T18:45:00+00:00,Atalanta,Sassuolo,11,8,0.591,3.06,,
 2026-08-23T18:35:06.740329,1552735,F1,2026-08-23T18:45:00+00:00,Rennes,Paris Saint Germain,8,11,0.566,2.95,,
 2026-08-23T19:02:23.504805,1570346,SP1,2026-08-23T19:30:00+00:00,Elche,Barcelona,11,10,0.543,2.85,,
+2026-08-27T18:14:07.509580,rapid_5868013,SP1,2026-08-27T18:30:00.000Z,Celta Vigo,Osasuna,10,10,0.459,2.51,2.2,1.6,rapidapi,0.421,0.009,-0.134
