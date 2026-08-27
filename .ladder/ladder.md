@@ -225,9 +225,20 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — pushed (18ea82b), `RAPIDAPI_KEY` secret set, verified GREEN in real GitHub Actions (run 33100490609): key loaded, budget correctly reused the committed cache (stayed 1/90, no wasted re-scan on a fresh checkout), clean exit. Third engine now genuinely live in production, not just locally — unlike R021's SofaScore build, this one actually works end to end.
 
-- [ ] **R028** — Odds fetch silently failing across all 8 logged predictions → *small*
+- [x] **R028** — Odds fetch silently failing across all 8 logged predictions → *small*
   - Context: user asked to check `live_recommendations.csv` post-reactivation; the 8 rows found (all from 2026-08-23, pre-suspension) are real model predictions, but every single row has empty `odds_over25`/`odds_under25`
   - Why: `engine.py`'s `process_fixture` only adds `fair_p_over25`/`ev_over25`/`ev_under25` when `over_odds and under_odds` are both truthy — since that's never happened once across 8 fixtures, EV has never actually been computed for any live prediction so far, only the bare model probability. A real, previously-unnoticed gap in the one thing (EV vs. market) this whole project is meant to test
-  - [ ] Dig into it now — check whether the odds fetch is erroring (network/API issue), returning an unexpected shape, or genuinely finding no Over/Under market for these specific fixtures
+  - [x] Dig into it now — check whether the odds fetch is erroring (network/API issue), returning an unexpected shape, or genuinely finding no Over/Under market for these specific fixtures
   - [ ] Leave it — fresh fixtures will flow now that the account's reactivated; revisit if the gap persists on new data too
   - Blocked by: ~none~
+  - Root cause: `_best_over_under_odds` checked bet name `== "Over/Under"`; API-Football's real market is named `"Goals Over/Under"` (confirmed live against fixture 1570336). One-line fix, plus the dry-run mocks had the same wrong name baked into their fake data (tests were "passing" against a bug that matched the code, not reality) — fixed those too and added `scripts/goals_odds_parse_test.py` to CI to catch this exact regression class going forward.
+  - Status: done — pushed (2adeef3), verified live: a real production row (Celta Vigo v Osasuna, via the RapidAPI engine) logged with real odds (2.2/1.6) and full EV (`ev_over25: 0.009`) — the first EV ever actually computed on a live prediction in this project's history.
+
+- [x] **R029** — Restrict live goals engine to individually-backtested leagues → *small*
+  - Context: user asked about running only leagues with real backtesting behind them, after all 5 big-5 leagues had been live-polled by default since R013
+  - Why: the t=3.04 figure cited throughout this session is the POOLED stat across all 5 leagues (RESULTS.md Phase A, full-lineup model) — not five individually-confirmed leagues. Per-league t-stats: E0 2.23 (significant alone), I1 1.97 (borderline), SP1 1.36 / D1 1.32 / F1 0.72 (not significant individually, Ligue 1 barely distinguishable from noise). RESULTS.md's own read is that pooling is legitimate (every league moves the same direction), but that's different from each league having its own confirmed evidence
+  - [x] E0 only — the one league that clears individual significance on its own, cleanest and most defensible scope
+  - [ ] E0 + I1 — include Serie A too (borderline, t=1.97)
+  - [ ] Keep all 5 — trust the pooled stat as the real signal, no code change
+  - Blocked by: ~none~
+  - Implemented: `LEAGUE_API_IDS` (engine.py), `TOURNAMENT_IDS` (sofascore_engine.py), `LEAGUE_IDS` (rapidapi_engine.py) all trimmed to `{"E0": ...}` only. `shots_engine.py` (props) was already E0-only by design, unaffected. Full local CI suite re-verified green after the change.

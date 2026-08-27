@@ -31,14 +31,13 @@ from ..strategy import remove_margin
 from . import namematch
 from .sofascore_client import SofaScoreClient, SofaScoreError
 
-# div code -> SofaScore unique-tournament id, verified 2026-08-26 via
-# /api/v1/search/unique-tournaments
+# Only E0 - the one league with individually significant backtested
+# evidence for the full-lineup model (RESULTS.md Phase A: E0 t=2.23 alone;
+# the pooled t=3.04 across all big-5 leans on E0, the others don't clear
+# significance on their own). div code -> SofaScore unique-tournament id,
+# verified 2026-08-26 via /api/v1/search/unique-tournaments.
 TOURNAMENT_IDS = {
     "E0": 17,   # Premier League
-    "SP1": 8,   # LaLiga
-    "D1": 35,   # Bundesliga
-    "I1": 23,   # Serie A
-    "F1": 34,   # Ligue 1
 }
 
 LIVE_LOG = PROCESSED_DIR / "live_recommendations.csv"

@@ -25,14 +25,14 @@ from ..strategy import remove_margin
 from . import namematch
 from .client import ApiFootballClient, ApiFootballError
 
-# Only the leagues we have a confirmed lineup model for (big-5, per RESULTS.md).
-# div code -> (API-Football league id, current season start year)
+# Only leagues with INDIVIDUALLY significant backtested evidence (not just
+# pooled) for the full-lineup model - see RESULTS.md's Phase A per-league
+# t-stats: E0 t=2.23 (significant alone), the pooled t=3.04 across all
+# big-5 relies on E0 carrying most of the weight (I1 1.97 borderline, SP1
+# 1.36 / D1 1.32 / F1 0.72 not significant individually). div code ->
+# API-Football league id.
 LEAGUE_API_IDS = {
     "E0": 39,    # Premier League
-    "SP1": 140,  # La Liga
-    "D1": 78,    # Bundesliga
-    "I1": 135,   # Serie A
-    "F1": 61,    # Ligue 1
 }
 
 LIVE_LOG = PROCESSED_DIR / "live_recommendations.csv"

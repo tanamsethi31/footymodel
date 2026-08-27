@@ -36,17 +36,16 @@ from ..strategy import remove_margin
 from . import namematch
 from .rapidapi_client import RapidApiClient, RapidApiError
 
-# div code -> RapidAPI leagueId, verified 2026-08-27 by inspecting a real
-# matches-by-date response filtered on country code (ENG/GER/FRA/ITA/ESP) -
-# the same league *name* recurs across many countries (e.g. "Premier
-# League" also exists for Russia/Tanzania/etc.), so id, not name, is what
-# matters here.
+# Only E0 - the one league with individually significant backtested
+# evidence for the full-lineup model (RESULTS.md Phase A: E0 t=2.23 alone;
+# the pooled t=3.04 across all big-5 leans on E0, the others don't clear
+# significance on their own). div code -> RapidAPI leagueId, verified
+# 2026-08-27 by inspecting a real matches-by-date response filtered on
+# country code - the same league *name* recurs across many countries (e.g.
+# "Premier League" also exists for Russia/Tanzania/etc.), so id, not name,
+# is what matters here.
 LEAGUE_IDS = {
     "E0": 47,   # Premier League (England)
-    "SP1": 87,  # LaLiga
-    "D1": 54,   # Bundesliga
-    "I1": 55,   # Serie A
-    "F1": 53,   # Ligue 1
 }
 
 LIVE_LOG = PROCESSED_DIR / "live_recommendations.csv"
