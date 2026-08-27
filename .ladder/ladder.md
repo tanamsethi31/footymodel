@@ -268,3 +268,19 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Also grade props now — deferred, not chosen
   - Blocked by: ~none~
   - Status: done — built, tested (a temporary real commit of test data confirmed the dashboard UI renders correctly, immediately reverted since it wasn't real), and verified green in production: dashboard deployed (Track Record section live, correctly empty until real grades land), `grade_results.yml` ran clean on a real Actions run (33113872415) — correctly found nothing gradeable yet (the one recent prediction is ~2hrs old, below the 3hr grading delay) rather than erroring. Two real bugs found and fixed along the way: pandas.read_csv choking on the same ragged-column schema drift already worked around in the TS dashboard, and pandas.to_datetime silently dropping every RapidAPI-sourced row to NaT on mixed timestamp formats (own regression test added). Next real predictions will get graded automatically once the daily 06:30 UTC job runs.
+
+## dashboard-v2
+
+- [x] **R032** — Dashboard redesign: tab navigation → *medium*
+  - Context: user wants the dashboard "to the next level" - too much scrolling on one long page, needs tabs (Track Record / Goals O-U / Player Props), fancier design with proper animation per the emil-design-eng skill, and a redesigned props table showing Shots + SOT at 1+/2+/3+ thresholds. Brainstorming via superpowers:brainstorming + visual companion (localhost, restarted once after a 30min auto-exit during a usage-limit gap)
+  - Why: single scrolling page doesn't scale as more picks/grades accumulate; tabs are the standard fix
+  - Shown: floating pill-tab navigation (segmented control, active pill slides via transform per emil's clip-path/transform guidance) across the 3 sections
+  - Blocked by: ~none~
+  - Status: shown, no explicit objection raised - proceeding as the base navigation pattern pending final confirmation alongside R033
+
+- [ ] **R033** — Player props table: full grouped columns vs. threshold toggle → *small*
+  - Context: follow-up to R032 - user's specific ask was showing Shots AND SOT probability at 1+/2+/3+ thresholds (6 numbers/player), not just the current single "1+" column
+  - Why: fitting 6 data points/player without becoming unscannable is a real layout tradeoff, not just a color/spacing choice
+  - [ ] Option A — grouped 2-level-header columns, all 6 numbers visible at once, no interaction needed but wider table
+  - [ ] Option B — 1+/2+/3+ segmented toggle above a simpler 2-column (Shots, SOT) table, less clutter but hides other thresholds until toggled
+  - Blocked by: ~none~
