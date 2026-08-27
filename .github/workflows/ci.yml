@@ -21,3 +21,5 @@ jobs:
         run: python scripts/props_odds_parse_test.py
       - name: SofaScore odds parser (pure, data-free)
         run: python scripts/sofascore_odds_parse_test.py
+      - name: RapidAPI odds parser (pure, data-free)
+        run: python scripts/rapidapi_odds_parse_test.py

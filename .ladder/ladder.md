@@ -199,13 +199,13 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — user chose free (Basic, $0) over paying. Started building `rapidapi_client.py` against it (plain `requests` works, no browser needed, real lineup+odds data confirmed via curl) before hitting a new problem — see R025.
 
-- [ ] **R025** — RapidAPI free-tier lineups have no confirmed/predicted flag → *small*
+- [x] **R025** — RapidAPI free-tier lineups have no confirmed/predicted flag → *small*
   - Context: found while building the free-tier client (R024) — checked both the lineup endpoint and the match-list endpoint for any signal distinguishing an official confirmed XI from FotMob's own prediction; neither has one (unlike SofaScore's explicit `confirmed:true/false`, or API-Football which simply returns empty until confirmed)
   - Why: the goals model's statistical validity (t=3.04) rests specifically on CONFIRMED lineups — silently treating a predicted XI as confirmed would corrupt predictions without any error signal. Also burned ~8-9 of the 100 monthly calls on verification, some wastefully duplicated
-  - [ ] Build with a timing heuristic — only fetch within ~20-30min of kickoff, assume that close in it's very likely the real XI (not guaranteed, but the budget doesn't support re-checking anyway)
+  - [x] Build with a timing heuristic — only fetch within ~20-30min of kickoff, assume that close in it's very likely the real XI (not guaranteed, but the budget doesn't support re-checking anyway)
   - [ ] Don't use it for the goals engine — too risky for the core mechanic; explore for something lower-stakes or stop here
   - Blocked by: ~none~
-  - Note: user didn't pick either option directly — redirected to try Sportmonks instead (see R026) before this got resolved. Still genuinely open if we come back to the RapidAPI free tier.
+  - Note: Sportmonks (R026) ruled out first, then user confirmed the timing-heuristic option directly.
 
 - [x] **R026** — Sportmonks with user's real API token → *small*
   - Context: user supplied a real Sportmonks v3 API token and asked to try it, as a possible way around R025's confirmed-flag gap
@@ -213,3 +213,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Tested: `GET /v3/football/leagues?api_token=...` (correct path is `/v3/football/leagues`, not `/v3/my/enabled-leagues` which 404'd) — one clean call, no guessing needed after that
   - Result: confirmed directly against the real account — exactly 4 leagues in this subscription: Danish Superliga, Scottish Premiership, and their playoffs. None of our 5 target leagues. Same conclusion as the earlier web research, now verified rather than assumed.
   - Status: done — ruled out immediately, no need to check lineups/odds since league coverage fails at the first gate.
+
+- [x] **R027** — RapidAPI goals engine built and shipped → *large*
+  - Context: R025 resolved on the timing-heuristic option; built the full integration
+  - Built: `footymodel/live/rapidapi_client.py` (plain `requests`, no browser needed — the one candidate this session that doesn't have a bot-detection or Playwright problem), `rapidapi_engine.py` (same LineupModel/namematch/EV logic as the other engines; a `rapidapi_budget.json` file tracks monthly usage against the 90-of-100 cap, `rapidapi_fixtures_cache.json` scans fixtures once/day instead of every 20-min cron tick to conserve budget, `LINEUP_WINDOW_MINUTES=30` heuristic gates lineup fetches to close-to-kickoff only), `scripts/rapidapi_odds_parse_test.py` (added to CI). League IDs verified against real data (E0=47, SP1=87, D1=54, I1=55, F1=53 — league *name* alone isn't unique, e.g. "Premier League" also exists for Russia/Tanzania/Azerbaijan/etc., so id was confirmed by country code, not name).
+  - Verified end-to-end locally: real run scanned 2 live fixtures for 2026-08-27, cache reuse confirmed on a second run (0 extra budget spent), budget tracking correct (1/90 after the scan).
+  - Wired into `live_poll.yml` (`continue-on-error`, same as SofaScore's step) — needs the user to set the `RAPIDAPI_KEY` repo secret before it can run in Actions (same as R013's `API_FOOTBALL_KEY` flow).
+  - Blocked by: user needs to `git push` this work and set the `RAPIDAPI_KEY` secret before it goes live.

@@ -22,5 +22,8 @@ data/logs/
 !data/processed/live_player_props.csv
 !data/processed/live_seen_fixtures.json
 !data/processed/sofascore_seen_fixtures.json
+!data/processed/rapidapi_seen_fixtures.json
+!data/processed/rapidapi_budget.json
+!data/processed/rapidapi_fixtures_cache.json
 !data/raw_fbref/player_match.jsonl
 .superpowers/
