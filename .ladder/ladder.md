@@ -259,3 +259,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [x] Classic PAT (`repo` scope) — pivoted to this instead: broader scope than ideal, but no per-repo selection step to get wrong, known-reliable pattern
   - Blocked by: ~none~
   - Status: done — classic token worked immediately (200 on both repo metadata and contents). Deployed to production: https://dashboard-nine-theta-13.vercel.app, real data confirmed live. `scripts/notify_dashboard.py` wired into `live_poll.yml`'s commit step (parses the staged git diff, POSTs a summary to `/api/notify`, never blocks the commit on failure) and verified on a real Actions run (33112733355) — full pipeline (both market engines + notify) green end to end.
+
+- [x] **R031** — Graded track record (dashboard "next level") → *large*
+  - Context: user asked to brainstorm taking the project further; scoped down via superpowers:brainstorming to "the dashboard" -> "graded track record" specifically (win/loss history, realized CLV, not just a live picks list)
+  - Why: VISION.md's own read is that a graded track record is "far more portfolio-worthy than a live picks list alone" - the current dashboard shows predictions but never proves whether they were right
+  - Design: new `footymodel/live/grade_results.py` finds predictions with kickoff 3+hrs in the past and no grade yet, looks up the real final score via API-Football (date + fuzzy team-name match, works regardless of which engine originally logged the prediction - avoids spending RapidAPI's scarce budget on grading), computes model-accuracy AND a betting grade (only when odds+positive EV existed - realized return in stake units), writes to a new `data/processed/graded_results.csv`. New daily `grade_results.yml` workflow (06:30 UTC, separate from the live poller so it never competes for budget). Dashboard gets a new "Track Record" section: running stats (accuracy%, bets placed, bet win rate, cumulative return) + per-pick table.
+  - [x] Goals-only for v1 (Recommended) — props grading needs per-player post-match stats, unverified across all three sources all session; explicit future item, not blocking
+  - [ ] Also grade props now — deferred, not chosen
+  - Blocked by: ~none~
