@@ -61,7 +61,7 @@ def _best_over_under_odds(odds_response: list[dict]) -> tuple[float | None, floa
     for entry in odds_response:
         for bm in entry.get("bookmakers", []):
             for bet in bm.get("bets", []):
-                if bet.get("name") != "Over/Under":
+                if bet.get("name") != "Goals Over/Under":
                     continue
                 for v in bet.get("values", []):
                     val = str(v.get("value", ""))

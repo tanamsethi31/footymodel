@@ -42,7 +42,7 @@ mock_lineups = [
     {"team": {"id": 29, "name": away_us}, "startXI": [{"player": {"name": n}} for n in away_names]},
 ]
 mock_odds = [{"bookmakers": [{"bets": [
-    {"name": "Over/Under",
+    {"name": "Goals Over/Under",
      "values": [{"value": "Over 2.5", "odd": "1.9"}, {"value": "Under 2.5", "odd": "1.9"}]},
     {"name": "Home Player Shots",
      "values": [{"value": f"{home_names[0]} - 1+", "odd": "1.75"}]},

@@ -35,10 +35,10 @@ mock_lineups = [
      "startXI": [{"player": {"name": n}} for n in away_names]},
 ]
 mock_odds = [{"bookmakers": [
-    {"bets": [{"name": "Over/Under",
+    {"bets": [{"name": "Goals Over/Under",
               "values": [{"value": "Over 2.5", "odd": "1.85"},
                         {"value": "Under 2.5", "odd": "1.95"}]}]},
-    {"bets": [{"name": "Over/Under",  # a second bookmaker -> tests "best price" logic
+    {"bets": [{"name": "Goals Over/Under",  # a second bookmaker -> tests "best price" logic
               "values": [{"value": "Over 2.5", "odd": "1.92"},
                         {"value": "Under 2.5", "odd": "1.88"}]}]},
 ]}]
