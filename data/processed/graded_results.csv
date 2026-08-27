@@ -1,4 +1,0 @@
-fixture_id,home,away,kickoff,actual_home_goals,actual_away_goals,actual_total_goals,actual_over_won,model_p_over25,model_correct,bet_side,bet_odds,bet_won,realized_return,graded_at
-test_1,Arsenal,Chelsea,2026-08-20T15:00:00+00:00,2,1,3,True,0.62,True,over,1.95,True,0.95,2026-08-21T06:30:00
-test_2,Liverpool,Everton,2026-08-21T15:00:00+00:00,1,0,1,False,0.55,False,over,1.85,False,-1.0,2026-08-22T06:30:00
-test_3,Fulham,Brentford,2026-08-22T15:00:00+00:00,0,1,1,False,0.41,True,,,,,2026-08-23T06:30:00
