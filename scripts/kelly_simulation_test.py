@@ -143,6 +143,7 @@ assert len(sweep_df) == len(STRATEGIES)
 assert list(sweep_df["strategy"]) == [label for label, _ in STRATEGIES]
 assert (sweep_df["n_trials"] == 500).all()
 assert (sweep_df["n_bets"] == 60).all()
+assert (sweep_df["start_bankroll"] == 100.0).all()
 for col in ["median_final_bankroll", "p5_final_bankroll", "p95_final_bankroll",
             "median_max_drawdown", "ruin_probability"]:
     assert col in sweep_df.columns

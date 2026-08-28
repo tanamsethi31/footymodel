@@ -132,6 +132,7 @@ def sweep(bets: pd.DataFrame, n_trials: int = 10_000, start_bankroll: float = 10
             "kelly_mult": kelly_mult if kelly_mult is not None else "",
             "n_trials": n_trials,
             "n_bets": len(bets),
+            "start_bankroll": start_bankroll,
             "median_final_bankroll": float(np.median(fb)),
             "p5_final_bankroll": float(np.percentile(fb, 5)),
             "p95_final_bankroll": float(np.percentile(fb, 95)),

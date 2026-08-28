@@ -25,7 +25,7 @@ export default function StakingPanel({ results }: { results: KellySimResult[] })
     );
   }
 
-  const startBankroll = 100;
+  const startBankroll = results[0].startBankroll;
 
   return (
     <section>

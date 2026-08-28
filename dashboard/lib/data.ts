@@ -48,6 +48,7 @@ export type KellySimResult = {
   kellyMult: number | null;
   nTrials: number;
   nBets: number;
+  startBankroll: number;
   medianFinalBankroll: number;
   p5FinalBankroll: number;
   p95FinalBankroll: number;
@@ -266,6 +267,7 @@ export async function getKellySimResults(): Promise<KellySimResult[]> {
       kellyMult: num(r.kelly_mult),
       nTrials: num(r.n_trials) ?? 0,
       nBets: num(r.n_bets) ?? 0,
+      startBankroll: num(r.start_bankroll) ?? 100,
       medianFinalBankroll: num(r.median_final_bankroll) ?? 0,
       p5FinalBankroll: num(r.p5_final_bankroll) ?? 0,
       p95FinalBankroll: num(r.p95_final_bankroll) ?? 0,
