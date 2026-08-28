@@ -18,6 +18,8 @@ export default function MatchPropsTable({
   fixtureId: string;
   rows: PropsPick[];
 }) {
+  const teams = [...new Set(rows.map((r) => r.team))];
+  const [activeTeam, setActiveTeam] = useState(0);
   const [thresh, setThresh] = useState(0);
   const [swapping, setSwapping] = useState(false);
 
@@ -30,16 +32,32 @@ export default function MatchPropsTable({
     }, 90);
   }
 
+  const teamRows = rows.filter((r) => r.team === teams[activeTeam]);
+
   return (
     <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
       <div className="flex items-baseline justify-between gap-2 flex-wrap mb-3">
-        <span className="font-medium">
-          {[...new Set(rows.map((r) => r.team))].join(" v ")}
-        </span>
+        <span className="font-medium">{teams.join(" v ")}</span>
         <span className="text-xs text-neutral-500">{formatKickoff(rows[0].kickoff)}</span>
       </div>
 
-      <div className="flex justify-end mb-2">
+      <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+        <div className="inline-flex bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-0.5 gap-0.5">
+          {teams.map((t, i) => (
+            <button
+              key={t}
+              onClick={() => setActiveTeam(i)}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors duration-150 active:scale-95 ${
+                i === activeTeam
+                  ? "bg-white dark:bg-neutral-100 text-neutral-900"
+                  : "text-neutral-500 dark:text-neutral-400"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+
         <div className="inline-flex bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-0.5 gap-0.5">
           {THRESHOLDS.map((t, i) => (
             <button
@@ -67,7 +85,7 @@ export default function MatchPropsTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => {
+            {teamRows.map((r) => {
               const sot = valueAt(r, "sot", thresh);
               const shots = valueAt(r, "shots", thresh);
               return (
