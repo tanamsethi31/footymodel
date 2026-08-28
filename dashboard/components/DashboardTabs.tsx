@@ -2,19 +2,21 @@
 
 import { useState, type ReactNode } from "react";
 
-const TABS = ["Track record", "Goals O/U", "Player props"];
+const TABS = ["Track record", "Goals O/U", "Player props", "Staking"];
 
 export default function DashboardTabs({
   trackRecord,
   goals,
   props,
+  staking,
 }: {
   trackRecord: ReactNode;
   goals: ReactNode;
   props: ReactNode;
+  staking: ReactNode;
 }) {
   const [active, setActive] = useState(0);
-  const panels = [trackRecord, goals, props];
+  const panels = [trackRecord, goals, props, staking];
 
   return (
     <div>

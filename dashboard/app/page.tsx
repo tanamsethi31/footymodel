@@ -3,6 +3,7 @@ import {
   getPropsPicks,
   getGradedResults,
   getMostProbablePicks,
+  getKellySimResults,
   type GoalsPick,
   type GradedResult,
 } from "@/lib/data";
@@ -10,6 +11,7 @@ import { formatKickoff, pct, odds, EvBadge, SOURCE_LABEL } from "@/lib/format";
 import SubscribeButton from "@/components/SubscribeButton";
 import DashboardTabs from "@/components/DashboardTabs";
 import PropsPanel from "@/components/PropsPanel";
+import StakingPanel from "@/components/StakingPanel";
 
 export const revalidate = 60;
 
@@ -183,10 +185,11 @@ function GoalsPanel({ goals }: { goals: GoalsPick[] }) {
 }
 
 export default async function Home() {
-  const [goals, props, graded] = await Promise.all([
+  const [goals, props, graded, kellySim] = await Promise.all([
     getGoalsPicks(),
     getPropsPicks(),
     getGradedResults(),
+    getKellySimResults(),
   ]);
   const mostProbable = getMostProbablePicks(props);
 
@@ -208,6 +211,7 @@ export default async function Home() {
         trackRecord={<TrackRecordPanel graded={graded} />}
         goals={<GoalsPanel goals={goals} />}
         props={<PropsPanel props={props} mostProbable={mostProbable} />}
+        staking={<StakingPanel results={kellySim} />}
       />
 
       <footer className="mt-16 text-xs text-neutral-400">
