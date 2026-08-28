@@ -278,9 +278,101 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: shown, no explicit objection raised - proceeding as the base navigation pattern pending final confirmation alongside R033
 
-- [ ] **R033** — Player props table: full grouped columns vs. threshold toggle → *small*
+- [x] **R033** — Player props table: full grouped columns vs. threshold toggle → *small*
   - Context: follow-up to R032 - user's specific ask was showing Shots AND SOT probability at 1+/2+/3+ thresholds (6 numbers/player), not just the current single "1+" column
   - Why: fitting 6 data points/player without becoming unscannable is a real layout tradeoff, not just a color/spacing choice
   - [ ] Option A — grouped 2-level-header columns, all 6 numbers visible at once, no interaction needed but wider table
-  - [ ] Option B — 1+/2+/3+ segmented toggle above a simpler 2-column (Shots, SOT) table, less clutter but hides other thresholds until toggled
+  - [x] Option B — 1+/2+/3+ segmented toggle above a simpler 2-column (Shots, SOT) table, less clutter but hides other thresholds until toggled
   - Blocked by: ~none~
+  - Status: done — user chose Option B via the mockup.
+
+- [x] **R034** — Most-probable-bets summary strip (top of Player Props tab) → *small*
+  - Context: follow-up to R032/R033 - user's ask included a short "most probable bets from every match" section at the top of the Player Props tab, aggregating best picks across all matches
+  - Why: needs to stay short/glanceable per the original ask, not duplicate the full table below it - three genuinely different density/emphasis tradeoffs
+  - [x] Option A — horizontal-scroll cards, one per pick, roomiest, most visual
+  - [ ] Option B — ranked compact list (top 5, with probability bars), most scannable
+  - [ ] Option C — single hero pick + small ticker of the next few, most minimal
+  - Blocked by: ~none~
+  - Status: done — user chose Option A via the mockup.
+
+- [x] **R035** — Dashboard redesign implementation → *large*
+  - Context: R032 (tabs) + R033 (props threshold toggle) + R034 (most-probable-bets strip) all approved via mockups; consolidated final mockup combining all three shown and approved ("ok")
+  - Why: this is the actual build, not another design decision - logged for completeness per the ladder's own rule (every major step tracked)
+  - Built: `lib/format.tsx` (shared formatters/EvBadge, split out of page.tsx), `lib/data.ts` gained `getMostProbablePicks()`, `components/DashboardTabs.tsx` (client, pill-tab nav using the duplicate-layer + clip-path technique, 260ms cubic-bezier(0.23,1,0.32,1)), `components/MostProbableStrip.tsx` (horizontal-scroll cards, staggered entrance), `components/MatchPropsTable.tsx` (client, 1+/2+/3+ segmented toggle with blur-crossfade on value swap - SOT 3+ correctly renders "—", no underlying data exists for it), `components/PropsPanel.tsx`. `app/globals.css` gained `stagger-in`/`panel-in` keyframes with a `prefers-reduced-motion` guard. `app/page.tsx` rewritten around `DashboardTabs`.
+  - Blocked by: ~none~
+  - Status: done — `npx tsc --noEmit` clean, `npm run build` clean, verified live in the browser preview against real production data (tab switching + pill slide, most-probable-bets strip with real players/odds, threshold toggle re-rendering all three positions correctly including the SOT 3+ blank, Goals tab). Mobile viewport (375px) confirmed correct responsive stacking via screenshot; mobile click-interaction testing hit repeated browser-pane timeouts unrelated to the code (desktop interactions all confirmed working first). Not yet deployed to Vercel production - deploy is the next step, pending user go-ahead.
+
+- [x] **R036** — Deploy dashboard redesign to Vercel production → *small*
+  - Context: R035 (redesign implementation) is built, type-checked, and verified locally against real data - not yet pushed live
+  - Why: production is a real deployed URL the user shares/checks - worth a deliberate go/no-go rather than deploying silently
+  - [x] Deploy now — build and local verification already passed, no known open issues
+  - [ ] Hold for further testing/iteration first — e.g. finish mobile interaction testing, or request more visual changes before it goes live
+  - Blocked by: ~none~
+  - Status: done — user said "complete and deploy it live".
+
+## quant-expansion
+
+- [x] **R037** — Monte Carlo simulation scope → *medium*
+  - Context: user asked about using Monte Carlo simulation / quant methods "as a full project to develop and test first"
+  - Why: two genuinely different projects hide under "Monte Carlo" - worth pinning down which before scoping either
+  - [x] Staking/bankroll simulator — simulate thousands of seasons at different Kelly fractions on already-graded picks to get real risk-of-ruin/drawdown numbers; low-risk, layers on existing `grade_results.py` output, no new modeling
+  - [ ] Scoreline/market simulator — sample from the existing Dixon-Coles goal-rate parameters to get correct-score/BTTS/other exotic-market probabilities with no clean closed form; a real new market (relates to R010's "new softer markets" lever), higher effort, untested for edge
+  - Blocked by: ~none~
+  - Status: done — user chose the staking/bankroll simulator.
+
+- [x] **R038** — Bankroll simulator: which bets to draw from → *small*
+  - Context: brainstorming R037's staking/bankroll simulator via superpowers:brainstorming - `evals_main.parquet` (36,525 rows, real model_p/odds/outcome across all 5 leagues+markets) is the real candidate data source, not the tiny `paper_trades.csv` (3 rows) or empty `graded_results.csv`
+  - Why: which population the sim draws from directly determines whether the bankroll conclusions rest on proven edge or not
+  - [x] E0-only O/U 2.5 (Recommended) — same individually-significant scope (t=2.23) R029 already restricted the live engine to
+  - [ ] All 5 leagues pooled O/U 2.5 — broader pooled stat (t=3.04), includes leagues not individually significant
+  - [ ] All markets + leagues in evals_main.parquet — biggest sample, includes markets never proven to have edge
+  - Blocked by: ~none~
+  - Status: done — user chose E0-only O/U 2.5.
+
+- [x] **R039** — Bankroll simulator: outcome-generation mechanism → *small*
+  - Context: brainstorming R037/R038's staking simulator - the core "Monte Carlo" design choice
+  - Why: determines whether the sim explores variance beyond what the real historical sample happened to produce, or just reshuffles it
+  - [x] Parametric (Recommended) — Bernoulli draw per bet from the model's own model_p, standard Monte Carlo, also tests model calibration itself
+  - [ ] Bootstrap — resample realized won/lost outcomes with replacement, stays closer to "what really happened" but can't explore beyond the historical sample
+  - Blocked by: ~none~
+  - Status: done — user chose parametric Bernoulli draws.
+
+- [x] **R040** — Bankroll simulator: what to actually test/output → *small*
+  - Context: brainstorming R037-R039's staking simulator
+  - Why: "develop and test" implies validating/tuning staking choice, not just confirming what's already in `staking.py`
+  - [x] Sweep multiple Kelly fractions (Recommended) — flat-stake baseline + 1/8, 1/4, 1/2, full Kelly compared on risk-of-ruin/drawdown/growth percentiles, picks the actual best multiplier
+  - [ ] Validate the current default only — stress-test the existing kelly_mult=0.25/max_fraction=0.02 defaults, narrower
+  - Blocked by: ~none~
+  - Status: done — user chose the multi-fraction sweep.
+
+- [x] **R041** — Bankroll simulator: how it lives in the project → *small*
+  - Context: brainstorming R037-R040's staking simulator
+  - Why: a research-script-only version vs. a full dashboard surface is a real scope fork
+  - [ ] Standalone research script + RESULTS.md write-up (Recommended) — matches existing backtest.py/scripts/RESULTS.md pattern, no UI work
+  - [x] Reusable module + dashboard tab — Python module computes the sweep, same CSV-to-dashboard pattern as R030/R031 (graded_results.csv), new tab reads it
+  - Blocked by: ~none~
+  - Status: done — user chose module + dashboard tab.
+
+- [x] **R042** — Bankroll simulator dashboard tab: content scope → *small*
+  - Context: follow-up to R041 - once a dashboard tab is in scope, what it actually renders is a real complexity fork
+  - Why: full trajectory fan charts need a charting approach (new dependency or hand-rolled SVG) and more data shipped; summary stats need neither
+  - [x] Summary stats per Kelly fraction (Recommended) — stat cards (median final bankroll, max drawdown %, risk-of-ruin %), same visual language as existing Track Record cards, zero new dependencies
+  - [ ] Full bankroll trajectory fan chart — real percentile-band curves over time, needs a charting library or hand-rolled SVG, meaningfully more effort
+  - Blocked by: ~none~
+  - Status: done — user chose summary stats, no new dependency.
+
+- [x] **R043** — Build the bankroll simulator, or skip it and focus on model-improvement instead → *small*
+  - Context: user asked directly whether R037-R042's design actually improves the predictive model before committing to build it
+  - Why: honest answer is no - the simulator is a downstream staking/risk-sizing tool that takes the model's existing edge as a given; it doesn't touch accuracy, calibration, or find new edge. Genuinely useful only if real staking is ever on the table (or as a standalone portfolio artifact per VISION.md §9); useless if the project stays paper-trade indefinitely
+  - [x] Build it anyway (the full R037-R042 design) — real value if real staking is ever considered, or as a CV/portfolio quant piece even if not
+  - [ ] Skip it, focus on model-improvement levers instead — R007 (ensemble models) or R010 (new leagues/markets) would actually move the needle on edge itself, unlike the simulator
+  - Blocked by: ~none~
+  - Status: done — user said "go ahead and build it".
+
+- [x] **R044** — Implementation execution mode → *small*
+  - Context: implementation plan for R037-R043's Kelly bankroll simulator written and committed (docs/superpowers/plans/2026-08-28-kelly-bankroll-simulation.md); writing-plans skill's standard handoff choice
+  - Why: determines how the 10-task plan gets executed - affects review cadence and iteration speed
+  - [x] Subagent-driven (Recommended) — fresh subagent per task, review between tasks, fast iteration
+  - [ ] Inline execution — batch execution with checkpoints in this session
+  - Blocked by: ~none~
+  - Status: done — user chose subagent-driven.
