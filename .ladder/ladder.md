@@ -432,3 +432,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Fix: rewrote the extra-column mapping to use the parsed field COUNT (0/1/3/4, which never collide across engine.py vs rapidapi/sofascore x odds-present/absent) to disambiguate which fields are actually present, instead of assuming a fixed column order.
   - Blocked by: ~none~
   - Status: done — verified locally (Crystal Palace v Man City now correctly shows EV +7.3%/-11.1% instead of blank/-11.1%), tsc/build clean, pushed (cf61844), Vercel auto-deploy confirmed.
+
+- [x] **R051** — Tab-switcher pill misalignment → *small*
+  - Context: user came back with "fix the tabs switcher, its not properly made" - the R050 investigation had fixed a real data bug but hadn't addressed what the user actually meant by the original "tabs switching visually is incorrect" report. Reproduced live: clicking "Player props" showed the pill visibly clipping the label mid-word ("Player prop" with the trailing "s" left uncovered)
+  - Why: `DashboardTabs.tsx`'s clip-path was computed as a naive equal fraction of the bar width (`i/TABS.length`), which only lines up with real button boundaries if every tab label happens to render the same width. With four genuinely different-length labels ("Track record" vs "Staking"), it never did - most visibly on "Player props", whose actual rendered width exceeds one quarter of the bar.
+  - Fix: replaced the fraction-based math with real measurement - `getBoundingClientRect()` on the active button inside a `useLayoutEffect`, corrected for the clip overlay's own `inset-1` padding (subtracted via `getComputedStyle`, not hardcoded, so it doesn't silently break if the padding class ever changes) - drives the clip-path with actual pixel offsets instead of assumed equal fractions.
+  - Blocked by: ~none~
+  - Status: done — verified all 4 tabs align correctly locally (Player props no longer clips, Staking's pill hugs its short label instead of stretching to a quarter-width), tsc/build clean, pushed (6f0c3e5), Vercel auto-deploy confirmed.
