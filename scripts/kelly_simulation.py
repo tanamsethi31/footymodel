@@ -20,11 +20,18 @@ from footymodel.simulate import SIM_OUTPUT_PATH, load_value_bets, sweep
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--n-trials", type=int, default=10_000)
-    parser.add_argument("--start-bankroll", type=float, default=100.0)
-    parser.add_argument("--edge-threshold", type=float, default=0.05)
-    parser.add_argument("--seed", type=int, default=0)
+    parser = argparse.ArgumentParser(
+        description="Kelly-fraction bankroll Monte Carlo simulator - runs sweep() over "
+                     "the E0 O/U 2.5 backtested value bets and writes kelly_simulation.csv."
+    )
+    parser.add_argument("--n-trials", type=int, default=10_000,
+                        help="simulated seasons per strategy (default: 10000)")
+    parser.add_argument("--start-bankroll", type=float, default=100.0,
+                        help="starting bankroll in units (default: 100.0)")
+    parser.add_argument("--edge-threshold", type=float, default=0.05,
+                        help="minimum edge (model_p * odds - 1) to count as a value bet (default: 0.05)")
+    parser.add_argument("--seed", type=int, default=0,
+                        help="rng seed, shared across all strategies for a paired comparison (default: 0)")
     args = parser.parse_args()
 
     bets = load_value_bets(edge_threshold=args.edge_threshold)
