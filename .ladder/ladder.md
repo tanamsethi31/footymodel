@@ -417,3 +417,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Inline execution — implement directly in this session, proportionate to a single-file ~15-line change
   - Blocked by: ~none~
   - Status: done — user chose subagent-driven.
+
+- [x] **R049** — Team-wise lineup tabs: implementation → *small*
+  - Context: single-task plan executed via subagent-driven-development, spec+code-quality review passed clean on the first try
+  - Why: tracks the outcome for completeness
+  - Built: `dashboard/components/MatchPropsTable.tsx` gained a team-name segmented toggle (same visual style as the existing 1+/2+/3+ toggle, per the spec's deliberate "secondary control, don't compete with primary nav" choice) and a `teamRows` filter; threshold state stays shared/unaffected across team switches.
+  - Code-quality review flagged two future-only notes (not blocking): `activeTeam` has no bounds-clamp if `rows` ever shrinks under a mounted instance (currently unreachable - no client-side revalidation exists, only full-navigation ISR), and neither toggle has ARIA labeling (pre-existing gap, now on two controls instead of one).
+  - Blocked by: ~none~
+  - Status: done — pushed (b70b426), Vercel auto-deploy succeeded, verified live in production: team toggle switches the table between Bournemouth/Manchester City rosters, and the 2+ threshold selection correctly survives the team switch (didn't reset to 1+).
