@@ -129,4 +129,28 @@ result_94 = simulate_bankroll(edge_case_94, kelly_mult=None, n_trials=1, start_b
 assert result_94["final_bankroll"][0] == 6.0
 assert not result_94["ruined"][0], "bankroll one unit above the floor must not be flagged ruined"
 
+# --- sweep -----------------------------------------------------------
+from footymodel.simulate import sweep, STRATEGIES
+
+sweep_bets = pd.DataFrame([
+    {"date": f"2024-{(i // 28) + 1:02d}-{(i % 28) + 1:02d}", "market": "over25",
+     "model_p": 0.55, "odds_close": 2.00}
+    for i in range(60)
+])
+sweep_df = sweep(sweep_bets, n_trials=500, start_bankroll=100.0, seed=3)
+
+assert len(sweep_df) == len(STRATEGIES)
+assert list(sweep_df["strategy"]) == [label for label, _ in STRATEGIES]
+assert (sweep_df["n_trials"] == 500).all()
+assert (sweep_df["n_bets"] == 60).all()
+for col in ["median_final_bankroll", "p5_final_bankroll", "p95_final_bankroll",
+            "median_max_drawdown", "ruin_probability"]:
+    assert col in sweep_df.columns
+    assert sweep_df[col].notna().all()
+# flat strategy's kelly_mult column should be empty (not a float), the rest numeric.
+assert sweep_df.iloc[0]["strategy"] == "flat"
+assert sweep_df.iloc[0]["kelly_mult"] == ""
+assert sweep_df.iloc[1]["kelly_mult"] == 0.125
+
 print("kelly_simulation_test: simulate_bankroll OK")
+print("kelly_simulation_test: sweep OK")

@@ -111,3 +111,31 @@ def simulate_bankroll(bets: pd.DataFrame, kelly_mult: float | None,
         max_drawdown[t] = worst_dd
 
     return {"final_bankroll": final_bankroll, "max_drawdown": max_drawdown, "ruined": ruined}
+
+
+def sweep(bets: pd.DataFrame, n_trials: int = 10_000, start_bankroll: float = 100.0,
+          max_fraction: float = 0.02, seed: int | None = 0) -> pd.DataFrame:
+    """Run every strategy in STRATEGIES over `bets`, return one summary row each.
+
+    All strategies use the same rng seed, so each is evaluated against the
+    identical sequence of simulated win/loss draws per trial - a paired
+    comparison, not five independently-noisy runs.
+    """
+    rows = []
+    for label, kelly_mult in STRATEGIES:
+        result = simulate_bankroll(bets, kelly_mult, n_trials=n_trials,
+                                   start_bankroll=start_bankroll,
+                                   max_fraction=max_fraction, seed=seed)
+        fb = result["final_bankroll"]
+        rows.append({
+            "strategy": label,
+            "kelly_mult": kelly_mult if kelly_mult is not None else "",
+            "n_trials": n_trials,
+            "n_bets": len(bets),
+            "median_final_bankroll": float(np.median(fb)),
+            "p5_final_bankroll": float(np.percentile(fb, 5)),
+            "p95_final_bankroll": float(np.percentile(fb, 95)),
+            "median_max_drawdown": float(np.median(result["max_drawdown"])),
+            "ruin_probability": float(result["ruined"].mean()),
+        })
+    return pd.DataFrame(rows)
