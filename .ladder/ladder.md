@@ -400,9 +400,19 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
 
 ## live-ops
 
-- [ ] **R047** — Live poller scheduled runs stalled: trigger manually now, or dig into why first? → *small*
+- [x] **R047** — Live poller scheduled runs stalled: trigger manually now, or dig into why first? → *small*
   - Context: user asked about tonight's PL match (Crystal Palace v Manchester City, 19:00 UTC kickoff) prep; checking the live poller's health for it surfaced that `live_poll.yml`'s scheduled (cron) runs stopped at 2026-08-28T04:06:09Z despite the `*/20 9-21 * * *` schedule - zero scheduled fires between 09:00-13:27 UTC today, right in the middle of its intended window
   - Why: lineups for tonight's match land ~18:20-18:40 UTC (20-40min pre-kickoff per API-Football); if the schedule stays stalled through then, the match gets missed entirely and there's no prediction logged for it
-  - [ ] Trigger `live_poll.yml` manually now via `gh workflow run`, and again closer to kickoff as a backstop — doesn't fix the root cause but guarantees tonight's match isn't missed regardless of why the schedule stalled
-  - [ ] Investigate why the schedule stalled first (GitHub Actions platform delay vs. a real repo-side issue) before doing anything - slower, but avoids masking a real problem with a manual workaround
+  - [x] Trigger `live_poll.yml` manually now via `gh workflow run`, and again closer to kickoff as a backstop — doesn't fix the root cause but guarantees tonight's match isn't missed regardless of why the schedule stalled
+  - [x] Investigate why the schedule stalled first (GitHub Actions platform delay vs. a real repo-side issue) before doing anything - slower, but avoids masking a real problem with a manual workaround
+  - Blocked by: ~none~
+  - Status: done — did both. Investigated first: full run history showed no stuck/queued runs, and even "normal" days (Aug 25-26) fired every ~50-90min instead of every 20 - this is GitHub Actions' documented free-tier cron throttling, not a repo bug, nothing to fix in code. Triggered manually (run 33176122425, completed clean: "No new confirmed-lineup fixtures this poll" - correct, too early). Scheduled two session-scoped one-shot reminders (~18:07 and ~18:33 UTC) to re-trigger and report on tonight's match specifically, with the caveat flagged to the user that these die if the session ends.
+
+## dashboard-v3
+
+- [ ] **R048** — Team-wise lineup tabs: execution mode → *small*
+  - Context: implementation plan for splitting each Player Props match card's 22-player table into per-team tabs is written and committed (docs/superpowers/plans/2026-08-28-team-lineup-tabs.md) - single task, one file (~15-line diff); writing-plans skill's standard handoff choice
+  - Why: determines review overhead vs. speed for a change small enough that the usual subagent two-stage review may be disproportionate
+  - [ ] Subagent-driven — dispatch a fresh subagent + two-stage review, same process as the Kelly simulator (R044/R045)
+  - [ ] Inline execution — implement directly in this session, proportionate to a single-file ~15-line change
   - Blocked by: ~none~
