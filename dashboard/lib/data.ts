@@ -65,6 +65,51 @@ export type PropsPick = {
   evSotGt15: number | null;
 };
 
+export type MostProbablePick = {
+  fixtureId: string;
+  kickoff: string;
+  player: string;
+  team: string;
+  marketLabel: string;
+  prob: number;
+  odds: number | null;
+};
+
+const PROP_MARKETS: {
+  key: keyof PropsPick;
+  oddsKey: keyof PropsPick;
+  label: string;
+}[] = [
+  { key: "pShotsGt05", oddsKey: "oddsShotsGt05", label: "Shots 1+" },
+  { key: "pShotsGt15", oddsKey: "oddsShotsGt15", label: "Shots 2+" },
+  { key: "pShotsGt25", oddsKey: "oddsShotsGt25", label: "Shots 3+" },
+  { key: "pSotGt05", oddsKey: "oddsSotGt05", label: "SOT 1+" },
+  { key: "pSotGt15", oddsKey: "oddsSotGt15", label: "SOT 2+" },
+];
+
+export function getMostProbablePicks(
+  props: PropsPick[],
+  limit = 8
+): MostProbablePick[] {
+  const picks: MostProbablePick[] = [];
+  for (const row of props) {
+    for (const m of PROP_MARKETS) {
+      const p = row[m.key] as number | null;
+      if (p === null) continue;
+      picks.push({
+        fixtureId: row.fixtureId,
+        kickoff: row.kickoff,
+        player: row.player,
+        team: row.team,
+        marketLabel: m.label,
+        prob: p,
+        odds: row[m.oddsKey] as number | null,
+      });
+    }
+  }
+  return picks.sort((a, b) => b.prob - a.prob).slice(0, limit);
+}
+
 function num(v: unknown): number | null {
   if (v === undefined || v === null || v === "") return null;
   const n = Number(v);
