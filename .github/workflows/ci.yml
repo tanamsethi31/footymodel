@@ -27,3 +27,5 @@ jobs:
         run: python scripts/rapidapi_odds_parse_test.py
       - name: Grade-results mixed-format kickoff parsing (pure, data-free)
         run: python scripts/grade_results_datetime_test.py
+      - name: Kelly bankroll simulator (pure, data-free)
+        run: python scripts/kelly_simulation_test.py
