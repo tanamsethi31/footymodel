@@ -410,9 +410,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
 
 ## dashboard-v3
 
-- [ ] **R048** — Team-wise lineup tabs: execution mode → *small*
+- [x] **R048** — Team-wise lineup tabs: execution mode → *small*
   - Context: implementation plan for splitting each Player Props match card's 22-player table into per-team tabs is written and committed (docs/superpowers/plans/2026-08-28-team-lineup-tabs.md) - single task, one file (~15-line diff); writing-plans skill's standard handoff choice
   - Why: determines review overhead vs. speed for a change small enough that the usual subagent two-stage review may be disproportionate
-  - [ ] Subagent-driven — dispatch a fresh subagent + two-stage review, same process as the Kelly simulator (R044/R045)
+  - [x] Subagent-driven — dispatch a fresh subagent + two-stage review, same process as the Kelly simulator (R044/R045)
   - [ ] Inline execution — implement directly in this session, proportionate to a single-file ~15-line change
   - Blocked by: ~none~
+  - Status: done — user chose subagent-driven.
