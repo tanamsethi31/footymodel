@@ -26,5 +26,6 @@ data/logs/
 !data/processed/rapidapi_budget.json
 !data/processed/rapidapi_fixtures_cache.json
 !data/processed/graded_results.csv
+!data/processed/kelly_simulation.csv
 !data/raw_fbref/player_match.jsonl
 .superpowers/
