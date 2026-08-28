@@ -108,4 +108,25 @@ assert high_mult["ruined"].mean() > low_mult["ruined"].mean(), (
     "full Kelly should ruin more often than 1/8 Kelly on identical bets"
 )
 
+# Boundary regression: ruin on the LAST bet of a trial must still be flagged
+# (a trial that dips to/below the floor on its final bet has no "next"
+# iteration to catch it if the ruin check runs before processing a bet).
+edge_case_95 = pd.DataFrame([
+    {"date": f"2024-{(i // 28) + 1:02d}-{(i % 28) + 1:02d}", "market": "over25",
+     "model_p": 0.0, "odds_close": 2.00}
+    for i in range(95)
+])
+result_95 = simulate_bankroll(edge_case_95, kelly_mult=None, n_trials=1, start_bankroll=100.0, seed=1)
+assert result_95["final_bankroll"][0] == 5.0
+assert result_95["ruined"][0], "bankroll hitting the floor exactly on the last bet must be flagged ruined"
+
+edge_case_94 = pd.DataFrame([
+    {"date": f"2024-{(i // 28) + 1:02d}-{(i % 28) + 1:02d}", "market": "over25",
+     "model_p": 0.0, "odds_close": 2.00}
+    for i in range(94)
+])
+result_94 = simulate_bankroll(edge_case_94, kelly_mult=None, n_trials=1, start_bankroll=100.0, seed=1)
+assert result_94["final_bankroll"][0] == 6.0
+assert not result_94["ruined"][0], "bankroll one unit above the floor must not be flagged ruined"
+
 print("kelly_simulation_test: simulate_bankroll OK")

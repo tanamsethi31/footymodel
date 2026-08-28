@@ -89,26 +89,23 @@ def simulate_bankroll(bets: pd.DataFrame, kelly_mult: float | None,
         outcomes = rng.random(n_bets) < probs
 
         for i in range(n_bets):
-            if bankroll <= ruin_floor:
-                ruined[t] = True
-                break
-
             if kelly_mult is None:
                 stake = min(flat_stake, bankroll)
             else:
                 stake = recommended_stake(bankroll, probs[i], odds[i],
                                           kelly_mult=kelly_mult, max_fraction=max_fraction)
-            if stake <= 0:
-                continue
+            if stake > 0:
+                if outcomes[i]:
+                    bankroll += stake * (odds[i] - 1.0)
+                else:
+                    bankroll -= stake
+                peak = max(peak, bankroll)
+                if peak > 0:
+                    worst_dd = max(worst_dd, (peak - bankroll) / peak)
 
-            if outcomes[i]:
-                bankroll += stake * (odds[i] - 1.0)
-            else:
-                bankroll -= stake
-
-            peak = max(peak, bankroll)
-            if peak > 0:
-                worst_dd = max(worst_dd, (peak - bankroll) / peak)
+            if bankroll <= ruin_floor:
+                ruined[t] = True
+                break
 
         final_bankroll[t] = max(bankroll, 0.0)
         max_drawdown[t] = worst_dd
