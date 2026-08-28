@@ -49,3 +49,68 @@ def load_value_bets(league: str = "E0", markets: tuple[str, ...] = ("over25", "u
     """Read evals_main.parquet and filter to positive-EV bets. See filter_value_bets."""
     df = pd.read_parquet(EVALS_PATH)
     return filter_value_bets(df, league=league, markets=markets, edge_threshold=edge_threshold)
+
+
+def simulate_bankroll(bets: pd.DataFrame, kelly_mult: float | None,
+                       n_trials: int = 10_000, start_bankroll: float = 100.0,
+                       max_fraction: float = 0.02, seed: int | None = None) -> dict:
+    """Run n_trials independent simulated seasons over `bets`, in the given order.
+
+    Each trial draws its own win/loss outcome per bet from a Bernoulli(model_p)
+    distribution (parametric Monte Carlo - the real historical outcome is not
+    used). kelly_mult=None means flat staking: 1 unit (1% of start_bankroll)
+    per bet, fixed, non-compounding, matching backtest.py's flat convention.
+    Otherwise stakes via staking.recommended_stake(), unmodified.
+
+    "Ruined" = bankroll falls to or below RUIN_FLOOR_FRACTION * start_bankroll
+    (proportional Kelly staking can only asymptotically approach zero, so a
+    literal bankroll<=0 definition would never trigger for Kelly strategies -
+    see the design spec for the full rationale). Once ruined, a trial stops
+    processing further bets (bankroll frozen at the ruin value).
+
+    Returns {"final_bankroll": np.ndarray, "max_drawdown": np.ndarray,
+             "ruined": np.ndarray[bool]}, each of shape (n_trials,).
+    """
+    rng = np.random.default_rng(seed)
+    probs = bets["model_p"].to_numpy()
+    odds = bets["odds_close"].to_numpy()
+    n_bets = len(probs)
+    ruin_floor = start_bankroll * RUIN_FLOOR_FRACTION
+    flat_stake = start_bankroll * 0.01
+
+    final_bankroll = np.empty(n_trials)
+    max_drawdown = np.empty(n_trials)
+    ruined = np.zeros(n_trials, dtype=bool)
+
+    for t in range(n_trials):
+        bankroll = start_bankroll
+        peak = start_bankroll
+        worst_dd = 0.0
+        outcomes = rng.random(n_bets) < probs
+
+        for i in range(n_bets):
+            if bankroll <= ruin_floor:
+                ruined[t] = True
+                break
+
+            if kelly_mult is None:
+                stake = min(flat_stake, bankroll)
+            else:
+                stake = recommended_stake(bankroll, probs[i], odds[i],
+                                          kelly_mult=kelly_mult, max_fraction=max_fraction)
+            if stake <= 0:
+                continue
+
+            if outcomes[i]:
+                bankroll += stake * (odds[i] - 1.0)
+            else:
+                bankroll -= stake
+
+            peak = max(peak, bankroll)
+            if peak > 0:
+                worst_dd = max(worst_dd, (peak - bankroll) / peak)
+
+        final_bankroll[t] = max(bankroll, 0.0)
+        max_drawdown[t] = worst_dd
+
+    return {"final_bankroll": final_bankroll, "max_drawdown": max_drawdown, "ruined": ruined}
