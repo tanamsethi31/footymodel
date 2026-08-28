@@ -43,6 +43,18 @@ export type GradedResult = {
   gradedAt: string;
 };
 
+export type KellySimResult = {
+  strategy: string;
+  kellyMult: number | null;
+  nTrials: number;
+  nBets: number;
+  medianFinalBankroll: number;
+  p5FinalBankroll: number;
+  p95FinalBankroll: number;
+  medianMaxDrawdown: number;
+  ruinProbability: number;
+};
+
 export type PropsPick = {
   fixtureId: string;
   kickoff: string;
@@ -244,4 +256,22 @@ export async function getGradedResults(): Promise<GradedResult[]> {
     }))
     .filter((r) => r.fixtureId)
     .sort((a, b) => (a.kickoff < b.kickoff ? 1 : -1));
+}
+
+export async function getKellySimResults(): Promise<KellySimResult[]> {
+  const rows = await fetchCsv("kelly_simulation.csv");
+  return rows
+    .map((r) => ({
+      strategy: r.strategy,
+      kellyMult: num(r.kelly_mult),
+      nTrials: num(r.n_trials) ?? 0,
+      nBets: num(r.n_bets) ?? 0,
+      medianFinalBankroll: num(r.median_final_bankroll) ?? 0,
+      p5FinalBankroll: num(r.p5_final_bankroll) ?? 0,
+      p95FinalBankroll: num(r.p95_final_bankroll) ?? 0,
+      medianMaxDrawdown: num(r.median_max_drawdown) ?? 0,
+      ruinProbability: num(r.ruin_probability) ?? 0,
+    }))
+    .filter((r) => r.strategy)
+    .sort((a, b) => (a.kellyMult ?? -1) - (b.kellyMult ?? -1));
 }
