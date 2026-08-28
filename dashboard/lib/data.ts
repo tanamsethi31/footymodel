@@ -164,12 +164,22 @@ async function fetchCsv(name: string): Promise<Record<string, string>[]> {
 
 // The goals CSV's header was written by the FIRST row ever appended
 // (before source/fair_p_over25/ev_over25/ev_under25 existed as columns),
-// and pandas' `to_csv(mode="a")` never rewrites the header - so older
-// rows have 12 fields, newer ones have 16. Papaparse puts any fields
-// beyond the header into a `__parsed_extra` array (verified directly,
-// NOT positionally-keyed properties as a first guess assumed) - this
-// maps those back to their real names rather than dropping them.
-const GOALS_EXTRA_COLS = ["source", "fair_p_over25", "ev_over25", "ev_under25"];
+// and pandas' `to_csv(mode="a")` never rewrites the header - so rows have
+// a ragged number of trailing fields depending on which engine logged them
+// AND whether odds were available at the time:
+//   - engine.py never writes "source" at all -> 0 extra fields (no odds)
+//     or 3 (fair_p/ev_over/ev_under, all-or-nothing together)
+//   - rapidapi_engine.py / sofascore_engine.py always write "source" ->
+//     1 extra field (source only, no odds) or 4 (source + the same triple)
+// These four lengths (0/1/3/4) never collide, so the row's field count
+// alone tells us which fields are actually present - a fixed positional
+// mapping (assuming "source" always comes first) previously misread
+// engine.py's 3-field rows, shifting fair_p/ev_over/ev_under left by one
+// and silently corrupting the EV badges for every API-Football-sourced
+// prediction that had real odds (caught 2026-08-28 on the first such row:
+// Crystal Palace v Man City rendered ev_under25's value in the ev_over25
+// slot, with ev_under25 itself blank).
+const GOALS_TRIPLE_COLS = ["fair_p_over25", "ev_over25", "ev_under25"] as const;
 
 type RowWithExtra = Record<string, string> & { __parsed_extra?: string[] };
 
@@ -177,10 +187,16 @@ export async function getGoalsPicks(): Promise<GoalsPick[]> {
   const rows = (await fetchCsv("live_recommendations.csv")) as RowWithExtra[];
   return rows
     .map((r) => {
+      const parsedExtra = r.__parsed_extra ?? [];
+      const n = parsedExtra.length;
       const extra: Record<string, string> = {};
-      (r.__parsed_extra ?? []).forEach((val, i) => {
-        if (GOALS_EXTRA_COLS[i] !== undefined) extra[GOALS_EXTRA_COLS[i]] = val;
-      });
+      if (n === 1 || n === 4) extra.source = parsedExtra[0];
+      if (n === 3 || n === 4) {
+        const tripleStart = n - 3;
+        GOALS_TRIPLE_COLS.forEach((col, i) => {
+          extra[col] = parsedExtra[tripleStart + i];
+        });
+      }
       return {
         loggedAt: r.logged_at,
         fixtureId: r.fixture_id,
