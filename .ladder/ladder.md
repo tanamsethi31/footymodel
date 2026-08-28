@@ -376,3 +376,23 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Inline execution — batch execution with checkpoints in this session
   - Blocked by: ~none~
   - Status: done — user chose subagent-driven.
+
+- [x] **R045** — Kelly bankroll simulator: subagent-driven execution, all 10 tasks → *large*
+  - Context: executed the R037-R044 plan via superpowers:subagent-driven-development, directly on main (explicit consent given, matching how the rest of this session operated)
+  - Why: tracks the actual execution outcome, including real issues the two-stage review process caught
+  - Built: `footymodel/simulate.py` (filter_value_bets/load_value_bets, simulate_bankroll, sweep), `scripts/kelly_simulation.py` (CLI), `scripts/kelly_simulation_test.py` (CI-wired), `data/processed/kelly_simulation.csv` (tracked), dashboard `getKellySimResults()` + `StakingPanel.tsx` + 4th "Staking" tab.
+  - Real bugs caught and fixed during review (not just style nits):
+    - Task 2: ruin-detection off-by-one — the ruin-floor check ran before processing each bet, so a trial crossing the floor on its last bet was never flagged; inherited from the plan's own code, fixed post-review with a boundary regression test.
+    - Task 4: broken `--help` output (`description=__doc__` flattened the usage examples); fixed to match the codebase's per-flag `help=` convention.
+    - Task 7: discovered the EARLIER dashboard redesign (R035, already deployed to production) had never actually been committed to git — Vercel CLI deploys upload the working directory directly, bypassing git entirely. Task 7's `git add lib/data.ts` swept that pre-existing uncommitted work into its own commit. Fixed by splitting history: redesign committed on its own (accurately describing what it actually is), Task 7's addition re-committed cleanly on top.
+    - Final full-implementation review: `StakingPanel` hardcoded `startBankroll=100` despite the CLI exposing a real `--start-bankroll` flag — today's committed CSV happened to use the default so nothing was visibly broken, but any future non-default run would have silently mislabeled every card. Fixed by adding `start_bankroll` to the CSV/type/component end to end.
+  - Deployment note: found (and worked around) a real, project-wide latent issue — the Vercel project has no `rootDirectory` configured, so a plain git-based deploy fails (`Couldn't find any pages or app directory`) since the Next app lives in `dashboard/`, not the repo root. Worked around per-deploy via `vercel deploy --prod --yes --archive=tgz` (forces a local-upload deploy instead of git-clone). Not fixed at the project-settings level - see R046.
+  - Blocked by: ~none~
+  - Status: done — all 10 tasks implemented, spec-reviewed, and code-quality-reviewed (with re-review loops on every finding), final whole-implementation review passed, pushed to origin/main, verified live in production (https://dashboard-nine-theta-13.vercel.app, Staking tab renders real data: 547 bets, 10,000 trials/strategy, flat 1.94x / 1-8 Kelly 4.35x / 1-4 Kelly 5.43x / 1-2 Kelly 5.63x / full Kelly 5.64x median bankroll, 0% ruin probability at the current 2%-max-fraction cap).
+
+- [ ] **R046** — Vercel project has no rootDirectory set: fix now or leave as a known workaround? → *small*
+  - Context: discovered while deploying R045 - a plain `vercel deploy --prod` (or any future git-push-triggered deploy) fails because the project's rootDirectory is unset while the Next app lives in `dashboard/`, not the repo root
+  - Why: this is a standing footgun for ANY future deploy of this project, not specific to the Kelly simulator feature - the `--archive=tgz` workaround only fixes it deploy-by-deploy
+  - [ ] Set `rootDirectory=dashboard` in the Vercel project settings (dashboard UI, not CLI-settable in this CLI version) - permanent fix, also enables git-push-triggered auto-deploys if ever wanted
+  - [ ] Leave as-is, keep using `--archive=tgz` on every future manual deploy - no settings change, but the footgun persists and any deploy that forgets the flag will fail
+  - Blocked by: ~none~
