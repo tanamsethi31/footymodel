@@ -56,8 +56,19 @@ trial:
      kelly_mult, max_fraction)` — reuses the existing module as-is, no changes to it.
 4. Update bankroll: win → `+= stake * (odds_close - 1)`; loss → `-= stake`.
 5. Track running peak bankroll; drawdown at each step = `(peak - bankroll) / peak`.
-6. If `bankroll <= 0`: mark the trial ruined, stop processing further bets in that
-   trial (bankroll frozen at the ruin value).
+6. **Ruin** = bankroll falls to or below `0.05 * start_bankroll` (5% of starting
+   bankroll), not literally zero. Proportional Kelly staking (stake = a fraction of
+   *current* bankroll) can only ever decay bankroll asymptotically toward zero — a
+   loss shrinks it by `stake_fraction`, but `bankroll * (1 - stake_fraction)` stays
+   strictly positive, so literal `bankroll <= 0` is unreachable under Kelly and every
+   Kelly strategy would report a 0% ruin probability regardless of how aggressive it
+   is. Flat staking (fixed absolute stake) *can* hit exactly zero, so a uniform
+   literal-zero definition would silently make the comparison meaningless for the
+   Kelly strategies specifically — the ones the sweep exists to compare. A practical
+   5%-of-starting-bankroll floor is the standard way quant staking analyses define
+   "effectively broke" for proportional betting, and it applies consistently to both
+   flat and Kelly strategies. Once a trial crosses the floor, mark it ruined and stop
+   processing further bets in that trial (bankroll frozen at the ruin value).
 
 Returns per-trial arrays (`final_bankroll`, `max_drawdown`, `ruined: bool`) which the
 caller reduces to summary statistics.
