@@ -614,3 +614,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Fix: rewrote `_read_predictions_csv()` to read raw rows via `csv.reader` and map each one by its actual field count (0/1/3/4, confirmed these never collide) via a new `parse_prediction_row()`, instead of a fixed-position `names=` list. Added `scripts/grade_results_columns_test.py` covering all four shapes, wired into CI.
   - Blocked by: ~none~
   - Status: done — re-graded the one affected fixture after the fix (deleted and regenerated `graded_results.csv`): `bet_side`/`bet_odds`/`bet_won`/`realized_return` went from all-blank to `over`/`1.77`/`True`/`+0.77`. Pushed (00e75ac), verified live in production - Track Record now correctly shows 1 bet placed, 100% win rate, +77.0% cumulative return, instead of 0 bets placed.
+
+- [x] **R073** — Glossary plan: execution mode → *small*
+  - Context: never actually asked this after committing the plan (docs/superpowers/plans/2026-08-29-glossary-page.md) - "check it live" and the R072 bug fix intervened first
+  - Why: standard writing-plans handoff choice, tracked explicitly for every prior plan this session
+  - [x] Subagent-driven (Recommended) - same process used for every previous plan this session
+  - [ ] Inline execution - proportionate given the small scope
+  - Blocked by: ~none~
+  - Status: done — user chose subagent-driven.
