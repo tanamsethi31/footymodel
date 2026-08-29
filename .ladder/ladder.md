@@ -710,3 +710,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Fix: added a "Live dashboard" section linking the deployed Vercel app and describing its 5 tabs; updated the architecture diagram to cover all 3 live sources + how the dashboard reads from the repo via GitHub's Contents API; rewrote Phase B to describe the real GitHub Actions cron mechanism and each source's actual current status (including SofaScore's R081 gap); updated the CI test list to the current 9 scripts (was showing 2); added Roadmap Phase J (multi-source live resilience) and Phase K (the public dashboard) covering everything shipped this session; removed stale claims ("season hasn't started", "needs an API key to run live")
   - Blocked by: ~none~
   - Status: done — verified every factual claim against the actual current codebase (ci.yml's test list, live_poll.yml's cron schedule, rapidapi_engine.py's budget cap, the R081 SofaScore finding, DashboardTabs.tsx's tab list) rather than assuming from memory. Committed (1b5f9f9).
+
+- [x] **R085** — Migrated to the new footymodel.vercel.app domain → *small*
+  - Context: the Vercel project moved from dashboard-nine-theta-13.vercel.app to footymodel.vercel.app - confirmed the old URL now 404s entirely, not just "also available"
+  - Why: user gave the new link and asked for the README/descriptions/buttons/diagrams to be updated accordingly
+  - Fix: updated README's dashboard link + added a "Live dashboard" badge at the top (previously just a plain text link, no visual button); updated live_poll.yml's NOTIFY_URL, which was still silently pointing at the dead domain (would have broken push notifications, though notify_dashboard.py fails soft so the cron itself was never at risk)
+  - Blocked by: ~none~
+  - Status: done — verified the new domain serves the same app before changing anything (/ returns 200, /api/notify and /api/subscribe both 405 on a bare GET, confirming the routes exist). GitHub repo's homepage field was already correct (updated separately, likely via Vercel's GitHub integration). Committed (aa7b00f).
