@@ -600,9 +600,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — user chose one shared section.
 
-- [ ] **R071** — Glossary design: approval gate → *small*
+- [x] **R071** — Glossary design: approval gate → *small*
   - Context: consolidated design presented after R068-R070's brainstorm - 5th "Glossary" tab, new static `GlossaryPanel.tsx`, 5 sections (General concepts, Track Record, Goals O/U, Player Props, Staking terms), reusing the existing h2+description section pattern rather than per-term cards
   - Why: superpowers:brainstorming's hard-gate requires explicit approval before any implementation
-  - [ ] Approved as presented
+  - [x] Approved as presented
   - [ ] Revise before approving
   - Blocked by: ~none~
+  - Status: done — user approved ("ok"). Writing the spec doc next.
