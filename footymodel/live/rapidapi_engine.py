@@ -33,7 +33,7 @@ import pandas as pd
 from ..data import PROCESSED_DIR
 from ..players import LineupModel, load_players
 from ..strategy import remove_margin
-from . import namematch
+from . import match_detail, namematch
 from .rapidapi_client import RapidApiClient, RapidApiError
 
 # Only E0 - the one league with individually significant backtested
@@ -214,6 +214,8 @@ class RapidApiWatcher:
             row["fair_p_over25"] = round(float(fair[0]), 3)
             row["ev_over25"] = round(pred["p_over25_blend"] * over_odds - 1.0, 3)
             row["ev_under25"] = round((1 - pred["p_over25_blend"]) * under_odds - 1.0, 3)
+        row["_detail"] = match_detail.make_detail(
+            row["fixture_id"], home_starters, away_starters, pred)
         return row
 
     def run_once(self) -> list[dict]:
@@ -273,6 +275,7 @@ class RapidApiWatcher:
                 _save_seen(seen)  # persist progress fixture-by-fixture, not just at the end
                 _save_budget(self.budget)
 
+        match_detail.extract_and_log_details(new_rows)
         if new_rows:
             df = pd.DataFrame(new_rows)
             LIVE_LOG.parent.mkdir(parents=True, exist_ok=True)
