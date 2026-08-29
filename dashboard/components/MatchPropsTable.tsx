@@ -99,14 +99,14 @@ export default function MatchPropsTable({
                       sot
                     )} ${swapping ? "blur-[3px] opacity-50" : ""}`}
                   >
-                    {sot === null ? "—" : `${(sot * 100).toFixed(0)}%`}
+                    {sot === null ? "-" : `${(sot * 100).toFixed(0)}%`}
                   </td>
                   <td
                     className={`py-1.5 pr-3 font-mono transition-[filter,opacity] duration-150 ${probClass(
                       shots
                     )} ${swapping ? "blur-[3px] opacity-50" : ""}`}
                   >
-                    {shots === null ? "—" : `${(shots * 100).toFixed(0)}%`}
+                    {shots === null ? "-" : `${(shots * 100).toFixed(0)}%`}
                   </td>
                 </tr>
               );

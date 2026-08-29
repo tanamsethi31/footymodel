@@ -34,13 +34,13 @@ function TrackRecordPanel({ graded }: { graded: GradedResult[] }) {
     <section>
       <h2 className="text-lg font-semibold mb-1">Track record</h2>
       <p className="text-sm text-neutral-500 mb-5">
-        Goals predictions only (v1) — graded against real results once a match
+        Goals predictions only (v1): graded against real results once a match
         finishes. &quot;Bet&quot; means the model showed positive EV on a side
         at the time it was logged; still paper-trade, no real money moved.
       </p>
       {graded.length === 0 ? (
         <p className="text-sm text-neutral-500">
-          No graded results yet — predictions get graded the day after
+          No graded results yet. Predictions get graded the day after
           they&apos;re logged, once the match has finished.
         </p>
       ) : (
@@ -122,14 +122,14 @@ function TrackRecordPanel({ graded }: { graded: GradedResult[] }) {
 function GoalsPanel({ goals }: { goals: GoalsPick[] }) {
   return (
     <section>
-      <h2 className="text-lg font-semibold mb-1">Goals — Over/Under 2.5</h2>
+      <h2 className="text-lg font-semibold mb-1">Goals: Over/Under 2.5</h2>
       <p className="text-sm text-neutral-500 mb-5">
         Confirmed-lineup model, pooled t=3.04 backtested (individually
         significant on the Premier League alone, t=2.23).
       </p>
       {goals.length === 0 ? (
         <p className="text-sm text-neutral-500">
-          No predictions logged yet — check back once a fixture&apos;s lineup
+          No predictions logged yet. Check back once a fixture&apos;s lineup
           is confirmed pre-kickoff.
         </p>
       ) : (
@@ -199,7 +199,7 @@ export default async function Home() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">footymodel</h1>
           <p className="text-sm text-neutral-500 mt-1">
-            Live predictions — Premier League goals O/U 2.5 and player shots /
+            Live predictions for Premier League goals O/U 2.5 and player shots /
             shots-on-target, both backtested. Paper-trade only, nothing here
             is a real bet.
           </p>
@@ -215,7 +215,7 @@ export default async function Home() {
       />
 
       <footer className="mt-16 text-xs text-neutral-400">
-        Research project — paper-trade only, no real money involved. Refreshes
+        Research project. Paper-trade only, no real money involved. Refreshes
         automatically as new predictions are logged.
       </footer>
     </div>

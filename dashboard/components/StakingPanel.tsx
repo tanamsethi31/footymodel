@@ -16,9 +16,9 @@ export default function StakingPanel({ results }: { results: KellySimResult[] })
   if (results.length === 0) {
     return (
       <section>
-        <h2 className="text-lg font-semibold mb-1">Staking — Kelly bankroll simulation</h2>
+        <h2 className="text-lg font-semibold mb-1">Staking: Kelly bankroll simulation</h2>
         <p className="text-sm text-neutral-500">
-          No simulation results yet — run{" "}
+          No simulation results yet. Run{" "}
           <code className="font-mono text-xs">python scripts/kelly_simulation.py</code>.
         </p>
       </section>
@@ -29,11 +29,11 @@ export default function StakingPanel({ results }: { results: KellySimResult[] })
 
   return (
     <section>
-      <h2 className="text-lg font-semibold mb-1">Staking — Kelly bankroll simulation</h2>
+      <h2 className="text-lg font-semibold mb-1">Staking: Kelly bankroll simulation</h2>
       <p className="text-sm text-neutral-500 mb-5">
         Monte Carlo over the {results[0].nBets} backtested E0 O/U 2.5 value bets,{" "}
         {results[0].nTrials.toLocaleString()} simulated seasons per strategy. Downstream
-        risk-sizing analysis only — doesn&apos;t affect the model&apos;s predictions or
+        risk-sizing analysis only. Doesn&apos;t affect the model&apos;s predictions or
         edge. &quot;Ruin&quot; means bankroll fell to 5% of its starting value.
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "footymodel",
-  description: "Live, backtested football predictions — goals O/U and player shots/SOT.",
+  description: "Live, backtested football predictions: goals O/U and player shots/SOT.",
   manifest: "/manifest.json",
 };
 

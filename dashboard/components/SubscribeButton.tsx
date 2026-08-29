@@ -77,7 +77,7 @@ export default function SubscribeButton() {
   if (status === "denied")
     return (
       <p className="text-sm text-neutral-500">
-        Notifications blocked — enable them for this site in your browser
+        Notifications blocked. Enable them for this site in your browser
         settings to get alerts.
       </p>
     );

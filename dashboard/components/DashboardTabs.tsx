@@ -54,7 +54,7 @@ export default function DashboardTabs({
                 buttonRefs.current[i] = el;
               }}
               onClick={() => setActive(i)}
-              className="relative z-10 px-4 py-1.5 rounded-full text-sm font-medium text-neutral-500 dark:text-neutral-400 whitespace-nowrap active:scale-[0.97] transition-transform duration-150"
+              className="relative z-10 w-32 px-2 py-1.5 rounded-full text-sm font-medium text-neutral-500 dark:text-neutral-400 whitespace-nowrap text-center active:scale-[0.97] transition-transform duration-150"
             >
               {t}
             </button>
@@ -70,7 +70,7 @@ export default function DashboardTabs({
             {TABS.map((t) => (
               <span
                 key={t}
-                className="px-4 py-1.5 rounded-full text-sm font-medium text-neutral-900 whitespace-nowrap"
+                className="w-32 px-2 py-1.5 rounded-full text-sm font-medium text-neutral-900 whitespace-nowrap text-center"
               >
                 {t}
               </span>

@@ -13,15 +13,15 @@ export function formatKickoff(iso: string) {
 }
 
 export function pct(n: number | null) {
-  return n === null ? "—" : `${(n * 100).toFixed(1)}%`;
+  return n === null ? "-" : `${(n * 100).toFixed(1)}%`;
 }
 
 export function odds(n: number | null) {
-  return n === null ? "—" : n.toFixed(2);
+  return n === null ? "-" : n.toFixed(2);
 }
 
 export function EvBadge({ ev }: { ev: number | null }) {
-  if (ev === null) return <span className="text-neutral-400">—</span>;
+  if (ev === null) return <span className="text-neutral-400">-</span>;
   const positive = ev > 0;
   return (
     <span
