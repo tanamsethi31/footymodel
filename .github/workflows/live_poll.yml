@@ -55,7 +55,7 @@ jobs:
 
       - name: Commit + push any new recommendations/state
         env:
-          NOTIFY_URL: https://dashboard-nine-theta-13.vercel.app/api/notify
+          NOTIFY_URL: https://footymodel.vercel.app/api/notify
           NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
         run: |
           git config user.name "github-actions[bot]"

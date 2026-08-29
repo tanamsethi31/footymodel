@@ -1,5 +1,6 @@
 # ⚽ footymodel
 
+[![Live dashboard](https://img.shields.io/badge/live%20dashboard-footymodel.vercel.app-blue?logo=vercel)](https://footymodel.vercel.app/)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![CI](https://github.com/tanamsethi31/footymodel/actions/workflows/ci.yml/badge.svg)
 ![Live poll](https://github.com/tanamsethi31/footymodel/actions/workflows/live_poll.yml/badge.svg)
@@ -19,7 +20,7 @@ do — see [Results at a glance](#results-at-a-glance) and the full
 
 ## Live dashboard
 
-**[dashboard-nine-theta-13.vercel.app](https://dashboard-nine-theta-13.vercel.app)**
+**[footymodel.vercel.app](https://footymodel.vercel.app/)**
 — the public-facing view of the live paper-trade pipeline below. Five tabs:
 **Track record** (graded results vs. real scores), **Goals O/U** (upcoming
 confirmed-lineup predictions, click a match to expand the team-model vs.
