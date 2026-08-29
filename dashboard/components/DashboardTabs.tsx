@@ -62,7 +62,7 @@ export default function DashboardTabs({
         </div>
         {clip && (
           <div
-            className="absolute inset-1 flex pointer-events-none bg-white dark:bg-neutral-100 rounded-full transition-[clip-path] duration-[260ms] [transition-timing-function:cubic-bezier(0.23,1,0.32,1)]"
+            className="absolute inset-1 flex pointer-events-none bg-blue-600 dark:bg-blue-500 rounded-full transition-[clip-path] duration-[260ms] [transition-timing-function:cubic-bezier(0.23,1,0.32,1)]"
             style={{
               clipPath: `inset(0 ${clip.right}px 0 ${clip.left}px round 999px)`,
             }}
@@ -70,7 +70,7 @@ export default function DashboardTabs({
             {TABS.map((t) => (
               <span
                 key={t}
-                className="w-32 px-2 py-1.5 rounded-full text-sm font-medium text-neutral-900 whitespace-nowrap text-center"
+                className="w-32 px-2 py-1.5 rounded-full text-sm font-medium text-white whitespace-nowrap text-center"
               >
                 {t}
               </span>

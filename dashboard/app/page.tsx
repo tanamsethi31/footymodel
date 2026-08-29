@@ -8,6 +8,7 @@ import {
   type GradedResult,
 } from "@/lib/data";
 import { formatKickoff, pct, odds, EvBadge, SOURCE_LABEL } from "@/lib/format";
+import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
 import DashboardTabs from "@/components/DashboardTabs";
 import PropsPanel from "@/components/PropsPanel";
@@ -197,7 +198,7 @@ export default async function Home() {
     <div className="max-w-4xl mx-auto px-4 py-10 sm:py-14 w-full">
       <header className="flex items-start justify-between gap-4 mb-10">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">footymodel</h1>
+          <Logo />
           <p className="text-sm text-neutral-500 mt-1">
             Live predictions for Premier League goals O/U 2.5 and player shots /
             shots-on-target, both backtested. Paper-trade only, nothing here
