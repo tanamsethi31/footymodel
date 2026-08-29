@@ -663,3 +663,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Explicit "Details" button/link per card - clearer affordance but an extra visible element on every card
   - Blocked by: ~none~
   - Status: chosen — user picked whole-card accordion.
+
+- [x] **R079** — Expandable match detail: plan execution mode → *small*
+  - Context: docs/superpowers/plans/2026-08-29-expandable-match-detail.md written and committed, standard writing-plans handoff choice
+  - Why: tracked explicitly for every prior plan this session
+  - [x] Subagent-driven (Recommended) - fresh subagent per task, two-stage review, same process used for every previous plan this session
+  - [ ] Inline execution - batch execution with checkpoints in this session
+  - Blocked by: ~none~
+  - Status: done — user chose subagent-driven.
