@@ -567,9 +567,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — pushed (787f5db), Vercel auto-deploy confirmed, verified live in production (logo + favicon + blue active pill all render correctly in both light and dark mode).
 
-- [ ] **R067** — Continue to glossary page + expandable match detail, or pause → *small*
+- [x] **R067** — Continue to glossary page + expandable match detail, or pause → *small*
   - Context: R052's sequencing (trivial items -> rebrand -> glossary/#3 + expandable match detail/#4) has now shipped its first two stages; #3 and #4 are next in line
   - Why: natural checkpoint after three consecutive shipped stages - worth confirming before starting a new brainstorm rather than assuming
-  - [ ] Continue now - brainstorm the glossary page and/or expandable match detail
+  - [x] Continue now - brainstorm the glossary page and/or expandable match detail
   - [ ] Pause here for this session
   - Blocked by: ~none~
+  - Status: done — user said "keep going, do the glossary page next" (specifically #3, not #4 yet).
