@@ -566,3 +566,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Also flagged (not fixed, out of scope per the approved design): `MatchPropsTable.tsx`'s team/threshold segmented toggles still use the old white/neutral style, so the brand doesn't yet read as fully consistent across every screen - a legitimate follow-up if a fully unified look is wanted later, not a defect in this task.
   - Blocked by: ~none~
   - Status: done — pushed (787f5db), Vercel auto-deploy confirmed, verified live in production (logo + favicon + blue active pill all render correctly in both light and dark mode).
+
+- [ ] **R067** — Continue to glossary page + expandable match detail, or pause → *small*
+  - Context: R052's sequencing (trivial items -> rebrand -> glossary/#3 + expandable match detail/#4) has now shipped its first two stages; #3 and #4 are next in line
+  - Why: natural checkpoint after three consecutive shipped stages - worth confirming before starting a new brainstorm rather than assuming
+  - [ ] Continue now - brainstorm the glossary page and/or expandable match detail
+  - [ ] Pause here for this session
+  - Blocked by: ~none~
