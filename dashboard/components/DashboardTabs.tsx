@@ -2,21 +2,23 @@
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
-const TABS = ["Track record", "Goals O/U", "Player props", "Staking"];
+const TABS = ["Track record", "Goals O/U", "Player props", "Staking", "Glossary"];
 
 export default function DashboardTabs({
   trackRecord,
   goals,
   props,
   staking,
+  glossary,
 }: {
   trackRecord: ReactNode;
   goals: ReactNode;
   props: ReactNode;
   staking: ReactNode;
+  glossary: ReactNode;
 }) {
   const [active, setActive] = useState(0);
-  const panels = [trackRecord, goals, props, staking];
+  const panels = [trackRecord, goals, props, staking, glossary];
 
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);

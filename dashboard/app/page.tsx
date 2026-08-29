@@ -13,6 +13,7 @@ import SubscribeButton from "@/components/SubscribeButton";
 import DashboardTabs from "@/components/DashboardTabs";
 import PropsPanel from "@/components/PropsPanel";
 import StakingPanel from "@/components/StakingPanel";
+import GlossaryPanel from "@/components/GlossaryPanel";
 
 export const revalidate = 60;
 
@@ -213,6 +214,7 @@ export default async function Home() {
         goals={<GoalsPanel goals={goals} />}
         props={<PropsPanel props={props} mostProbable={mostProbable} />}
         staking={<StakingPanel results={kellySim} />}
+        glossary={<GlossaryPanel />}
       />
 
       <footer className="mt-16 text-xs text-neutral-400">
