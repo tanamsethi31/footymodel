@@ -607,3 +607,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Revise before approving
   - Blocked by: ~none~
   - Status: done — user approved ("ok"). Writing the spec doc next.
+
+- [x] **R072** — grade_results.py has the same column-mismatch bug as R050, never fixed → *small*
+  - Context: while checking a real automated grading commit that landed mid-session (the first-ever real graded prediction), found `bet_side`/`bet_odds`/`bet_won`/`realized_return` were all blank for Crystal Palace v Manchester City despite the dashboard correctly showing +7.3%/-11.1% EV
+  - Why: `footymodel/live/grade_results.py`'s `_read_predictions_csv()` used a fixed `pd.read_csv(names=<16 columns>)`, the exact same wrong assumption fixed on the dashboard side in R050 (`dashboard/lib/data.ts`) - engine.py's rows have only 3 extra columns (no "source"), not 4, so the fixed mapping shifted `fair_p_over25`/`ev_over25`/`ev_under25` left by one, and the "is there positive EV" check silently found nothing
+  - Fix: rewrote `_read_predictions_csv()` to read raw rows via `csv.reader` and map each one by its actual field count (0/1/3/4, confirmed these never collide) via a new `parse_prediction_row()`, instead of a fixed-position `names=` list. Added `scripts/grade_results_columns_test.py` covering all four shapes, wired into CI.
+  - Blocked by: ~none~
+  - Status: done — re-graded the one affected fixture after the fix (deleted and regenerated `graded_results.csv`): `bet_side`/`bet_odds`/`bet_won`/`realized_return` went from all-blank to `over`/`1.77`/`True`/`+0.77`. Pushed (00e75ac), verified live in production - Track Record now correctly shows 1 bet placed, 100% win rate, +77.0% cumulative return, instead of 0 bets placed.
