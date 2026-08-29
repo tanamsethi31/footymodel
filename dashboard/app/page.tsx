@@ -9,7 +9,7 @@ import {
   type GradedResult,
   type MatchDetail,
 } from "@/lib/data";
-import { formatKickoff, pct, odds, EvBadge, SOURCE_LABEL } from "@/lib/format";
+import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
 import DashboardTabs from "@/components/DashboardTabs";
