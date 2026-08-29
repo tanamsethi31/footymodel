@@ -550,9 +550,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — user approved ("ok"). Writing the spec doc next.
 
-- [ ] **R065** — Rebrand implementation: execution mode → *small*
+- [x] **R065** — Rebrand implementation: execution mode → *small*
   - Context: implementation plan for the rebrand (docs/superpowers/plans/2026-08-29-dashboard-rebrand.md) is written and committed - 2 tasks, 4 files total (Logo component, favicon, header wiring, active-pill recolor); writing-plans skill's standard handoff choice
   - Why: determines review overhead vs. speed for a small, well-scoped change
-  - [ ] Subagent-driven - fresh subagent per task, two-stage review, same process as the Kelly simulator and team-lineup-tabs work
+  - [x] Subagent-driven - fresh subagent per task, two-stage review, same process as the Kelly simulator and team-lineup-tabs work
   - [ ] Inline execution - implement directly in this session, proportionate to the small scope
   - Blocked by: ~none~
+  - Status: done — user chose subagent-driven.
