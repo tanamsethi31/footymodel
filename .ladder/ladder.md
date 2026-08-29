@@ -636,3 +636,30 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Fix: nested the overlay inside the buttons wrapper div (so it shares the same scrolled coordinate space and sizes naturally to the full row) and measured the active button's offset against that wrapper instead of the outer container
   - Blocked by: ~none~
   - Status: done — confirmed via direct `getBoundingClientRect()`/`clipPath` inspection (visible region now matches the target button's rect exactly at any scroll position) and visually at 375px for every tab, scrolled and unscrolled. `tsc --noEmit` and `next build` clean. Committed (2e47475).
+
+## match-detail
+
+- [x] **R076** — Expandable match detail: how far to reach into the backend → *medium*
+  - Context: brainstorming item #4 from the original bundled request - clicking a match in the Goals O/U tab should show more analysis detail. Research showed the dashboard only stores 16 fields per match today, but the live engines (engine.py/rapidapi_engine.py/sofascore_engine.py) compute real starting-XI names and a team-model/lineup-model/blended breakdown at prediction time, then discard everything but the blended numbers and a starter count before writing to CSV
+  - Why: determines whether this ships as a pure frontend reshuffle of existing fields, or needs new logging in all three live engines
+  - [ ] Frontend only, no backend change - reorganize existing fields, ships fastest but no real "how we arrived at this" depth
+  - [ ] Frontend + small backend change - log the already-computed team-model/lineup-model estimates (4 more numbers), no real lineup names
+  - [x] Frontend + full backend change (chosen) - log real starting-XI names AND the team/lineup/blended breakdown; only applies to predictions logged going forward, past rows stay counts-only
+  - Blocked by: ~none~
+  - Status: chosen — user picked full backend change during brainstorming.
+
+- [x] **R077** — Expandable match detail: storage format for the new data → *small*
+  - Context: live_recommendations.csv's ragged-column format already caused two separate bugs this session (R050, R072) from silently growing optional trailing fields over time; adding lineup names (a whole list, not a scalar) and 2 more numeric fields would make that CSV parsing worse, not better
+  - Why: avoid creating a third version of the same class of bug in a file that's already fragile
+  - [x] Separate JSON side-log keyed by fixture_id (chosen) - new match_detail.jsonl, one JSON object per prediction, existing CSV untouched entirely
+  - [ ] Extend the existing CSV with more trailing columns - consistent with how the file has always grown, but adds a 5th/6th field-count case and doesn't cleanly fit a name list into one CSV cell
+  - Blocked by: ~none~
+  - Status: chosen — user picked the separate JSON side-log.
+
+- [x] **R078** — Expandable match detail: expand interaction pattern → *small*
+  - Context: this is the first expand/collapse UI element anywhere in the dashboard - no existing pattern to follow (MatchPropsTable's pill-button group swaps which data is shown, it doesn't grow/collapse a card)
+  - Why: sets the interaction convention for this and any future expandable card
+  - [x] Accordion: click anywhere on the card, content grows below in place (chosen) - matches the existing card-based layout, no page-level layout jump elsewhere
+  - [ ] Explicit "Details" button/link per card - clearer affordance but an extra visible element on every card
+  - Blocked by: ~none~
+  - Status: chosen — user picked whole-card accordion.
