@@ -20,6 +20,7 @@ unverified across all three live sources this project has tried.
 """
 from __future__ import annotations
 
+import csv
 import json
 
 import numpy as np
@@ -40,21 +41,61 @@ GRADE_DELAY_HOURS = 3  # give the match time to actually finish
 
 # live_recommendations.csv's header was written by the FIRST row ever
 # appended (before source/fair_p_over25/ev_over25/ev_under25 existed as
-# columns), and pandas' to_csv(mode="a") never rewrites it - so older rows
-# have 12 fields, newer ones have 16, and pandas.read_csv errors on the
-# ragged widths unless told the full column set up front (same underlying
-# issue the dashboard's TypeScript parser already works around).
-_FULL_COLUMNS = [
+# columns), and pandas' to_csv(mode="a") never rewrites it - so rows have a
+# ragged number of trailing fields depending on which engine logged them AND
+# whether odds were available at the time:
+#   - engine.py never writes "source" at all -> 0 extra fields (no odds) or
+#     3 (fair_p/ev_over/ev_under, all-or-nothing together)
+#   - rapidapi_engine.py / sofascore_engine.py always write "source" -> 1
+#     extra field (source only, no odds) or 4 (source + the same triple)
+# These four lengths (0/1/3/4) never collide, so the row's actual field
+# count tells us which fields are present - a fixed pd.read_csv(names=...)
+# assumed every row had exactly 16 fields and silently mis-shifted any
+# row that didn't (confirmed live: the first engine.py row that ever got
+# real odds - Crystal Palace v Man City, 2026-08-28 - had its ev_over25
+# read as ev_under25's real value, with ev_under25 itself coming back
+# blank, which meant a real +7.3% EV bet was silently never placed). Same
+# underlying bug already fixed on the TypeScript side, see
+# dashboard/lib/data.ts's getGoalsPicks().
+_BASE_COLUMNS = [
     "logged_at", "fixture_id", "league", "kickoff", "home", "away",
     "n_home_starters_matched", "n_away_starters_matched",
     "model_p_over25", "exp_total_goals", "odds_over25", "odds_under25",
-    "source", "fair_p_over25", "ev_over25", "ev_under25",
 ]
+_TRIPLE_COLUMNS = ["fair_p_over25", "ev_over25", "ev_under25"]
+_NUMERIC_COLUMNS = [
+    "n_home_starters_matched", "n_away_starters_matched", "model_p_over25",
+    "exp_total_goals", "odds_over25", "odds_under25",
+] + _TRIPLE_COLUMNS
+
+
+def _num(v: str) -> float:
+    return float(v) if v not in (None, "") else float("nan")
+
+
+def parse_prediction_row(raw: list[str]) -> dict:
+    """Map one raw CSV row (already comma-split) to its real fields by
+    actual length, not by a fixed position - see the module-level comment
+    for why a fixed 16-column mapping silently corrupts ragged rows."""
+    row = dict(zip(_BASE_COLUMNS, raw[: len(_BASE_COLUMNS)]))
+    extra = raw[len(_BASE_COLUMNS):]
+    n = len(extra)
+    if n in (1, 4):
+        row["source"] = extra[0]
+    if n in (3, 4):
+        row.update(zip(_TRIPLE_COLUMNS, extra[-3:]))
+    for col in _NUMERIC_COLUMNS:
+        if col in row:
+            row[col] = _num(row[col])
+    return row
 
 
 def _read_predictions_csv() -> pd.DataFrame:
-    return pd.read_csv(PREDICTIONS_LOG, header=None, names=_FULL_COLUMNS,
-                       skiprows=1, engine="python")
+    with open(PREDICTIONS_LOG, newline="") as f:
+        reader = csv.reader(f)
+        next(reader)  # skip header
+        rows = [parse_prediction_row(raw) for raw in reader if raw]
+    return pd.DataFrame(rows)
 
 
 def _load_graded_ids() -> set:
