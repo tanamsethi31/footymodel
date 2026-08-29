@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
 
-from footymodel.live import engine, run_all, shots_engine
+from footymodel.live import engine, match_detail, run_all, shots_engine
 from footymodel.live import namematch
 from footymodel.players import load_players
 
@@ -25,6 +25,7 @@ engine.LIVE_LOG = tmp / "goals.csv"
 run_all.LIVE_LOG = engine.LIVE_LOG
 shots_engine.PROPS_LOG = tmp / "props.csv"
 run_all.PROPS_LOG = shots_engine.PROPS_LOG
+match_detail.MATCH_DETAIL_LOG = tmp / "match_detail.jsonl"
 
 players = load_players()
 home_us, away_us = "Manchester City", "Everton"

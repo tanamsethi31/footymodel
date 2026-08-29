@@ -20,6 +20,7 @@ data/logs/
 !data/processed/player_match.parquet
 !data/processed/live_recommendations.csv
 !data/processed/live_player_props.csv
+!data/processed/match_detail.jsonl
 !data/processed/live_seen_fixtures.json
 !data/processed/sofascore_seen_fixtures.json
 !data/processed/rapidapi_seen_fixtures.json
