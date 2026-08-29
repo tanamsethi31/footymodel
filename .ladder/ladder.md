@@ -622,3 +622,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Inline execution - proportionate given the small scope
   - Blocked by: ~none~
   - Status: done — user chose subagent-driven.
+
+- [x] **R074** — Mobile tab bar unreachable, found during glossary Task 2 review → *small*
+  - Context: code-quality reviewer for glossary Task 2 found the fixed `w-32` x 5 tab bar (introduced in R053) overflows its container below ~640px with no scroll mechanism - Staking and Glossary (the very tab this plan was building) were completely unreachable on phone-width viewports; the plan's claim that this layout "already generalizes... confirmed when Staking was added" was false, since Staking was added before tabs were fixed-width
+  - Why: a real accessibility regression found during review, fixed immediately rather than deferred - same pattern as R066's contrast fix
+  - Fix: added `overflow-x-auto` to the tab bar's container so it scrolls instead of overflowing; that alone squeezed the fixed-width buttons via flexbox's default shrink and garbled the tab text, fixed by adding `shrink-0` to the button wrapper, each button, and each clip-path overlay span
+  - Blocked by: ~none~
+  - Status: done — verified at 375px: all 5 tabs reachable via scroll, each tab's clip-path pill aligns correctly on click (including Staking, after scrolling), content renders correctly for every tab. `tsc --noEmit` and `next build` clean. Committed (6d540a0).
