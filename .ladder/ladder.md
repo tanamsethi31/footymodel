@@ -694,3 +694,12 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Fix: dashboard/app/page.tsx's GoalsPanel filters to `new Date(g.kickoff).getTime() > Date.now()` before rendering, with a plain "No upcoming predictions right now" message when the filtered list is empty
   - Blocked by: ~none~
   - Status: done — verified in the dev server: Goals O/U now shows the empty-state message (since everything currently logged is in the past), Track Record's historical data (Crystal Palace 1-4 Manchester City, +77.0% cumulative return) confirmed unaffected. `tsc --noEmit` and `next build` clean. Committed (414dda9).
+
+- [x] **R083** — Collapse past predictions instead of hiding them; extend to Player Props → *medium*
+  - Context: user asked whether Player Props needed the same fix as R082 (yes - PropsPanel grouped every logged prop by fixture with no kickoff filter, identical staleness problem), and separately wanted past-kickoff predictions still checkable rather than fully hidden
+  - Why: R082's outright hide loses the ability to check old predictions without digging into git history or the raw CSV; user wants them collapsed under a disclosure instead, expandable on demand
+  - [x] Collapsed disclosure below the upcoming list (chosen) - a single "Show N past predictions" line, click to reveal, rendered the same as upcoming
+  - [ ] A small Upcoming/Past pill toggle at the top of the section - more visible affordance but a second toggle pattern alongside the main tab bar
+  - Fix: new shared `dashboard/components/PastDisclosure.tsx` client component; wired into both GoalsPanel (page.tsx) and PropsPanel.tsx, each splitting by kickoff and passing the past group's count/children to the same disclosure. Also filtered `getMostProbablePicks()`'s input to upcoming props only, since recommending a bet on an already-played match makes no sense
+  - Blocked by: ~none~
+  - Status: done — verified in the dev server: Goals O/U's "Show 10 past predictions" reveals Crystal Palace v Manchester City etc. correctly; Player Props' "Show 8 past predictions" reveals the same Manchester City v Crystal Palace prop table with team-switcher/threshold pills still fully interactive; "Most probable bets" strip correctly empty (no upcoming props exist right now). `tsc --noEmit` and `next build` clean. Committed (fba4818).
