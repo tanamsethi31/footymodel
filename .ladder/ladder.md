@@ -463,3 +463,88 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Pause here - two shipped fixes is a natural checkpoint
   - Blocked by: ~none~
   - Status: done — user said "start the rebrand now".
+
+## rebrand
+
+- [x] **R055** — Visual companion for the rebrand brainstorm → *small*
+  - Context: rebrand work is heavily visual (logo, colors) - offered per superpowers:brainstorming's standard offer
+  - Why: standard offer before visual questions
+  - [ ] Use the visual companion
+  - [x] Text only
+  - Blocked by: ~none~
+  - Status: done — user chose text-only.
+
+- [x] **R056** — Rebrand: keep the project name or rename → *small*
+  - Context: "brand identity" work could include a rename, worth confirming before designing a logo
+  - Why: renaming adds real scope (new domain/branding everywhere) vs. just visual identity on the existing name
+  - [x] Keep "footymodel" (Recommended)
+  - [ ] Open to a new name
+  - Blocked by: ~none~
+  - Status: done — user chose to keep the name.
+
+- [x] **R057** — Brand tone/personality → *small*
+  - Context: drives color palette, typography, logo style choices downstream
+  - Why: needed before any visual decisions could be made
+  - [x] Serious quant/fintech (Recommended)
+  - [ ] Sports-editorial
+  - [ ] Minimal academic/research
+  - Blocked by: ~none~
+  - Status: done — user chose serious quant/fintech.
+
+- [x] **R058** — Logo mark style → *small*
+  - Context: follow-up to R057's tone choice
+  - Why: determines whether this is a quick wordmark or a real icon-design task
+  - [ ] Wordmark only (Recommended)
+  - [ ] Wordmark + small icon
+  - [x] Icon-first, wordmark secondary
+  - Blocked by: ~none~
+  - Status: done — user chose icon-first (the bigger design lift of the three options).
+
+- [x] **R059** — Icon concept → *small*
+  - Context: follow-up to R058's icon-first choice; described in words since text-only (R055)
+  - Why: concrete visual concept needed before writing any SVG
+  - [x] Ball + trajectory line (Recommended)
+  - [ ] Pitch reduced to a data grid
+  - [ ] Goal-frame bracket
+  - Blocked by: ~none~
+  - Status: done — user chose ball + trajectory line.
+
+- [x] **R060** — Color palette approach → *small*
+  - Context: current dashboard uses neutral dark background + emerald/red EV semantics only, no brand accent
+  - Why: whether to introduce a new brand color at all, before picking which one
+  - [x] Add one accent color (Recommended)
+  - [ ] Keep exactly as-is
+  - Blocked by: ~none~
+  - Status: done — user chose to add one accent color.
+
+- [x] **R061** — Accent color choice → *small*
+  - Context: follow-up to R060
+  - Why: emerald/red are taken by EV semantics, needed a color that reads as "brand" not "good/bad"
+  - [x] Electric blue/indigo (Recommended)
+  - [ ] Amber/gold
+  - [ ] Violet/purple
+  - Blocked by: ~none~
+  - Status: done — user chose electric blue/indigo.
+
+- [x] **R062** — "Always sliding" tab switch: what it actually means → *small*
+  - Context: user's original ask ("make tabs switching always sliding switch") was ambiguous against the already-existing pill-slide mechanic
+  - Why: "content slides like a carousel" vs. "just make the existing pill glide feel smoother" are very different amounts of work
+  - [ ] Content also slides horizontally (Recommended)
+  - [x] Keep content fade, just make the pill glide feel more continuous
+  - Blocked by: ~none~
+  - Status: done — user chose the lighter option. Assessed as likely already resolved by R051 (alignment fix) + R053 (equal-width tabs, consistent glide distance) rather than needing new animation work - will re-verify after the reskin.
+
+- [x] **R063** — Active tab pill color → *small*
+  - Context: follow-up to R061's accent color choice
+  - Why: whether the new brand color becomes visible in the tab bar's own active state, or stays confined to the logo/links
+  - [x] Pill becomes the accent color (Recommended)
+  - [ ] Keep pill white/light, accent used elsewhere only
+  - Blocked by: ~none~
+  - Status: done — user chose to make the active pill the accent color.
+
+- [ ] **R064** — Consolidated rebrand design: approval gate → *medium*
+  - Context: full design presented (icon SVG concept, color system, favicon, tab-slide assessment, explicit scope note excluding a layout redesign) after R055-R063's brainstorm; superpowers:brainstorming's hard-gate requires explicit approval before any implementation
+  - Why: nothing gets built until this is approved or revised
+  - [ ] Approved as presented
+  - [ ] Revise before approving
+  - Blocked by: ~none~
