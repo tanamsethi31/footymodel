@@ -19,6 +19,14 @@
   }
 }
 
+html {
+  /* Reserve scrollbar space permanently - without this, a tab short enough
+     to fit the viewport (no scrollbar) vs. a tall one like Glossary (needs
+     one) shift the whole centered layout sideways by the scrollbar's width
+     when switching between them. */
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
