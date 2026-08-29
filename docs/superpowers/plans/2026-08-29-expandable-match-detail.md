@@ -12,7 +12,7 @@
 
 ---
 
-### Task 1: Shared `match_detail` module + its test
+### Task 1: Shared `match_detail` module + its test ✅ done (383ba23)
 
 **Files:**
 - Create: `footymodel/live/match_detail.py`
@@ -167,7 +167,7 @@ git commit -m "feat: add shared match_detail.py JSONL logging module"
 
 ---
 
-### Task 2: Wire `engine.py` (API-Football)
+### Task 2: Wire `engine.py` (API-Football) ✅ done (b1dc743) — NOT pushed yet, see note after Task 5
 
 **Files:**
 - Modify: `footymodel/live/engine.py`
@@ -277,7 +277,7 @@ git commit -m "feat: log match_detail.jsonl from rapidapi_engine.py"
 
 ---
 
-### Task 4: Wire `sofascore_engine.py`
+### Task 4: Wire `sofascore_engine.py` ✅ done (850eeb9) — NOT pushed yet
 
 **Files:**
 - Modify: `footymodel/live/sofascore_engine.py`
@@ -331,12 +331,15 @@ git commit -m "feat: log match_detail.jsonl from sofascore_engine.py"
 
 ---
 
-### Task 5: Wire `run_all.py`
+### Task 5: Wire `run_all.py` + fix the cron's commit file list ✅ done (ce15694, becf3c8) — NOT pushed yet
 
 **Files:**
 - Modify: `footymodel/live/run_all.py`
+- Modify: `.github/workflows/live_poll.yml`
 
 `run_all.py` reimplements the fetch/process/write loop itself (rather than calling `LiveWatcher.run_once()`), calling `goals.process_fixture()` directly — since Task 2 already made `process_fixture()` attach `_detail` to every row it returns, `goal_row` here already carries it. Only the "pop + log" step needs adding.
+
+Separately (found during Task 3's code review): `live_poll.yml`'s "Commit + push any new recommendations/state" step `git add`s a hardcoded list of files — `data/processed/match_detail.jsonl` isn't on it, so every poll would write the file locally on the ephemeral CI runner and then discard it, and the dashboard's fetch of it would 404 forever in production. This must be fixed in the same task, or the whole feature never actually reaches production despite every engine correctly writing the file.
 
 - [ ] **Step 1: Import the new module**
 
@@ -363,21 +366,51 @@ to:
         df = pd.DataFrame(goal_rows)
 ```
 
-- [ ] **Step 3: Verify**
+- [ ] **Step 3: Add the new file to the cron's commit file list**
+
+In `.github/workflows/live_poll.yml`, the "Commit + push any new recommendations/state" step has this file list:
+
+```yaml
+          for f in data/processed/live_seen_fixtures.json \
+                   data/processed/live_recommendations.csv \
+                   data/processed/live_player_props.csv \
+                   data/processed/sofascore_seen_fixtures.json \
+                   data/processed/rapidapi_seen_fixtures.json \
+                   data/processed/rapidapi_budget.json \
+                   data/processed/rapidapi_fixtures_cache.json; do
+```
+
+Add `data/processed/match_detail.jsonl` to it:
+
+```yaml
+          for f in data/processed/live_seen_fixtures.json \
+                   data/processed/live_recommendations.csv \
+                   data/processed/live_player_props.csv \
+                   data/processed/match_detail.jsonl \
+                   data/processed/sofascore_seen_fixtures.json \
+                   data/processed/rapidapi_seen_fixtures.json \
+                   data/processed/rapidapi_budget.json \
+                   data/processed/rapidapi_fixtures_cache.json; do
+```
+
+- [ ] **Step 4: Verify**
 
 Run: `python -m compileall -q footymodel/live/run_all.py`
 Expected: no output (clean compile — a full run needs a live `API_FOOTBALL_KEY`; Task 1's test already covers `extract_and_log_details()`'s behavior directly)
 
-- [ ] **Step 4: Commit**
+Run: `grep -c "match_detail.jsonl" .github/workflows/live_poll.yml`
+Expected: `1`
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add footymodel/live/run_all.py
-git commit -m "feat: log match_detail.jsonl from run_all.py"
+git add footymodel/live/run_all.py .github/workflows/live_poll.yml
+git commit -m "feat: log match_detail.jsonl from run_all.py, commit it from the cron"
 ```
 
 ---
 
-### Task 6: Frontend data layer
+### Task 6: Frontend data layer ✅ done (565e997, 06d109f) — NOT pushed yet
 
 **Files:**
 - Modify: `dashboard/lib/data.ts`
@@ -464,7 +497,7 @@ git commit -m "feat: fetch and join match_detail.jsonl in the dashboard data lay
 
 ---
 
-### Task 7: `MatchCard` component
+### Task 7: `MatchCard` component ✅ done (734ae25, 9feece2) — NOT pushed yet
 
 **Files:**
 - Create: `dashboard/components/MatchCard.tsx`
@@ -646,7 +679,7 @@ git commit -m "feat: add MatchCard expandable component"
 
 ---
 
-### Task 8: Wire `MatchCard` into the Goals O/U tab
+### Task 8: Wire `MatchCard` into the Goals O/U tab ✅ done (159f9d5, 6998c7c)
 
 **Files:**
 - Modify: `dashboard/app/page.tsx`
