@@ -21,24 +21,24 @@ export default function DashboardTabs({
   const panels = [trackRecord, goals, props, staking, glossary];
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [clip, setClip] = useState<{ left: number; right: number } | null>(null);
 
   useLayoutEffect(() => {
-    const container = containerRef.current;
+    const wrapper = wrapperRef.current;
     const btn = buttonRefs.current[active];
-    if (!container || !btn) return;
-    const containerRect = container.getBoundingClientRect();
+    if (!wrapper || !btn) return;
+    // Measure against the buttons wrapper, not the (fixed-frame) scroll
+    // container - the wrapper and the clip-path overlay are both scrolled
+    // content, so their coordinate origins shift together when the tab bar
+    // is scrolled. Measuring against the container instead was off by
+    // exactly scrollLeft whenever the bar was scrolled off zero.
+    const wrapperRect = wrapper.getBoundingClientRect();
     const btnRect = btn.getBoundingClientRect();
-    // The clip-path overlay sits at `inset-1` inside the container, so its own
-    // coordinate origin is already shifted in by the container's padding -
-    // subtract it out here or every clip would be off by exactly that amount.
-    const style = getComputedStyle(container);
-    const padLeft = parseFloat(style.paddingLeft) || 0;
-    const padRight = parseFloat(style.paddingRight) || 0;
     setClip({
-      left: btnRect.left - containerRect.left - padLeft,
-      right: containerRect.right - btnRect.right - padRight,
+      left: btnRect.left - wrapperRect.left,
+      right: wrapperRect.right - btnRect.right,
     });
   }, [active]);
 
@@ -48,7 +48,7 @@ export default function DashboardTabs({
         ref={containerRef}
         className="relative inline-flex max-w-full overflow-x-auto bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full p-1 mb-8"
       >
-        <div className="flex shrink-0">
+        <div ref={wrapperRef} className="relative flex shrink-0">
           {TABS.map((t, i) => (
             <button
               key={t}
@@ -61,24 +61,24 @@ export default function DashboardTabs({
               {t}
             </button>
           ))}
+          {clip && (
+            <div
+              className="absolute inset-y-0 left-0 flex pointer-events-none bg-blue-600 rounded-full transition-[clip-path] duration-[260ms] [transition-timing-function:cubic-bezier(0.23,1,0.32,1)]"
+              style={{
+                clipPath: `inset(0 ${clip.right}px 0 ${clip.left}px round 999px)`,
+              }}
+            >
+              {TABS.map((t) => (
+                <span
+                  key={t}
+                  className="w-32 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-white whitespace-nowrap text-center"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
-        {clip && (
-          <div
-            className="absolute inset-1 flex pointer-events-none bg-blue-600 rounded-full transition-[clip-path] duration-[260ms] [transition-timing-function:cubic-bezier(0.23,1,0.32,1)]"
-            style={{
-              clipPath: `inset(0 ${clip.right}px 0 ${clip.left}px round 999px)`,
-            }}
-          >
-            {TABS.map((t) => (
-              <span
-                key={t}
-                className="w-32 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-white whitespace-nowrap text-center"
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       {panels.map((panel, i) => (
