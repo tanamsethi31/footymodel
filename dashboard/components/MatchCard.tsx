@@ -49,6 +49,7 @@ export default function MatchCard({
     <div
       role="button"
       tabIndex={0}
+      aria-expanded={open}
       onClick={() => setOpen((o) => !o)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
