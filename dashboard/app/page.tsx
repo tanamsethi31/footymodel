@@ -4,13 +4,16 @@ import {
   getGradedResults,
   getMostProbablePicks,
   getKellySimResults,
+  getMatchDetails,
   type GoalsPick,
   type GradedResult,
+  type MatchDetail,
 } from "@/lib/data";
 import { formatKickoff, pct, odds, EvBadge, SOURCE_LABEL } from "@/lib/format";
 import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
 import DashboardTabs from "@/components/DashboardTabs";
+import MatchCard from "@/components/MatchCard";
 import PropsPanel from "@/components/PropsPanel";
 import StakingPanel from "@/components/StakingPanel";
 import GlossaryPanel from "@/components/GlossaryPanel";
@@ -121,7 +124,13 @@ function TrackRecordPanel({ graded }: { graded: GradedResult[] }) {
   );
 }
 
-function GoalsPanel({ goals }: { goals: GoalsPick[] }) {
+function GoalsPanel({
+  goals,
+  matchDetails,
+}: {
+  goals: GoalsPick[];
+  matchDetails: Record<string, MatchDetail>;
+}) {
   return (
     <section>
       <h2 className="text-lg font-semibold mb-1">Goals: Over/Under 2.5</h2>
@@ -137,48 +146,12 @@ function GoalsPanel({ goals }: { goals: GoalsPick[] }) {
       ) : (
         <div className="space-y-3">
           {goals.map((g, i) => (
-            <div
+            <MatchCard
               key={g.fixtureId}
-              className="animate-stagger-in rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 transition-transform duration-150 hover:-translate-y-0.5"
-              style={{ animationDelay: `${i * 40}ms` }}
-            >
-              <div className="flex items-baseline justify-between gap-2 flex-wrap">
-                <span className="font-medium">
-                  {g.home} v {g.away}
-                </span>
-                <span className="text-xs text-neutral-500">{formatKickoff(g.kickoff)}</span>
-              </div>
-              <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-                <div>
-                  <div className="text-neutral-500 text-xs">Model P(O2.5)</div>
-                  <div className="font-mono">{pct(g.modelPOver25)}</div>
-                </div>
-                <div>
-                  <div className="text-neutral-500 text-xs">xG total</div>
-                  <div className="font-mono">{g.expTotalGoals.toFixed(2)}</div>
-                </div>
-                <div>
-                  <div className="text-neutral-500 text-xs">Odds O / U</div>
-                  <div className="font-mono">
-                    {odds(g.oddsOver25)} / {odds(g.oddsUnder25)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-neutral-500 text-xs">EV Over / Under</div>
-                  <div className="flex gap-2">
-                    <EvBadge ev={g.evOver25} />
-                    <EvBadge ev={g.evUnder25} />
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3 flex items-center gap-2 text-xs text-neutral-400">
-                <span>
-                  starters matched {g.nHomeMatched}/{g.nAwayMatched}
-                </span>
-                <span>·</span>
-                <span>{SOURCE_LABEL[g.source ?? ""] ?? g.source}</span>
-              </div>
-            </div>
+              match={g}
+              detail={matchDetails[g.fixtureId] ?? null}
+              index={i}
+            />
           ))}
         </div>
       )}
@@ -187,11 +160,12 @@ function GoalsPanel({ goals }: { goals: GoalsPick[] }) {
 }
 
 export default async function Home() {
-  const [goals, props, graded, kellySim] = await Promise.all([
+  const [goals, props, graded, kellySim, matchDetails] = await Promise.all([
     getGoalsPicks(),
     getPropsPicks(),
     getGradedResults(),
     getKellySimResults(),
+    getMatchDetails(),
   ]);
   const mostProbable = getMostProbablePicks(props);
 
@@ -211,7 +185,7 @@ export default async function Home() {
 
       <DashboardTabs
         trackRecord={<TrackRecordPanel graded={graded} />}
-        goals={<GoalsPanel goals={goals} />}
+        goals={<GoalsPanel goals={goals} matchDetails={matchDetails} />}
         props={<PropsPanel props={props} mostProbable={mostProbable} />}
         staking={<StakingPanel results={kellySim} />}
         glossary={<GlossaryPanel />}
