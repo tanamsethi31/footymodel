@@ -542,9 +542,17 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — user chose to make the active pill the accent color.
 
-- [ ] **R064** — Consolidated rebrand design: approval gate → *medium*
+- [x] **R064** — Consolidated rebrand design: approval gate → *medium*
   - Context: full design presented (icon SVG concept, color system, favicon, tab-slide assessment, explicit scope note excluding a layout redesign) after R055-R063's brainstorm; superpowers:brainstorming's hard-gate requires explicit approval before any implementation
   - Why: nothing gets built until this is approved or revised
-  - [ ] Approved as presented
+  - [x] Approved as presented
   - [ ] Revise before approving
+  - Blocked by: ~none~
+  - Status: done — user approved ("ok"). Writing the spec doc next.
+
+- [ ] **R065** — Rebrand implementation: execution mode → *small*
+  - Context: implementation plan for the rebrand (docs/superpowers/plans/2026-08-29-dashboard-rebrand.md) is written and committed - 2 tasks, 4 files total (Logo component, favicon, header wiring, active-pill recolor); writing-plans skill's standard handoff choice
+  - Why: determines review overhead vs. speed for a small, well-scoped change
+  - [ ] Subagent-driven - fresh subagent per task, two-stage review, same process as the Kelly simulator and team-lineup-tabs work
+  - [ ] Inline execution - implement directly in this session, proportionate to the small scope
   - Blocked by: ~none~
