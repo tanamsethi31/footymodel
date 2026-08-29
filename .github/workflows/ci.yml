@@ -29,5 +29,7 @@ jobs:
         run: python scripts/grade_results_datetime_test.py
       - name: Grade-results ragged-column parsing (pure, data-free)
         run: python scripts/grade_results_columns_test.py
+      - name: Match-detail JSONL logging (pure, data-free)
+        run: python scripts/match_detail_test.py
       - name: Kelly bankroll simulator (pure, data-free)
         run: python scripts/kelly_simulation_test.py
