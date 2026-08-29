@@ -459,6 +459,7 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
 - [ ] **R054** — Start the rebrand now, or pause here → *small*
   - Context: R053's two trivial items just shipped - the natural next step per R052's agreed sequencing is the rebrand (#5: logo, brand identity, full UI makeover, "always sliding" tab switch), which is large enough to need its own proper brainstorm/mockup pass
   - Why: rebrand work is a genuinely separate, sizeable project (visual identity, not a quick pass) - worth checking whether the user wants to dive in now or stop here for this session
-  - [ ] Start the rebrand brainstorm now (with visual companion, given how visual this work is)
+  - [x] Start the rebrand brainstorm now (with visual companion, given how visual this work is)
   - [ ] Pause here - two shipped fixes is a natural checkpoint
   - Blocked by: ~none~
+  - Status: done — user said "start the rebrand now".
