@@ -33,3 +33,5 @@ jobs:
         run: python scripts/match_detail_test.py
       - name: Kelly bankroll simulator (pure, data-free)
         run: python scripts/kelly_simulation_test.py
+      - name: Player-roster incremental merge logic (pure, data-free)
+        run: python scripts/build_players_merge_test.py

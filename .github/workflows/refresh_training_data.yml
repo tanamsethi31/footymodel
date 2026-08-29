@@ -1,0 +1,52 @@
+name: Refresh training data
+
+on:
+  schedule:
+    # Once daily, after grade_results.yml (06:30 UTC) - football-data.co.uk
+    # and Understat's own season files update within a day of matches being
+    # played, so once-daily is plenty.
+    - cron: "0 7 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-training-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - name: Refresh match results + odds (football-data.co.uk, big-5 leagues, full season history - cheap, one file per league-season)
+        run: python -m footymodel.data --leagues E0 SP1 D1 I1 F1
+
+      - name: Refresh base xG (Understat, full season history - cheap, one request per league-season)
+        run: python -m footymodel.understat
+
+      # Player rosters are one Understat request PER MATCH - re-scraping the
+      # full multi-season history daily would mean thousands of redundant
+      # requests for seasons that already finished. Only the current season
+      # changes week to week, so only that gets refreshed here (merged into
+      # the existing file, see build_players.py's merge_player_dataset()).
+      # Bump the year below once the 2026/27 season starts.
+      - name: Refresh player rosters (Understat, current season only)
+        run: python scripts/build_players.py E0,SP1,D1,I1,F1 2025
+
+      - name: Commit + push any updated training data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/processed/matches.parquet data/processed/matches_xg.parquet data/processed/player_match.parquet
+          git diff --cached --quiet && exit 0
+          git commit -m "refresh training data: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git push

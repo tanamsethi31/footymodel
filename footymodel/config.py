@@ -37,7 +37,7 @@ DEFAULT_LEAGUES = ["E0", "E1", "N1", "B1", "P1", "T1", "G1"]
 
 # Default history: ~6 recent seasons (start years). Old data is stale; we lean
 # on time-decay rather than more history. 2019 -> the 2019/20 season, etc.
-DEFAULT_START_YEARS = [2019, 2020, 2021, 2022, 2023, 2024]
+DEFAULT_START_YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025]
 
 
 def season_code(start_year: int) -> str:
