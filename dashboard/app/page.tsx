@@ -14,6 +14,7 @@ import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
 import DashboardTabs from "@/components/DashboardTabs";
 import MatchCard from "@/components/MatchCard";
+import PastDisclosure from "@/components/PastDisclosure";
 import PropsPanel from "@/components/PropsPanel";
 import StakingPanel from "@/components/StakingPanel";
 import GlossaryPanel from "@/components/GlossaryPanel";
@@ -131,10 +132,12 @@ function GoalsPanel({
   goals: GoalsPick[];
   matchDetails: Record<string, MatchDetail>;
 }) {
-  // "Upcoming" only - a match that's already kicked off isn't a live pick
-  // anymore. Finished matches move to the Track Record tab once graded;
-  // this tab is specifically about what's coming up next.
-  const upcoming = goals.filter((g) => new Date(g.kickoff).getTime() > Date.now());
+  // A match that's already kicked off isn't a live pick anymore - it moves
+  // into the collapsed "past predictions" disclosure below instead of
+  // cluttering the upcoming list (still checkable, just out of the way).
+  const now = Date.now();
+  const upcoming = goals.filter((g) => new Date(g.kickoff).getTime() > now);
+  const past = goals.filter((g) => new Date(g.kickoff).getTime() <= now);
   return (
     <section>
       <h2 className="text-lg font-semibold mb-1">Goals: Over/Under 2.5</h2>
@@ -159,6 +162,16 @@ function GoalsPanel({
           ))}
         </div>
       )}
+      <PastDisclosure count={past.length}>
+        {past.map((g, i) => (
+          <MatchCard
+            key={g.fixtureId}
+            match={g}
+            detail={matchDetails[g.fixtureId] ?? null}
+            index={i}
+          />
+        ))}
+      </PastDisclosure>
     </section>
   );
 }
@@ -171,7 +184,10 @@ export default async function Home() {
     getKellySimResults(),
     getMatchDetails(),
   ]);
-  const mostProbable = getMostProbablePicks(props);
+  // The highlights strip is about what's coming up next, not a match
+  // that's already been played.
+  const upcomingProps = props.filter((p) => new Date(p.kickoff).getTime() > Date.now());
+  const mostProbable = getMostProbablePicks(upcomingProps);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 sm:py-14 w-full">

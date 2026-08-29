@@ -1,6 +1,7 @@
 import type { PropsPick, MostProbablePick } from "@/lib/data";
 import MostProbableStrip from "./MostProbableStrip";
 import MatchPropsTable from "./MatchPropsTable";
+import PastDisclosure from "./PastDisclosure";
 
 export default function PropsPanel({
   props,
@@ -16,6 +17,13 @@ export default function PropsPanel({
     propsByFixture.set(p.fixtureId, arr);
   }
 
+  // A fixture's rows all share the same kickoff, so any row's kickoff tells
+  // us whether the whole group is upcoming or already played.
+  const now = Date.now();
+  const groups = [...propsByFixture.entries()];
+  const upcomingGroups = groups.filter(([, rows]) => new Date(rows[0].kickoff).getTime() > now);
+  const pastGroups = groups.filter(([, rows]) => new Date(rows[0].kickoff).getTime() <= now);
+
   return (
     <section>
       <h2 className="text-lg font-semibold mb-1">Player shots &amp; shots-on-target</h2>
@@ -29,13 +37,20 @@ export default function PropsPanel({
 
       {propsByFixture.size === 0 ? (
         <p className="text-sm text-neutral-500">No prop predictions logged yet.</p>
+      ) : upcomingGroups.length === 0 ? (
+        <p className="text-sm text-neutral-500">No upcoming prop predictions right now.</p>
       ) : (
         <div className="space-y-4">
-          {[...propsByFixture.entries()].map(([fixtureId, rows]) => (
+          {upcomingGroups.map(([fixtureId, rows]) => (
             <MatchPropsTable key={fixtureId} fixtureId={fixtureId} rows={rows} />
           ))}
         </div>
       )}
+      <PastDisclosure count={pastGroups.length}>
+        {pastGroups.map(([fixtureId, rows]) => (
+          <MatchPropsTable key={fixtureId} fixtureId={fixtureId} rows={rows} />
+        ))}
+      </PastDisclosure>
     </section>
   );
 }
