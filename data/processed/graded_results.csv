@@ -1,0 +1,2 @@
+fixture_id,home,away,kickoff,actual_home_goals,actual_away_goals,actual_total_goals,actual_over_won,model_p_over25,model_correct,bet_side,bet_odds,bet_won,realized_return,graded_at
+1557381,Crystal Palace,Manchester City,2026-08-28T19:00:00+00:00,1,4,5,True,0.606,True,,,,,2026-08-29T12:48:20.826592
