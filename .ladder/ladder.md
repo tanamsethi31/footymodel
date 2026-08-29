@@ -629,3 +629,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Fix: added `overflow-x-auto` to the tab bar's container so it scrolls instead of overflowing; that alone squeezed the fixed-width buttons via flexbox's default shrink and garbled the tab text, fixed by adding `shrink-0` to the button wrapper, each button, and each clip-path overlay span
   - Blocked by: ~none~
   - Status: done — verified at 375px: all 5 tabs reachable via scroll, each tab's clip-path pill aligns correctly on click (including Staking, after scrolling), content renders correctly for every tab. `tsc --noEmit` and `next build` clean. Committed (6d540a0).
+
+- [x] **R075** — R074's fix left the clip-path pill mispositioned once the bar actually scrolls → *small*
+  - Context: after shipping R074, live verification on production showed a stray blue disc pinned near the tab bar's left edge instead of a pill around the clicked tab, whenever the bar was scrolled (Staking/Glossary)
+  - Why: the clip-path math measured the active button's offset against the scroll container's own frame (fixed in the viewport, doesn't move on scroll), then applied it to an overlay that DOES move with scroll and whose width was constrained to the container's visible width (~333px) rather than the full scrollable content (~640px) - the two disagreed by exactly `scrollLeft`, and the overlay was too narrow to ever reach the later tabs
+  - Fix: nested the overlay inside the buttons wrapper div (so it shares the same scrolled coordinate space and sizes naturally to the full row) and measured the active button's offset against that wrapper instead of the outer container
+  - Blocked by: ~none~
+  - Status: done — confirmed via direct `getBoundingClientRect()`/`clipPath` inspection (visible region now matches the target button's rect exactly at any scroll position) and visually at 375px for every tab, scrolled and unscrolled. `tsc --noEmit` and `next build` clean. Committed (2e47475).
