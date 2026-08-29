@@ -131,6 +131,10 @@ function GoalsPanel({
   goals: GoalsPick[];
   matchDetails: Record<string, MatchDetail>;
 }) {
+  // "Upcoming" only - a match that's already kicked off isn't a live pick
+  // anymore. Finished matches move to the Track Record tab once graded;
+  // this tab is specifically about what's coming up next.
+  const upcoming = goals.filter((g) => new Date(g.kickoff).getTime() > Date.now());
   return (
     <section>
       <h2 className="text-lg font-semibold mb-1">Goals: Over/Under 2.5</h2>
@@ -138,14 +142,14 @@ function GoalsPanel({
         Confirmed-lineup model, pooled t=3.04 backtested (individually
         significant on the Premier League alone, t=2.23).
       </p>
-      {goals.length === 0 ? (
+      {upcoming.length === 0 ? (
         <p className="text-sm text-neutral-500">
-          No predictions logged yet. Check back once a fixture&apos;s lineup
-          is confirmed pre-kickoff.
+          No upcoming predictions right now. Check back once a fixture&apos;s
+          lineup is confirmed pre-kickoff.
         </p>
       ) : (
         <div className="space-y-3">
-          {goals.map((g, i) => (
+          {upcoming.map((g, i) => (
             <MatchCard
               key={g.fixtureId}
               match={g}
