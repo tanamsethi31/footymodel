@@ -256,15 +256,25 @@ export async function getMatchDetails(): Promise<Record<string, MatchDetail>> {
   const rows = await fetchJsonl("match_detail.jsonl");
   const byFixtureId: Record<string, MatchDetail> = {};
   for (const r of rows) {
+    // A malformed/partial line (e.g. an interrupted write) should degrade to
+    // "no detail for this match", the same as a fixture with no line at all -
+    // not render NaN through pct()/toFixed() in the UI.
+    const expTeam = num(r.exp_team);
+    const expFull = num(r.exp_full);
+    const pOver25Team = num(r.p_over25_team);
+    const pOver25Full = num(r.p_over25_full);
+    if (expTeam === null || expFull === null || pOver25Team === null || pOver25Full === null) {
+      continue;
+    }
     const fixtureId = String(r.fixture_id);
     byFixtureId[fixtureId] = {
       fixtureId,
-      homeStarters: (r.home_starters as string[]) ?? [],
-      awayStarters: (r.away_starters as string[]) ?? [],
-      expTeam: Number(r.exp_team),
-      expFull: Number(r.exp_full),
-      pOver25Team: Number(r.p_over25_team),
-      pOver25Full: Number(r.p_over25_full),
+      homeStarters: Array.isArray(r.home_starters) ? (r.home_starters as string[]) : [],
+      awayStarters: Array.isArray(r.away_starters) ? (r.away_starters as string[]) : [],
+      expTeam,
+      expFull,
+      pOver25Team,
+      pOver25Full,
     };
   }
   return byFixtureId;
