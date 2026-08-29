@@ -557,3 +557,12 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Inline execution - implement directly in this session, proportionate to the small scope
   - Blocked by: ~none~
   - Status: done — user chose subagent-driven.
+
+- [x] **R066** — Rebrand: implementation → *small*
+  - Context: 2-task plan executed via subagent-driven-development, both tasks passed spec review clean on the first try
+  - Why: tracks the outcome, including a real issue the code-quality review caught
+  - Built: `dashboard/components/Logo.tsx` (ball + trajectory icon, "footymodel" wordmark), `dashboard/app/icon.svg` (matching favicon, Next.js auto-detected), wired into `app/page.tsx`'s header; `DashboardTabs.tsx`'s active pill recolored to the blue accent.
+  - Real issue caught by code-quality review: `bg-blue-500` (dark mode) + `text-white` computed to ~3.68:1 contrast, below WCAG AA's 4.5:1 minimum for normal-weight text - light mode's `blue-600` was already fine at ~5.17:1. Fixed by dropping the `dark:` variant entirely and using `blue-600` in both themes; verified visually in both color schemes.
+  - Also flagged (not fixed, out of scope per the approved design): `MatchPropsTable.tsx`'s team/threshold segmented toggles still use the old white/neutral style, so the brand doesn't yet read as fully consistent across every screen - a legitimate follow-up if a fully unified look is wanted later, not a defect in this task.
+  - Blocked by: ~none~
+  - Status: done — pushed (787f5db), Vercel auto-deploy confirmed, verified live in production (logo + favicon + blue active pill all render correctly in both light and dark mode).
