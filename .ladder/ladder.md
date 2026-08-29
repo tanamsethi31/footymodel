@@ -448,3 +448,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — user confirmed ("ok"). Starting with the two trivial items now.
   - Note: expandable match detail (#4) has a real backend gap underneath the UI ask - lineups (player names) aren't currently persisted anywhere for Goals O/U predictions, only starter-counts (`n_home_starters_matched`/`n_away_starters_matched`). Showing lineups in the expanded view needs a `footymodel/live/engine.py` change to log the actual starting XI, not just a dashboard change.
+
+- [x] **R053** — R052's trivial items: equal-width tabs + remove em dashes → *small*
+  - Context: first stage of R052's agreed sequencing
+  - Why: no design dependencies, both mechanical, could ship before the rebrand
+  - Built: `DashboardTabs.tsx` gives each button a fixed `w-32` instead of sizing to its own text (the getBoundingClientRect pill-measurement fix from R051 still applies correctly - it just now reports four equal widths). Replaced every em dash across `dashboard/` - prose ones with a period/colon depending on what read better, and the "-" null-value placeholder glyph (in `EvBadge`/`pct`/`odds`/`MatchPropsTable`) with a plain hyphen.
+  - Blocked by: ~none~
+  - Status: done — tsc/build clean, verified visually (all 4 tabs equal width, no em dashes remain anywhere per `grep -rl`), pushed (24b3a00), Vercel auto-deploy confirmed, verified live in production.
