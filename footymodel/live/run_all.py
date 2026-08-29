@@ -18,6 +18,7 @@ from __future__ import annotations
 import pandas as pd
 
 from ..data import PROCESSED_DIR
+from . import match_detail
 from .client import ApiFootballClient, ApiFootballError
 from .engine import (LEAGUE_API_IDS, LIVE_LOG, DEFAULT_HOURS_AHEAD,
                      LiveWatcher, _load_seen, _save_seen)
@@ -88,6 +89,7 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD) -> tuple[list[dict], list[d
 
         seen.add(fid)
 
+    match_detail.extract_and_log_details(goal_rows)
     if goal_rows:
         df = pd.DataFrame(goal_rows)
         LIVE_LOG.parent.mkdir(parents=True, exist_ok=True)
