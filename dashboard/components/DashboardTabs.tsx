@@ -46,9 +46,9 @@ export default function DashboardTabs({
     <div>
       <div
         ref={containerRef}
-        className="relative inline-flex bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full p-1 mb-8"
+        className="relative inline-flex max-w-full overflow-x-auto bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full p-1 mb-8"
       >
-        <div className="flex">
+        <div className="flex shrink-0">
           {TABS.map((t, i) => (
             <button
               key={t}
@@ -56,7 +56,7 @@ export default function DashboardTabs({
                 buttonRefs.current[i] = el;
               }}
               onClick={() => setActive(i)}
-              className="relative z-10 w-32 px-2 py-1.5 rounded-full text-sm font-medium text-neutral-500 dark:text-neutral-400 whitespace-nowrap text-center active:scale-[0.97] transition-transform duration-150"
+              className="relative z-10 w-32 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-neutral-500 dark:text-neutral-400 whitespace-nowrap text-center active:scale-[0.97] transition-transform duration-150"
             >
               {t}
             </button>
@@ -72,7 +72,7 @@ export default function DashboardTabs({
             {TABS.map((t) => (
               <span
                 key={t}
-                className="w-32 px-2 py-1.5 rounded-full text-sm font-medium text-white whitespace-nowrap text-center"
+                className="w-32 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-white whitespace-nowrap text-center"
               >
                 {t}
               </span>
