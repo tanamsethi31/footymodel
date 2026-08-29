@@ -455,3 +455,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Built: `DashboardTabs.tsx` gives each button a fixed `w-32` instead of sizing to its own text (the getBoundingClientRect pill-measurement fix from R051 still applies correctly - it just now reports four equal widths). Replaced every em dash across `dashboard/` - prose ones with a period/colon depending on what read better, and the "-" null-value placeholder glyph (in `EvBadge`/`pct`/`odds`/`MatchPropsTable`) with a plain hyphen.
   - Blocked by: ~none~
   - Status: done — tsc/build clean, verified visually (all 4 tabs equal width, no em dashes remain anywhere per `grep -rl`), pushed (24b3a00), Vercel auto-deploy confirmed, verified live in production.
+
+- [ ] **R054** — Start the rebrand now, or pause here → *small*
+  - Context: R053's two trivial items just shipped - the natural next step per R052's agreed sequencing is the rebrand (#5: logo, brand identity, full UI makeover, "always sliding" tab switch), which is large enough to need its own proper brainstorm/mockup pass
+  - Why: rebrand work is a genuinely separate, sizeable project (visual identity, not a quick pass) - worth checking whether the user wants to dive in now or stop here for this session
+  - [ ] Start the rebrand brainstorm now (with visual companion, given how visual this work is)
+  - [ ] Pause here - two shipped fixes is a natural checkpoint
+  - Blocked by: ~none~
