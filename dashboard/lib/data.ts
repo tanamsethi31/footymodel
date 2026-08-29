@@ -25,6 +25,16 @@ export type GoalsPick = {
   evUnder25: number | null;
 };
 
+export type MatchDetail = {
+  fixtureId: string;
+  homeStarters: string[];
+  awayStarters: string[];
+  expTeam: number;
+  expFull: number;
+  pOver25Team: number;
+  pOver25Full: number;
+};
+
 export type GradedResult = {
   fixtureId: string;
   home: string;
@@ -162,6 +172,28 @@ async function fetchCsv(name: string): Promise<Record<string, string>[]> {
   return parsed.data;
 }
 
+async function fetchJsonl(name: string): Promise<Record<string, unknown>[]> {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) throw new Error("GITHUB_TOKEN not set");
+  const res = await fetch(
+    `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/${name}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.raw+json",
+      },
+      next: { revalidate: 60 },
+    }
+  );
+  if (res.status === 404) return []; // file doesn't exist yet (no rows logged)
+  if (!res.ok) throw new Error(`Failed to fetch ${name}: ${res.status} ${await res.text()}`);
+  const text = await res.text();
+  return text
+    .split("\n")
+    .filter((line) => line.trim().length > 0)
+    .map((line) => JSON.parse(line));
+}
+
 // The goals CSV's header was written by the FIRST row ever appended
 // (before source/fair_p_over25/ev_over25/ev_under25 existed as columns),
 // and pandas' `to_csv(mode="a")` never rewrites the header - so rows have
@@ -218,6 +250,24 @@ export async function getGoalsPicks(): Promise<GoalsPick[]> {
     })
     .filter((p) => p.fixtureId)
     .sort((a, b) => (a.kickoff < b.kickoff ? 1 : -1));
+}
+
+export async function getMatchDetails(): Promise<Record<string, MatchDetail>> {
+  const rows = await fetchJsonl("match_detail.jsonl");
+  const byFixtureId: Record<string, MatchDetail> = {};
+  for (const r of rows) {
+    const fixtureId = String(r.fixture_id);
+    byFixtureId[fixtureId] = {
+      fixtureId,
+      homeStarters: (r.home_starters as string[]) ?? [],
+      awayStarters: (r.away_starters as string[]) ?? [],
+      expTeam: Number(r.exp_team),
+      expFull: Number(r.exp_full),
+      pOver25Team: Number(r.p_over25_team),
+      pOver25Full: Number(r.p_over25_full),
+    };
+  }
+  return byFixtureId;
 }
 
 export async function getPropsPicks(): Promise<PropsPick[]> {
