@@ -22,7 +22,7 @@ from .. import config as fm_config
 from ..data import PROCESSED_DIR
 from ..players import LineupModel, load_players
 from ..strategy import remove_margin
-from . import namematch
+from . import match_detail, namematch
 from .client import ApiFootballClient, ApiFootballError
 
 # Only leagues with INDIVIDUALLY significant backtested evidence (not just
@@ -174,6 +174,8 @@ class LiveWatcher:
             row["fair_p_over25"] = round(float(fair[0]), 3)
             row["ev_over25"] = round(pred["p_over25_blend"] * over_odds - 1.0, 3)
             row["ev_under25"] = round((1 - pred["p_over25_blend"]) * under_odds - 1.0, 3)
+        row["_detail"] = match_detail.make_detail(
+            fixture_id, home_names, away_names, pred)
         return row
 
     def run_once(self, hours_ahead: int = DEFAULT_HOURS_AHEAD) -> list[dict]:
@@ -218,6 +220,7 @@ class LiveWatcher:
                 new_rows.append(row)
                 seen.add(fid)
 
+        match_detail.extract_and_log_details(new_rows)
         if new_rows:
             df = pd.DataFrame(new_rows)
             LIVE_LOG.parent.mkdir(parents=True, exist_ok=True)
