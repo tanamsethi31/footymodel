@@ -343,6 +343,16 @@ re-scraped after the fact (manual step).
       computed and discarded); mobile-responsive; past-kickoff predictions
       collapse into a "show N past predictions" disclosure instead of either
       cluttering the upcoming list or disappearing entirely.
+- [x] Phase L — Scheduled training-data refresh (`refresh_training_data.yml`)
+      → nothing was keeping `matches.parquet`/`matches_xg.parquet`/
+      `player_match.parquet` current as the season progressed. Now runs
+      daily in GitHub Actions, no laptop involved: full big-5 season history
+      for match results/base xG (cheap, one request per league-season), but
+      `build_players.py`'s per-match Understat roster scrape only refreshes
+      the **current season** - re-scraping the full history daily would be
+      thousands of redundant requests. Required fixing `build_players.py` to
+      merge the refreshed season into the existing file instead of
+      overwriting it wholesale (`merge_player_dataset()`, unit tested).
 
 ## Testing
 
