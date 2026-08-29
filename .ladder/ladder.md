@@ -574,3 +574,35 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Pause here for this session
   - Blocked by: ~none~
   - Status: done — user said "keep going, do the glossary page next" (specifically #3, not #4 yet).
+
+- [x] **R068** — Glossary page placement → *small*
+  - Context: R052's #3 item ("a glossary/info page for terms") - first question of the brainstorm
+  - Why: whether it's a full page, inline tooltips, or a modal changes the entire component approach
+  - [x] Own 5th tab (Recommended)
+  - [ ] Inline tooltips on each term
+  - [ ] A modal opened from a header info icon
+  - Blocked by: ~none~
+  - Status: done — user chose a 5th tab.
+
+- [x] **R069** — Glossary organization → *small*
+  - Context: follow-up to R068
+  - Why: whether terms are grouped by which tab they belong to, or listed flat/alphabetically
+  - [x] Grouped by tab (Recommended)
+  - [ ] One flat alphabetical list
+  - Blocked by: ~none~
+  - Status: done — user chose grouped by tab.
+
+- [x] **R070** — Shared vs. repeated EV/odds explanations → *small*
+  - Context: EV and decimal odds appear identically on both the Goals O/U and Player Props tabs
+  - Why: whether to explain them once in a shared section or duplicate the explanation per tab-specific section
+  - [x] One shared "General concepts" section up top (Recommended)
+  - [ ] Repeat the explanation in each relevant section
+  - Blocked by: ~none~
+  - Status: done — user chose one shared section.
+
+- [ ] **R071** — Glossary design: approval gate → *small*
+  - Context: consolidated design presented after R068-R070's brainstorm - 5th "Glossary" tab, new static `GlossaryPanel.tsx`, 5 sections (General concepts, Track Record, Goals O/U, Player Props, Staking terms), reusing the existing h2+description section pattern rather than per-term cards
+  - Why: superpowers:brainstorming's hard-gate requires explicit approval before any implementation
+  - [ ] Approved as presented
+  - [ ] Revise before approving
+  - Blocked by: ~none~
