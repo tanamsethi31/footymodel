@@ -214,8 +214,16 @@ export default function ThemeToggle() {
 
   // Correct the default "system" guess to whatever's actually stored, right
   // after mount - avoids a server/client render mismatch on the initial paint.
+  // Also re-applies the resolved class here, not just reads state: React
+  // Strict Mode's dev-only remount resets <html> to only the attributes in
+  // its JSX, stripping whatever class layout.tsx's pre-hydration script added
+  // imperatively - without this, a stored "dark"/"light" preference would
+  // flash correctly then flip back on every dev hard-reload (production has
+  // no such remount, so this only matters in `npm run dev`).
   useEffect(() => {
-    setPreference(readStoredPreference());
+    const stored = readStoredPreference();
+    setPreference(stored);
+    applyTheme(stored);
   }, []);
 
   // While following the OS preference, keep the page in sync live if the OS
