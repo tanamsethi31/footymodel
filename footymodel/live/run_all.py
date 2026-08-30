@@ -15,6 +15,8 @@ docstring for why.
 """
 from __future__ import annotations
 
+import json
+
 import pandas as pd
 
 from ..data import PROCESSED_DIR
@@ -24,6 +26,26 @@ from .engine import (LEAGUE_API_IDS, LIVE_LOG, DEFAULT_HOURS_AHEAD,
                      LiveWatcher, _load_seen, _save_seen)
 from .shots_engine import LEAGUE as PROPS_LEAGUE
 from .shots_engine import PROPS_LOG, PropsWatcher
+
+UPCOMING_LOG = PROCESSED_DIR / "upcoming_fixtures.json"
+
+
+def build_upcoming_list(all_fixtures: list[dict], api_id_to_div: dict[int, str]) -> list[dict]:
+    """Shape every fixture in a tracked league into the small preview record
+    the dashboard shows for matches without a confirmed-lineup prediction
+    yet. Doesn't check confirmation status - the dashboard does that itself
+    by cross-referencing fixture_id against what it already has."""
+    upcoming = []
+    for fx in all_fixtures:
+        if api_id_to_div.get(fx["league"]["id"]) is None:
+            continue
+        upcoming.append({
+            "fixture_id": fx["fixture"]["id"],
+            "home": fx["teams"]["home"]["name"],
+            "away": fx["teams"]["away"]["name"],
+            "kickoff": fx["fixture"]["date"],
+        })
+    return upcoming
 
 
 def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD) -> tuple[list[dict], list[dict]]:
@@ -36,11 +58,20 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD) -> tuple[list[dict], list[d
     api_id_to_div = {v: k for k, v in LEAGUE_API_IDS.items()}
 
     all_fixtures = []
-    for date_str in {now.strftime("%Y-%m-%d"), (now + pd.Timedelta(days=1)).strftime("%Y-%m-%d")}:
+    for date_str in {now.strftime("%Y-%m-%d"),
+                     (now + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+                     (now + pd.Timedelta(days=2)).strftime("%Y-%m-%d")}:
         try:
             all_fixtures.extend(client.fixtures_by_date(date_str))
         except ApiFootballError as e:
             print(f"! fixtures fetch failed for {date_str}: {e}")
+
+    try:
+        upcoming = build_upcoming_list(all_fixtures, api_id_to_div)
+        UPCOMING_LOG.parent.mkdir(parents=True, exist_ok=True)
+        UPCOMING_LOG.write_text(json.dumps(upcoming))
+    except Exception as e:
+        print(f"  ! failed to write upcoming_fixtures.json (predictions themselves unaffected): {e}")
 
     goal_rows, prop_rows = [], []
     for fx in all_fixtures:
