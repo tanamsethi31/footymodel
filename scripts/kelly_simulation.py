@@ -12,6 +12,7 @@ Usage:
 """
 import argparse
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -40,6 +41,7 @@ def main():
 
     result = sweep(bets, n_trials=args.n_trials, start_bankroll=args.start_bankroll,
                    seed=args.seed)
+    result["generated_at"] = datetime.now(timezone.utc).isoformat()
     result.to_csv(SIM_OUTPUT_PATH, index=False)
     print(f"Saved -> {SIM_OUTPUT_PATH}\n")
 
