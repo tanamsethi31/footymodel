@@ -24,14 +24,16 @@ export default function PropsPanel({
   // us whether the whole group is upcoming or already played.
   const now = Date.now();
   const groups = [...propsByFixture.entries()];
-  const upcomingGroups = groups.filter(([, rows]) => new Date(rows[0].kickoff).getTime() > now);
+  const upcomingGroups = groups
+    .filter(([, rows]) => new Date(rows[0].kickoff).getTime() > now)
+    .sort((a, b) => new Date(a[1][0].kickoff).getTime() - new Date(b[1][0].kickoff).getTime());
   const pastGroups = groups.filter(([, rows]) => new Date(rows[0].kickoff).getTime() <= now);
   // Any upcoming fixture without prop rows yet shows as a preview card -
   // once its lineup is confirmed it'll show up in propsByFixture above and
   // drop out of this list automatically.
-  const previewFixtures = upcomingFixtures.filter(
-    (f) => !propsByFixture.has(f.fixtureId) && new Date(f.kickoff).getTime() > now
-  );
+  const previewFixtures = upcomingFixtures
+    .filter((f) => !propsByFixture.has(f.fixtureId) && new Date(f.kickoff).getTime() > now)
+    .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
 
   return (
     <section>
