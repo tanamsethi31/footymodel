@@ -26,6 +26,7 @@ run_all.LIVE_LOG = engine.LIVE_LOG
 shots_engine.PROPS_LOG = tmp / "props.csv"
 run_all.PROPS_LOG = shots_engine.PROPS_LOG
 match_detail.MATCH_DETAIL_LOG = tmp / "match_detail.jsonl"
+run_all.UPCOMING_LOG = tmp / "upcoming_fixtures.json"
 
 players = load_players()
 home_us, away_us = "Manchester City", "Everton"
@@ -58,13 +59,13 @@ run_all.ApiFootballClient = lambda: mock_client
 
 goal_rows, prop_rows = run_all.run_once()
 
-print(f"fixtures_by_date calls: {mock_client.fixtures_by_date.call_count} (expect 2 — today+tomorrow)")
+print(f"fixtures_by_date calls: {mock_client.fixtures_by_date.call_count} (expect 3 — today+tomorrow+day-after)")
 print(f"lineups calls: {mock_client.lineups.call_count} (expect 1 — SHARED across both engines)")
 print(f"odds calls: {mock_client.odds.call_count} (expect 1 — SHARED across both engines)")
 print(f"goal_rows: {len(goal_rows)} (expect 1)")
 print(f"prop_rows: {len(prop_rows)} (expect 22)")
 
-assert mock_client.fixtures_by_date.call_count == 2
+assert mock_client.fixtures_by_date.call_count == 3
 assert mock_client.lineups.call_count == 1, "lineups must be fetched ONCE and shared, not once per engine"
 assert mock_client.odds.call_count == 1, "odds must be fetched ONCE and shared, not once per engine"
 assert len(goal_rows) == 1
