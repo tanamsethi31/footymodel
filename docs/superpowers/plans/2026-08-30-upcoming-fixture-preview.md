@@ -169,7 +169,7 @@ git commit -m "feat: add upcoming_fixtures.json preview list to run_all.py"
 
 ---
 
-### Task 2: Production data-path fixes (gitignore, cron commit list, dry-run isolation)
+### Task 2: Production data-path fixes (gitignore, cron commit list, dry-run isolation) ✅ done (3dbb318)
 
 **Files:**
 - Modify: `.gitignore`

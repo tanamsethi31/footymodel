@@ -39,15 +39,23 @@ def build_upcoming_list(all_fixtures: list[dict], api_id_to_div: dict[int, str],
     it already has. Does exclude fixtures whose kickoff has already passed -
     without that, a fixture that never got a confirmed lineup (so never
     became a real prediction, and never entered `seen`) would sit in
-    `all_fixtures` and render as "analysis pending" forever."""
+    `all_fixtures` and render as "analysis pending" forever. Deduplicates by
+    fixture_id - `all_fixtures` is built from 3 separate date-string queries,
+    and a fixture near a day boundary could plausibly come back from more
+    than one of them."""
     upcoming = []
+    seen_ids = set()
     for fx in all_fixtures:
         if api_id_to_div.get(fx["league"]["id"]) is None:
             continue
         if pd.Timestamp(fx["fixture"]["date"]) <= now:
             continue
+        fid = fx["fixture"]["id"]
+        if fid in seen_ids:
+            continue
+        seen_ids.add(fid)
         upcoming.append({
-            "fixture_id": fx["fixture"]["id"],
+            "fixture_id": fid,
             "home": fx["teams"]["home"]["name"],
             "away": fx["teams"]["away"]["name"],
             "kickoff": fx["fixture"]["date"],

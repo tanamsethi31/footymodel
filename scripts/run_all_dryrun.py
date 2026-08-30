@@ -72,4 +72,12 @@ assert len(goal_rows) == 1
 assert len(prop_rows) == 22
 sample_row = [r for r in prop_rows if r["player"] == home_names[0]][0]
 assert sample_row["odds_shots_gt0.5"] == 1.75, "expected mocked player-shots odds to reach the props row"
+
+import json as _json
+upcoming = _json.loads(run_all.UPCOMING_LOG.read_text())
+assert upcoming and upcoming[0]["fixture_id"] == fixture["fixture"]["id"], (
+    "expected the mocked fixture to actually reach upcoming_fixtures.json, not just a silent write"
+)
+print(f"upcoming_fixtures.json: {len(upcoming)} row(s), fixture_id={upcoming[0]['fixture_id']}")
+
 print("\nALL CHECKS PASSED — shared fetch confirmed, no duplicate API-Football calls.")

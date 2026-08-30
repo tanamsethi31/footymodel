@@ -59,4 +59,11 @@ assert len(result) == 1, (
 
 assert build_upcoming_list([], api_id_to_div, now) == []
 
+# Deduplicates by fixture_id - all_fixtures is built from 3 separate
+# date-string queries, and a fixture near a day boundary could plausibly
+# come back from more than one of them.
+duplicated = [fixtures[0], fixtures[0]]
+dedup_result = build_upcoming_list(duplicated, api_id_to_div, now)
+assert len(dedup_result) == 1, f"expected the duplicate fixture_id collapsed to one entry, got {dedup_result}"
+
 print("run_all_upcoming_test: OK")
