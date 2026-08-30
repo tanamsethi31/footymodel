@@ -238,7 +238,8 @@ expandable match cards).
 ### Running it — production is GitHub Actions, not a local cron
 
 Production polling is [`.github/workflows/live_poll.yml`](.github/workflows/live_poll.yml):
-every 20 minutes, 9:00–21:59 UTC (covering kickoffs across PL/La
+every 20 minutes, 14:30 IST–03:29 IST the next day (9:00–21:59 UTC - GitHub
+Actions cron is always UTC; covering kickoffs across PL/La
 Liga/Bundesliga/Serie A/Ligue 1), it runs all three engines and commits+pushes
 any new rows straight to this repo — no server, no local machine needs to
 stay on. `run_all.py` drives the API-Football goals + player-props engines

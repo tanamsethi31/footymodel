@@ -2,7 +2,8 @@ name: Refresh training data
 
 on:
   schedule:
-    # Once daily, after grade_results.yml (06:30 UTC) - football-data.co.uk
+    # Once daily at 12:30 IST (GitHub Actions cron is always UTC - this is
+    # 07:00 UTC), after grade_results.yml (12:00 IST) - football-data.co.uk
     # and Understat's own season files update within a day of matches being
     # played, so once-daily is plenty.
     - cron: "0 7 * * *"

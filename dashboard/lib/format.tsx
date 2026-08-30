@@ -1,12 +1,18 @@
 export function formatKickoff(iso: string) {
   try {
-    return new Date(iso).toLocaleString("en-GB", {
+    // Explicit timeZone, not the runtime's local one - some panels render
+    // server-side (Vercel's server clock) and some render client-side (the
+    // viewer's own browser clock), which would otherwise show two different
+    // times for the same kickoff depending on which tab you're looking at.
+    const formatted = new Date(iso).toLocaleString("en-GB", {
+      timeZone: "Asia/Kolkata",
       weekday: "short",
       day: "2-digit",
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
     });
+    return `${formatted} IST`;
   } catch {
     return iso;
   }
