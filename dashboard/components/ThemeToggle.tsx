@@ -82,6 +82,7 @@ export default function ThemeToggle() {
         <button
           key={opt.value}
           onClick={() => choose(opt.value)}
+          aria-pressed={preference === opt.value}
           className={`px-3 py-1 rounded-md text-xs font-medium transition-colors duration-150 active:scale-95 ${
             preference === opt.value
               ? "bg-white dark:bg-neutral-100 text-neutral-900"
