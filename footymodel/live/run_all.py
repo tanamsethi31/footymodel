@@ -30,14 +30,21 @@ from .shots_engine import PROPS_LOG, PropsWatcher
 UPCOMING_LOG = PROCESSED_DIR / "upcoming_fixtures.json"
 
 
-def build_upcoming_list(all_fixtures: list[dict], api_id_to_div: dict[int, str]) -> list[dict]:
-    """Shape every fixture in a tracked league into the small preview record
-    the dashboard shows for matches without a confirmed-lineup prediction
-    yet. Doesn't check confirmation status - the dashboard does that itself
-    by cross-referencing fixture_id against what it already has."""
+def build_upcoming_list(all_fixtures: list[dict], api_id_to_div: dict[int, str],
+                        now: pd.Timestamp) -> list[dict]:
+    """Shape every tracked-league fixture that hasn't kicked off yet into the
+    small preview record the dashboard shows for matches without a
+    confirmed-lineup prediction yet. Doesn't check confirmation status - the
+    dashboard does that itself by cross-referencing fixture_id against what
+    it already has. Does exclude fixtures whose kickoff has already passed -
+    without that, a fixture that never got a confirmed lineup (so never
+    became a real prediction, and never entered `seen`) would sit in
+    `all_fixtures` and render as "analysis pending" forever."""
     upcoming = []
     for fx in all_fixtures:
         if api_id_to_div.get(fx["league"]["id"]) is None:
+            continue
+        if pd.Timestamp(fx["fixture"]["date"]) <= now:
             continue
         upcoming.append({
             "fixture_id": fx["fixture"]["id"],
@@ -67,7 +74,7 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD) -> tuple[list[dict], list[d
             print(f"! fixtures fetch failed for {date_str}: {e}")
 
     try:
-        upcoming = build_upcoming_list(all_fixtures, api_id_to_div)
+        upcoming = build_upcoming_list(all_fixtures, api_id_to_div, now)
         UPCOMING_LOG.parent.mkdir(parents=True, exist_ok=True)
         UPCOMING_LOG.write_text(json.dumps(upcoming))
     except Exception as e:

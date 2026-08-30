@@ -11,9 +11,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import pandas as pd
+
 from footymodel.live.run_all import build_upcoming_list
 
 api_id_to_div = {39: "E0"}
+now = pd.Timestamp("2026-08-30T00:00:00+00:00")
 
 fixtures = [
     {
@@ -26,15 +29,26 @@ fixtures = [
         "league": {"id": 140},  # La Liga - not a tracked league
         "teams": {"home": {"name": "Barcelona"}, "away": {"name": "Real Madrid"}},
     },
+    {
+        # Already kicked off - never got a confirmed lineup, so never made
+        # it into `seen` either. Without an explicit kickoff filter this
+        # would render as "analysis pending" forever.
+        "fixture": {"id": 333, "date": "2026-08-29T13:00:00+00:00"},
+        "league": {"id": 39},
+        "teams": {"home": {"name": "Liverpool"}, "away": {"name": "Everton"}},
+    },
 ]
 
-result = build_upcoming_list(fixtures, api_id_to_div)
+result = build_upcoming_list(fixtures, api_id_to_div, now)
 assert result == [
     {"fixture_id": 111, "home": "Chelsea", "away": "Brighton",
      "kickoff": "2026-08-30T13:00:00+00:00"},
 ], result
-assert len(result) == 1, "the untracked-league fixture must be excluded entirely"
+assert len(result) == 1, (
+    "expected only the tracked-league, still-upcoming fixture - "
+    "the untracked league and the already-kicked-off fixture must both be excluded"
+)
 
-assert build_upcoming_list([], api_id_to_div) == []
+assert build_upcoming_list([], api_id_to_div, now) == []
 
 print("run_all_upcoming_test: OK")
