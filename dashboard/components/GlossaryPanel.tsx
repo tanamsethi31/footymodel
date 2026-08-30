@@ -13,7 +13,7 @@ export default function GlossaryPanel() {
           General concepts
         </h3>
         <dl className="space-y-4 text-sm">
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Expected Value (EV)</dt>
             <dd className="text-neutral-500 mt-0.5">
               For a bet with model probability p and decimal odds o: EV = p x o - 1.
@@ -24,7 +24,7 @@ export default function GlossaryPanel() {
               return 1.073 units on average, across many repeats).
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Decimal odds</dt>
             <dd className="text-neutral-500 mt-0.5">
               &quot;@ 1.77&quot; means: stake 1 unit, get back 1.77 total if it wins
@@ -41,32 +41,32 @@ export default function GlossaryPanel() {
           Track Record terms
         </h3>
         <dl className="space-y-4 text-sm">
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Model accuracy</dt>
             <dd className="text-neutral-500 mt-0.5">
               Fraction of graded goals predictions where the model&apos;s Over/Under
               2.5 pick matched the real result, whether or not there was a bet on it.
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Bets placed</dt>
             <dd className="text-neutral-500 mt-0.5">
               Count of graded predictions where the model showed positive EV on a
               side at the time it was logged (paper-trade only, no real stakes).
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Bet win rate</dt>
             <dd className="text-neutral-500 mt-0.5">Of those bets, the fraction that actually won.</dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Cumulative return</dt>
             <dd className="text-neutral-500 mt-0.5">
               Total realized profit/loss across all bets, in stake units (each bet
               assumed 1 unit).
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">model &#10003; / &#10007;</dt>
             <dd className="text-neutral-500 mt-0.5">
               Whether the model&apos;s Over/Under pick matched the real final score.
@@ -80,33 +80,33 @@ export default function GlossaryPanel() {
           Goals O/U terms
         </h3>
         <dl className="space-y-4 text-sm">
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Model P(O2.5)</dt>
             <dd className="text-neutral-500 mt-0.5">
               The model&apos;s probability that the match finishes with over 2.5
               total goals.
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">xG total</dt>
             <dd className="text-neutral-500 mt-0.5">
               The model&apos;s expected combined goals for both teams (Dixon-Coles
               model blended with the confirmed starting lineups).
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Odds O / U</dt>
             <dd className="text-neutral-500 mt-0.5">
               The best available market price for Over 2.5 / Under 2.5, fetched live.
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">EV Over / Under</dt>
             <dd className="text-neutral-500 mt-0.5">
               See Expected Value above, computed separately for each side.
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">starters matched</dt>
             <dd className="text-neutral-500 mt-0.5">
               How many of the confirmed starting XI (out of 11 per side) were
@@ -122,14 +122,14 @@ export default function GlossaryPanel() {
           Player Props terms
         </h3>
         <dl className="space-y-4 text-sm">
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Shots 1+ / 2+ / 3+</dt>
             <dd className="text-neutral-500 mt-0.5">
               Probability a player registers at least that many total shots in the
               match.
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">SOT (Shots on Target) 1+ / 2+</dt>
             <dd className="text-neutral-500 mt-0.5">
               Same idea, restricted to shots that were on target. SOT 3+ shows as
@@ -137,7 +137,7 @@ export default function GlossaryPanel() {
               built for it yet, not because of missing data for a particular player.
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Most probable bets</dt>
             <dd className="text-neutral-500 mt-0.5">
               The single highest-probability pick across every player, market, and
@@ -152,7 +152,7 @@ export default function GlossaryPanel() {
           Staking terms
         </h3>
         <dl className="space-y-4 text-sm">
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Kelly criterion</dt>
             <dd className="text-neutral-500 mt-0.5">
               A formula for how much of your bankroll to stake on a positive-EV bet
@@ -162,14 +162,14 @@ export default function GlossaryPanel() {
               less variance.
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Flat stake</dt>
             <dd className="text-neutral-500 mt-0.5">
               A fixed 1% of starting bankroll every bet, regardless of edge size. The
               baseline comparison against the Kelly strategies.
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">median final bankroll</dt>
             <dd className="text-neutral-500 mt-0.5">
               Across 10,000 simulated seasons, the middle outcome, shown as a
@@ -178,14 +178,14 @@ export default function GlossaryPanel() {
               simulation).
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Max drawdown</dt>
             <dd className="text-neutral-500 mt-0.5">
               The largest peak-to-trough drop in bankroll within a single simulated
               season, median across all simulations.
             </dd>
           </div>
-          <div className="border-l-2 border-blue-500 dark:border-blue-400 pl-3">
+          <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Risk of ruin</dt>
             <dd className="text-neutral-500 mt-0.5">
               How often, across all simulations, the bankroll fell to 5% or less of
