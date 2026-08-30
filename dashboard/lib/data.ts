@@ -71,6 +71,7 @@ export type KellySimResult = {
   p95FinalBankroll: number;
   medianMaxDrawdown: number;
   ruinProbability: number;
+  generatedAt: string | null;
 };
 
 export type PropsPick = {
@@ -393,6 +394,7 @@ export async function getKellySimResults(): Promise<KellySimResult[]> {
       p95FinalBankroll: num(r.p95_final_bankroll) ?? 0,
       medianMaxDrawdown: num(r.median_max_drawdown) ?? 0,
       ruinProbability: num(r.ruin_probability) ?? 0,
+      generatedAt: r.generated_at ?? null,
     }))
     .filter((r) => r.strategy)
     .sort((a, b) => (a.kellyMult ?? -1) - (b.kellyMult ?? -1));
