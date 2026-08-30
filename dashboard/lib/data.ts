@@ -309,13 +309,19 @@ export async function getMatchDetails(): Promise<Record<string, MatchDetail>> {
 export async function getUpcomingFixtures(): Promise<UpcomingFixture[]> {
   const rows = (await fetchJson("upcoming_fixtures.json")) as Record<string, unknown>[];
   return rows
+    // A stray non-object entry (null, a string, ...) would throw on the next
+    // filter's property access - guard against that before anything else.
+    .filter((r) => r && typeof r === "object")
+    // Filter on the raw fields, before stringifying - a missing field would
+    // otherwise become the literal string "undefined" (truthy, so it would
+    // slip past a post-map filter and render as "undefined v undefined").
+    .filter((r) => r.fixture_id != null && r.home && r.away && r.kickoff)
     .map((r) => ({
       fixtureId: String(r.fixture_id),
       home: String(r.home),
       away: String(r.away),
       kickoff: String(r.kickoff),
-    }))
-    .filter((f) => f.fixtureId && f.home && f.away);
+    }));
 }
 
 export async function getPropsPicks(): Promise<PropsPick[]> {
