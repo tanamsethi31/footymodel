@@ -1,14 +1,17 @@
-import type { PropsPick, MostProbablePick } from "@/lib/data";
+import type { PropsPick, MostProbablePick, UpcomingFixture } from "@/lib/data";
 import MostProbableStrip from "./MostProbableStrip";
 import MatchPropsTable from "./MatchPropsTable";
 import PastDisclosure from "./PastDisclosure";
+import PreviewMatchCard from "./PreviewMatchCard";
 
 export default function PropsPanel({
   props,
   mostProbable,
+  upcomingFixtures,
 }: {
   props: PropsPick[];
   mostProbable: MostProbablePick[];
+  upcomingFixtures: UpcomingFixture[];
 }) {
   const propsByFixture = new Map<string, PropsPick[]>();
   for (const p of props) {
@@ -23,6 +26,10 @@ export default function PropsPanel({
   const groups = [...propsByFixture.entries()];
   const upcomingGroups = groups.filter(([, rows]) => new Date(rows[0].kickoff).getTime() > now);
   const pastGroups = groups.filter(([, rows]) => new Date(rows[0].kickoff).getTime() <= now);
+  // Any upcoming fixture without prop rows yet shows as a preview card -
+  // once its lineup is confirmed it'll show up in propsByFixture above and
+  // drop out of this list automatically.
+  const previewFixtures = upcomingFixtures.filter((f) => !propsByFixture.has(f.fixtureId));
 
   return (
     <section>
@@ -35,14 +42,21 @@ export default function PropsPanel({
 
       <MostProbableStrip picks={mostProbable} />
 
-      {propsByFixture.size === 0 ? (
+      {propsByFixture.size === 0 && previewFixtures.length === 0 ? (
         <p className="text-sm text-neutral-500">No prop predictions logged yet.</p>
-      ) : upcomingGroups.length === 0 ? (
+      ) : upcomingGroups.length === 0 && previewFixtures.length === 0 ? (
         <p className="text-sm text-neutral-500">No upcoming prop predictions right now.</p>
       ) : (
         <div className="space-y-4">
           {upcomingGroups.map(([fixtureId, rows]) => (
             <MatchPropsTable key={fixtureId} fixtureId={fixtureId} rows={rows} />
+          ))}
+          {previewFixtures.map((f, i) => (
+            <PreviewMatchCard
+              key={f.fixtureId}
+              fixture={f}
+              index={upcomingGroups.length + i}
+            />
           ))}
         </div>
       )}

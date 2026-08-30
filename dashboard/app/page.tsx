@@ -5,15 +5,18 @@ import {
   getMostProbablePicks,
   getKellySimResults,
   getMatchDetails,
+  getUpcomingFixtures,
   type GoalsPick,
   type GradedResult,
   type MatchDetail,
+  type UpcomingFixture,
 } from "@/lib/data";
 import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
 import DashboardTabs from "@/components/DashboardTabs";
 import MatchCard from "@/components/MatchCard";
+import PreviewMatchCard from "@/components/PreviewMatchCard";
 import PastDisclosure from "@/components/PastDisclosure";
 import PropsPanel from "@/components/PropsPanel";
 import StakingPanel from "@/components/StakingPanel";
@@ -128,9 +131,11 @@ function TrackRecordPanel({ graded }: { graded: GradedResult[] }) {
 function GoalsPanel({
   goals,
   matchDetails,
+  upcomingFixtures,
 }: {
   goals: GoalsPick[];
   matchDetails: Record<string, MatchDetail>;
+  upcomingFixtures: UpcomingFixture[];
 }) {
   // A match that's already kicked off isn't a live pick anymore - it moves
   // into the collapsed "past predictions" disclosure below instead of
@@ -138,6 +143,13 @@ function GoalsPanel({
   const now = Date.now();
   const upcoming = goals.filter((g) => new Date(g.kickoff).getTime() > now);
   const past = goals.filter((g) => new Date(g.kickoff).getTime() <= now);
+  // Any upcoming fixture that doesn't have a real prediction yet shows as a
+  // preview card instead - once its lineup is confirmed it'll show up in
+  // `goals` above and drop out of this list automatically.
+  const predictedFixtureIds = new Set(goals.map((g) => g.fixtureId));
+  const previewFixtures = upcomingFixtures.filter(
+    (f) => !predictedFixtureIds.has(f.fixtureId)
+  );
   return (
     <section>
       <h2 className="text-lg font-semibold mb-1">Goals: Over/Under 2.5</h2>
@@ -145,7 +157,7 @@ function GoalsPanel({
         Confirmed-lineup model, pooled t=3.04 backtested (individually
         significant on the Premier League alone, t=2.23).
       </p>
-      {upcoming.length === 0 ? (
+      {upcoming.length === 0 && previewFixtures.length === 0 ? (
         <p className="text-sm text-neutral-500">
           No upcoming predictions right now. Check back once a fixture&apos;s
           lineup is confirmed pre-kickoff.
@@ -158,6 +170,13 @@ function GoalsPanel({
               match={g}
               detail={matchDetails[g.fixtureId] ?? null}
               index={i}
+            />
+          ))}
+          {previewFixtures.map((f, i) => (
+            <PreviewMatchCard
+              key={f.fixtureId}
+              fixture={f}
+              index={upcoming.length + i}
             />
           ))}
         </div>
@@ -177,12 +196,13 @@ function GoalsPanel({
 }
 
 export default async function Home() {
-  const [goals, props, graded, kellySim, matchDetails] = await Promise.all([
+  const [goals, props, graded, kellySim, matchDetails, upcomingFixtures] = await Promise.all([
     getGoalsPicks(),
     getPropsPicks(),
     getGradedResults(),
     getKellySimResults(),
     getMatchDetails(),
+    getUpcomingFixtures(),
   ]);
   // The highlights strip is about what's coming up next, not a match
   // that's already been played.
@@ -205,8 +225,20 @@ export default async function Home() {
 
       <DashboardTabs
         trackRecord={<TrackRecordPanel graded={graded} />}
-        goals={<GoalsPanel goals={goals} matchDetails={matchDetails} />}
-        props={<PropsPanel props={props} mostProbable={mostProbable} />}
+        goals={
+          <GoalsPanel
+            goals={goals}
+            matchDetails={matchDetails}
+            upcomingFixtures={upcomingFixtures}
+          />
+        }
+        props={
+          <PropsPanel
+            props={props}
+            mostProbable={mostProbable}
+            upcomingFixtures={upcomingFixtures}
+          />
+        }
         staking={<StakingPanel results={kellySim} />}
         glossary={<GlossaryPanel />}
       />
