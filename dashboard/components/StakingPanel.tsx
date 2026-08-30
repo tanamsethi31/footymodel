@@ -1,4 +1,5 @@
 import type { KellySimResult } from "@/lib/data";
+import { formatKickoff } from "@/lib/format";
 
 const STRATEGY_LABELS: Record<string, string> = {
   flat: "Flat stake",
@@ -30,12 +31,17 @@ export default function StakingPanel({ results }: { results: KellySimResult[] })
   return (
     <section>
       <h2 className="text-lg font-semibold mb-1">Staking: Kelly bankroll simulation</h2>
-      <p className="text-sm text-neutral-500 mb-5">
+      <p className="text-sm text-neutral-500 mb-1">
         Monte Carlo over the {results[0].nBets} backtested E0 O/U 2.5 value bets,{" "}
         {results[0].nTrials.toLocaleString()} simulated seasons per strategy. Downstream
         risk-sizing analysis only. Doesn&apos;t affect the model&apos;s predictions or
         edge. &quot;Ruin&quot; means bankroll fell to 5% of its starting value.
       </p>
+      {results[0].generatedAt && (
+        <p className="text-xs text-neutral-400 mb-5">
+          Last run: {formatKickoff(results[0].generatedAt)}
+        </p>
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {results.map((r, i) => (
           <div
