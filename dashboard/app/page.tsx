@@ -14,6 +14,7 @@ import {
 import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
+import ThemeToggle from "@/components/ThemeToggle";
 import DashboardTabs from "@/components/DashboardTabs";
 import MatchCard from "@/components/MatchCard";
 import PreviewMatchCard from "@/components/PreviewMatchCard";
@@ -224,7 +225,10 @@ export default async function Home() {
             is a real bet.
           </p>
         </div>
-        <SubscribeButton />
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <SubscribeButton />
+        </div>
       </header>
 
       <DashboardTabs
