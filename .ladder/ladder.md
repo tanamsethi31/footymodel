@@ -747,3 +747,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Fix: updated comments in all 3 workflow files (live_poll.yml: 14:30 IST-03:29 IST next day; grade_results.yml: 12:00 IST; refresh_training_data.yml: 12:30 IST) and README's Phase B section to match. Separately fixed a real bug found while doing this: `formatKickoff()` had no explicit `timeZone`, so it silently rendered in whatever timezone the execution context happened to be in - the viewer's browser for client-rendered panels (MatchCard) vs. Vercel's server clock for server-rendered ones (TrackRecordPanel) - meaning the same kickoff could show two different times depending which tab you looked at. Now explicit `timeZone: "Asia/Kolkata"` everywhere, labeled "IST"
   - Blocked by: ~none~
   - Status: done — verified live in the dev server: Track Record (server-rendered) and Goals O/U (client-rendered) both show "Sat 29 Aug, 00:30 IST" identically. `tsc --noEmit` and `next build` clean, all 3 workflow YAMLs validated. Committed (95d88f4).
+
+- [x] **R090** — Upcoming fixture preview: plan execution mode → *small*
+  - Context: docs/superpowers/plans/2026-08-30-upcoming-fixture-preview.md written and committed, standard writing-plans handoff choice
+  - Why: tracked explicitly for every prior plan this session
+  - [x] Subagent-driven (Recommended) - same process used for every previous plan this session
+  - [ ] Inline execution
+  - Blocked by: ~none~
+  - Status: done — user chose subagent-driven.
