@@ -298,7 +298,7 @@ git commit -m "fix: gitignore/cron-commit-list/dry-run isolation for upcoming_fi
 
 ---
 
-### Task 3: Frontend data layer
+### Task 3: Frontend data layer ✅ done (a658b3c, 8a13582)
 
 **Files:**
 - Modify: `dashboard/lib/data.ts`
@@ -379,7 +379,7 @@ git commit -m "feat: fetch upcoming_fixtures.json in the dashboard data layer"
 
 ---
 
-### Task 4: `PreviewMatchCard` component
+### Task 4: `PreviewMatchCard` component ✅ done (bb8337f)
 
 **Files:**
 - Create: `dashboard/components/PreviewMatchCard.tsx`
@@ -506,7 +506,7 @@ function GoalsPanel({
   // `goals` above and drop out of this list automatically.
   const predictedFixtureIds = new Set(goals.map((g) => g.fixtureId));
   const previewFixtures = upcomingFixtures.filter(
-    (f) => !predictedFixtureIds.has(f.fixtureId)
+    (f) => !predictedFixtureIds.has(f.fixtureId) && new Date(f.kickoff).getTime() > now
   );
   return (
     <section>
@@ -643,7 +643,9 @@ export default function PropsPanel({
   // Any upcoming fixture without prop rows yet shows as a preview card -
   // once its lineup is confirmed it'll show up in propsByFixture above and
   // drop out of this list automatically.
-  const previewFixtures = upcomingFixtures.filter((f) => !propsByFixture.has(f.fixtureId));
+  const previewFixtures = upcomingFixtures.filter(
+    (f) => !propsByFixture.has(f.fixtureId) && new Date(f.kickoff).getTime() > now
+  );
 
   return (
     <section>

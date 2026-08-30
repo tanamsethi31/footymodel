@@ -29,7 +29,9 @@ export default function PropsPanel({
   // Any upcoming fixture without prop rows yet shows as a preview card -
   // once its lineup is confirmed it'll show up in propsByFixture above and
   // drop out of this list automatically.
-  const previewFixtures = upcomingFixtures.filter((f) => !propsByFixture.has(f.fixtureId));
+  const previewFixtures = upcomingFixtures.filter(
+    (f) => !propsByFixture.has(f.fixtureId) && new Date(f.kickoff).getTime() > now
+  );
 
   return (
     <section>

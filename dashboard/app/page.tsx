@@ -148,7 +148,7 @@ function GoalsPanel({
   // `goals` above and drop out of this list automatically.
   const predictedFixtureIds = new Set(goals.map((g) => g.fixtureId));
   const previewFixtures = upcomingFixtures.filter(
-    (f) => !predictedFixtureIds.has(f.fixtureId)
+    (f) => !predictedFixtureIds.has(f.fixtureId) && new Date(f.kickoff).getTime() > now
   );
   return (
     <section>
