@@ -12,7 +12,7 @@
 
 ---
 
-### Task 1: `build_upcoming_list()` + wire into `run_all.py`
+### Task 1: `build_upcoming_list()` + wire into `run_all.py` ✅ done (db5c6c4)
 
 **Files:**
 - Modify: `footymodel/live/run_all.py`
@@ -250,7 +250,35 @@ run_all.UPCOMING_LOG = tmp / "upcoming_fixtures.json"
 
 (`UPCOMING_LOG` is defined directly in `run_all.py`, unlike `LIVE_LOG`/`PROPS_LOG` which are imported from `engine.py`/`shots_engine.py` - so only this one override is needed, no `engine.UPCOMING_LOG` counterpart exists.)
 
-- [ ] **Step 5: Verify**
+- [ ] **Step 5: Fix the dry-run's own call-count assertion (found after Task 1 landed)**
+
+Task 1 extended `run_once()`'s date-range fetch from 2 days to 3, but `scripts/run_all_dryrun.py` has a real assertion hardcoded to the old count that will now fail. Change:
+
+```python
+print(f"fixtures_by_date calls: {mock_client.fixtures_by_date.call_count} (expect 2 — today+tomorrow)")
+```
+
+to:
+
+```python
+print(f"fixtures_by_date calls: {mock_client.fixtures_by_date.call_count} (expect 3 — today+tomorrow+day-after)")
+```
+
+and change:
+
+```python
+assert mock_client.fixtures_by_date.call_count == 2
+```
+
+to:
+
+```python
+assert mock_client.fixtures_by_date.call_count == 3
+```
+
+(The mock returns the same fixed fixture list for every `fixtures_by_date` call regardless of the date argument, so the 3rd call just returns the same fixtures again - already-`seen` fixture_ids get skipped on repeat occurrences within the same run, so `goal_rows`/`prop_rows` counts are unaffected; only the call-count assertion itself needs updating.)
+
+- [ ] **Step 6: Verify**
 
 Run: `python scripts/run_all_dryrun.py`
 Expected: `ALL CHECKS PASSED — shared fetch confirmed, no duplicate API-Football calls.`
@@ -261,7 +289,7 @@ Expected: no output (the dry run no longer touches the real tracked file)
 Run: `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/live_poll.yml'))"`
 Expected: no output (YAML still valid)
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add .gitignore .github/workflows/live_poll.yml scripts/run_all_dryrun.py
