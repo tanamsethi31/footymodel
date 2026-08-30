@@ -433,7 +433,7 @@ git commit -m "feat: add PreviewMatchCard component"
 
 ---
 
-### Task 5: Wire preview fixtures into both tabs
+### Task 5: Wire preview fixtures into both tabs ✅ done (c8e3a67, 7464442)
 
 **Files:**
 - Modify: `dashboard/app/page.tsx`
