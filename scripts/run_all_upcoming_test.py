@@ -37,6 +37,14 @@ fixtures = [
         "league": {"id": 39},
         "teams": {"home": {"name": "Liverpool"}, "away": {"name": "Everton"}},
     },
+    {
+        # Exactly at kickoff (kickoff == now) - treated as already-started,
+        # not upcoming. Pins the <= comparison so a future refactor to <
+        # can't silently reopen a sliver of the original staleness bug.
+        "fixture": {"id": 444, "date": "2026-08-30T00:00:00+00:00"},
+        "league": {"id": 39},
+        "teams": {"home": {"name": "Arsenal"}, "away": {"name": "Fulham"}},
+    },
 ]
 
 result = build_upcoming_list(fixtures, api_id_to_div, now)
