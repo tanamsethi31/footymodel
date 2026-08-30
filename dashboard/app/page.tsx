@@ -141,15 +141,19 @@ function GoalsPanel({
   // into the collapsed "past predictions" disclosure below instead of
   // cluttering the upcoming list (still checkable, just out of the way).
   const now = Date.now();
-  const upcoming = goals.filter((g) => new Date(g.kickoff).getTime() > now);
+  const byKickoffAsc = (a: { kickoff: string }, b: { kickoff: string }) =>
+    new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime();
+  const upcoming = goals
+    .filter((g) => new Date(g.kickoff).getTime() > now)
+    .sort(byKickoffAsc);
   const past = goals.filter((g) => new Date(g.kickoff).getTime() <= now);
   // Any upcoming fixture that doesn't have a real prediction yet shows as a
   // preview card instead - once its lineup is confirmed it'll show up in
   // `goals` above and drop out of this list automatically.
   const predictedFixtureIds = new Set(goals.map((g) => g.fixtureId));
-  const previewFixtures = upcomingFixtures.filter(
-    (f) => !predictedFixtureIds.has(f.fixtureId) && new Date(f.kickoff).getTime() > now
-  );
+  const previewFixtures = upcomingFixtures
+    .filter((f) => !predictedFixtureIds.has(f.fixtureId) && new Date(f.kickoff).getTime() > now)
+    .sort(byKickoffAsc);
   return (
     <section>
       <h2 className="text-lg font-semibold mb-1">Goals: Over/Under 2.5</h2>
