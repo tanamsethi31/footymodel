@@ -35,6 +35,13 @@ export type MatchDetail = {
   pOver25Full: number;
 };
 
+export type UpcomingFixture = {
+  fixtureId: string;
+  home: string;
+  away: string;
+  kickoff: string;
+};
+
 export type GradedResult = {
   fixtureId: string;
   home: string;
@@ -194,6 +201,25 @@ async function fetchJsonl(name: string): Promise<Record<string, unknown>[]> {
     .map((line) => JSON.parse(line));
 }
 
+async function fetchJson(name: string): Promise<unknown[]> {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) throw new Error("GITHUB_TOKEN not set");
+  const res = await fetch(
+    `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/${name}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.raw+json",
+      },
+      next: { revalidate: 60 },
+    }
+  );
+  if (res.status === 404) return []; // file doesn't exist yet
+  if (!res.ok) throw new Error(`Failed to fetch ${name}: ${res.status} ${await res.text()}`);
+  const text = await res.text();
+  return JSON.parse(text);
+}
+
 // The goals CSV's header was written by the FIRST row ever appended
 // (before source/fair_p_over25/ev_over25/ev_under25 existed as columns),
 // and pandas' `to_csv(mode="a")` never rewrites the header - so rows have
@@ -278,6 +304,18 @@ export async function getMatchDetails(): Promise<Record<string, MatchDetail>> {
     };
   }
   return byFixtureId;
+}
+
+export async function getUpcomingFixtures(): Promise<UpcomingFixture[]> {
+  const rows = (await fetchJson("upcoming_fixtures.json")) as Record<string, unknown>[];
+  return rows
+    .map((r) => ({
+      fixtureId: String(r.fixture_id),
+      home: String(r.home),
+      away: String(r.away),
+      kickoff: String(r.kickoff),
+    }))
+    .filter((f) => f.fixtureId && f.home && f.away);
 }
 
 export async function getPropsPicks(): Promise<PropsPick[]> {
