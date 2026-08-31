@@ -793,10 +793,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — all 4 tasks implemented, spec-reviewed, and code-quality-reviewed (one plan amendment + one fix-and-re-review loop). Final whole-feature review passed clean (`tsc --noEmit` + `next build` both clean on the full range, confirmed the whole chain - variant, script, component, wiring - shares one consistent contract). Pushed to origin/main (rebased onto a concurrent live-poll cron commit first, no conflicts). Verified live in production: toggle renders in the header, clicking Light immediately restyles the whole page and persists across a hard reload with no flash and no console hydration warnings, reset back to System afterward.
 
-- [ ] **R096** — Mobile view fixes: plan execution mode → *small*
+- [x] **R096** — Mobile view fixes: plan execution mode → *small*
   - Context: docs/superpowers/plans/2026-08-30-mobile-view-fixes.md written, self-reviewed, and committed - standard writing-plans handoff choice, covering the header horizontal-overflow fix and the tab-bar active-highlight scroll-into-view fix
   - Why: tracked explicitly for every prior plan this session
-  - [ ] Subagent-driven (Recommended) - fresh subagent per task, two-stage review, same process used for every previous plan this session
+  - [x] Subagent-driven (Recommended) - fresh subagent per task, two-stage review, same process used for every previous plan this session
   - [ ] Inline execution - batch execution with checkpoints in this session
-  - Blocked by: waiting on user's choice
-  - Status: pending — question asked, awaiting response.
+  - Blocked by: ~none~
+  - Status: done — user chose subagent-driven.
