@@ -225,9 +225,9 @@ export default async function Home() {
             is a real bet.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <ThemeToggle />
+        <div className="flex flex-col items-end gap-2">
           <SubscribeButton />
+          <ThemeToggle />
         </div>
       </header>
 
