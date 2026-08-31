@@ -134,7 +134,7 @@ export default function SubscribeButton() {
         ⓘ
       </button>
       {infoOpen && (
-        <div className="absolute top-full right-0 mt-2 w-64 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-xs text-neutral-500 dark:text-neutral-400 shadow-lg z-20">
+        <div className="absolute top-full right-0 mt-10 w-64 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-xs text-neutral-500 dark:text-neutral-400 shadow-lg z-20">
           {DESCRIPTIONS[status]}
         </div>
       )}
