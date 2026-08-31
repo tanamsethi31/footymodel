@@ -1,8 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Status = "checking" | "unsupported" | "denied" | "off" | "on" | "working";
+
+const DESCRIPTIONS: Record<Exclude<Status, "checking">, string> = {
+  unsupported:
+    "Push notifications aren't supported in this browser. On iPhone, add this page to your Home Screen first, then reopen it from there.",
+  denied:
+    "Notifications blocked. Enable them for this site in your browser settings to get alerts.",
+  off: "Get notified when new picks are logged. Tap the bell to enable.",
+  on: "Notifications on — you'll get alerts when new picks are logged. Tap the bell to turn off.",
+  working: "Working…",
+};
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -13,6 +23,8 @@ function urlBase64ToUint8Array(base64String: string) {
 
 export default function SubscribeButton() {
   const [status, setStatus] = useState<Status>("checking");
+  const [infoOpen, setInfoOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
@@ -28,6 +40,18 @@ export default function SubscribeButton() {
       setStatus(existing ? "on" : "off");
     });
   }, []);
+
+  // Close the popover on a click anywhere outside this component - only
+  // attached while it's actually open, removed the moment it closes (or the
+  // component unmounts), so this never leaks a document-level listener.
+  useEffect(() => {
+    if (!infoOpen) return;
+    function onDocClick(e: MouseEvent) {
+      if (!wrapperRef.current?.contains(e.target as Node)) setInfoOpen(false);
+    }
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, [infoOpen]);
 
   async function subscribe() {
     setStatus("working");
@@ -67,30 +91,53 @@ export default function SubscribeButton() {
   }
 
   if (status === "checking") return null;
-  if (status === "unsupported")
-    return (
-      <p className="text-sm text-neutral-500">
-        Push notifications aren&apos;t supported in this browser. On iPhone,
-        add this page to your Home Screen first, then reopen it from there.
-      </p>
-    );
-  if (status === "denied")
-    return (
-      <p className="text-sm text-neutral-500">
-        Notifications blocked. Enable them for this site in your browser
-        settings to get alerts.
-      </p>
-    );
+
+  const interactive = status === "off" || status === "on";
+
+  function handleBellClick() {
+    if (status === "on") unsubscribe();
+    else if (status === "off") subscribe();
+  }
 
   return (
-    <button
-      onClick={status === "on" ? unsubscribe : subscribe}
-      disabled={status === "working"}
-      className="rounded-full border border-neutral-300 dark:border-neutral-700 px-4 py-1.5 text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition disabled:opacity-50"
-    >
-      {status === "on" && "🔔 Notifications on"}
-      {status === "off" && "🔕 Get notified of new picks"}
-      {status === "working" && "…"}
-    </button>
+    <div ref={wrapperRef} className="relative flex items-center gap-2">
+      <button
+        onClick={handleBellClick}
+        disabled={!interactive}
+        aria-label={
+          status === "on"
+            ? "Notifications on - tap to turn off"
+            : status === "off"
+              ? "Get notified of new picks"
+              : status === "denied"
+                ? "Notifications blocked"
+                : "Notifications unsupported in this browser"
+        }
+        className={`w-9 h-9 rounded-full border flex items-center justify-center text-base transition-opacity duration-300 ${
+          status === "on"
+            ? "border-indigo-800 dark:border-indigo-400 text-indigo-200 animate-bell-glow"
+            : "border-neutral-200 dark:border-neutral-800 text-neutral-400 dark:text-neutral-600"
+        } ${status === "working" ? "opacity-50" : ""} ${interactive ? "" : "cursor-default"}`}
+      >
+        {/* During "working", this always shows the muted glyph rather than
+            trying to preserve which direction the transition is going -
+            it's a brief, sub-second state either way, not worth the extra
+            bookkeeping to track the pre-transition glyph. */}
+        {status === "on" ? "🔔" : "🔕"}
+      </button>
+      <button
+        onClick={() => setInfoOpen((o) => !o)}
+        aria-expanded={infoOpen}
+        aria-label="What does this mean?"
+        className="w-9 h-9 rounded-full border border-neutral-200 dark:border-neutral-800 flex items-center justify-center text-sm text-neutral-400 dark:text-neutral-600"
+      >
+        ⓘ
+      </button>
+      {infoOpen && (
+        <div className="absolute top-full right-0 mt-2 w-64 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-xs text-neutral-500 dark:text-neutral-400 shadow-lg z-20">
+          {DESCRIPTIONS[status]}
+        </div>
+      )}
+    </div>
   );
 }
