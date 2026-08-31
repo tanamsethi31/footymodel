@@ -216,7 +216,7 @@ export default async function Home() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 sm:py-14 w-full">
-      <header className="flex items-start justify-between gap-4 mb-10">
+      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-10">
         <div>
           <Logo />
           <p className="text-sm text-neutral-500 mt-1">
