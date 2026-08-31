@@ -40,6 +40,14 @@ export default function DashboardTabs({
       left: btnRect.left - wrapperRect.left,
       right: wrapperRect.right - btnRect.right,
     });
+    // The tab bar itself scrolls horizontally when there isn't room for all
+    // 5 tabs (see the container's overflow-x-auto below) - without this,
+    // clicking a tab outside the currently-visible scroll window left the
+    // container's scroll position unchanged, so the highlight (and the
+    // clicked tab's label) could end up entirely off-screen. "nearest" on
+    // both axes means this only scrolls the minimum needed, and only
+    // horizontally within this tab bar - never the page itself vertically.
+    btn.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, [active]);
 
   return (
