@@ -23,6 +23,7 @@ export default function DashboardTabs({
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const didMountRef = useRef(false);
   const [clip, setClip] = useState<{ left: number; right: number } | null>(null);
 
   useLayoutEffect(() => {
@@ -44,10 +45,14 @@ export default function DashboardTabs({
     // 5 tabs (see the container's overflow-x-auto below) - without this,
     // clicking a tab outside the currently-visible scroll window left the
     // container's scroll position unchanged, so the highlight (and the
-    // clicked tab's label) could end up entirely off-screen. "nearest" on
-    // both axes means this only scrolls the minimum needed, and only
-    // horizontally within this tab bar - never the page itself vertically.
-    btn.scrollIntoView({ block: "nearest", inline: "nearest" });
+    // clicked tab's label) could end up entirely off-screen. Only do this
+    // after mount, though - this effect also runs once on initial render
+    // (active=0), and scrolling then would risk an unwanted page-level
+    // vertical scroll on load if the first tab isn't fully in view yet.
+    if (didMountRef.current) {
+      btn.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+    didMountRef.current = true;
   }, [active]);
 
   return (
