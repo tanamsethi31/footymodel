@@ -859,5 +859,5 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Why: two real gaps remain - (1) timing is a blanket time-of-day interval, not tied to each specific match's actual kickoff, and (2) `notify_dashboard.py`'s notification body currently only lists team names ("Chelsea v Brighton, +2 more"), not any model reasoning (P(O2.5)/xG/confidence)
   - [ ] Build true calendar-driven per-match scheduling (fetch the PL fixture list, dynamically schedule a run ~20-40min before each specific kickoff)
   - [x] Recommended instead: keep the existing blanket-interval polling as-is (GitHub Actions cron can't natively do dynamic per-match scheduling without real extra infra, and 20min blanket polling already reliably catches confirmed lineups within their pre-kickoff window - marginal gain for real added complexity), and put the effort into richer notification content (a short reasoning summary) instead
-  - Blocked by: waiting on user's response to "Want me to brainstorm that?" (richer notification content)
-  - Status: pending — recommendation given, awaiting user's go-ahead to brainstorm the notification-content improvement.
+  - Blocked by: ~none~
+  - Status: done — user confirmed: proceed with brainstorming the richer notification-content improvement (calendar-driven scheduling deliberately not pursued, per the recommendation above).
