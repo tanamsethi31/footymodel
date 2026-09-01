@@ -922,3 +922,12 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Fix: n/a - this is a pure investigation, no production code (`players.py`/`engine.py`/`run_all.py`) touched. Both tasks passed spec review and code-quality review clean on the first pass (no fix-and-re-review loop needed), and a final whole-round reviewer independently re-ran the script from scratch and reproduced the exact same numbers rather than trusting the implementer's report
   - Blocked by: ~none~
   - Status: done, but the finding is a clean NO — no NB dispersion value beat the Poisson baseline. Best candidate (disp=15) pooled Brier 0.2416 vs Poisson's 0.2413 (worse, not better); paired t-stat -1.70 (not significant, and the wrong sign - the "best" NB candidate is actually worse on average); every one of the 5 leagues individually got worse under NB(15), not just the pooled average. All three of the design spec's go/no-go conditions fail. Conclusion: unlike shots, the goals model's Poisson assumption is already well-calibrated - this specific hypothesis is ruled out, matching this project's own established discipline of proving a negative result rigorously rather than assuming a fix must exist. Final reviewer suggested (not yet done, small optional follow-up) recording this negative finding in RESULTS.md alongside the project's other ruled-out approaches, matching its existing documentation convention.
+
+- [ ] **R112** — Goals-dispersion-test finish workflow: push / keep local / discard → *small*
+  - Context: all 2 tasks implemented, reviewed, and whole-round-reviewed clean (R111); all existing CI-equivalent test scripts + compileall re-run and confirmed still passing before offering finish options, per finishing-a-development-branch's "verify tests" step. No separate feature branch/worktree was used this round (matches every prior round this session - straight commits on main), so the standard 4-option menu adapts to 3: push, keep local, or discard
+  - Why: standard finishing-a-development-branch handoff, tracked like every prior plan's execution-mode choice
+  - [ ] Push these 6 commits to origin/main
+  - [ ] Keep local for now
+  - [ ] Discard this work
+  - Blocked by: awaiting user's answer
+  - Status: in progress — question posed to user, not yet answered.
