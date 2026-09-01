@@ -40,6 +40,17 @@ fixture = {
     "league": {"id": 39},  # E0
     "teams": {"home": {"id": 50, "name": home_us}, "away": {"id": 29, "name": away_us}},
 }
+# A fixture whose kickoff already passed (an hour ago) but still has
+# confirmed lineups available - this is the exact shape of the 5 real
+# matches a GitHub Actions cron gap lost over the 2026-08-30/31 weekend.
+# Its lineup/odds data is identical to `fixture`'s (this test only cares
+# about the window logic, not a second distinct roster).
+fixture_past = {
+    "fixture": {"id": 999004,
+               "date": (pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=1)).isoformat()},
+    "league": {"id": 39},  # E0
+    "teams": {"home": {"id": 50, "name": home_us}, "away": {"id": 29, "name": away_us}},
+}
 mock_lineups = [
     {"team": {"id": 50, "name": home_us}, "startXI": [{"player": {"name": n}} for n in home_names]},
     {"team": {"id": 29, "name": away_us}, "startXI": [{"player": {"name": n}} for n in away_names]},
@@ -52,7 +63,7 @@ mock_odds = [{"bookmakers": [{"bets": [
 ]}]}]
 
 mock_client = MagicMock()
-mock_client.fixtures_by_date.side_effect = lambda date_str: [fixture]
+mock_client.fixtures_by_date.side_effect = lambda date_str: [fixture, fixture_past]
 mock_client.lineups.return_value = mock_lineups
 mock_client.odds.return_value = mock_odds
 
@@ -61,23 +72,28 @@ run_all.ApiFootballClient = lambda: mock_client
 goal_rows, prop_rows = run_all.run_once()
 
 print(f"fixtures_by_date calls: {mock_client.fixtures_by_date.call_count} (expect 3 — today+tomorrow+day-after)")
-print(f"lineups calls: {mock_client.lineups.call_count} (expect 1 — SHARED across both engines)")
-print(f"odds calls: {mock_client.odds.call_count} (expect 1 — SHARED across both engines)")
-print(f"goal_rows: {len(goal_rows)} (expect 1)")
-print(f"prop_rows: {len(prop_rows)} (expect 22)")
+print(f"lineups calls: {mock_client.lineups.call_count} (expect 2 — one per unique fixture, SHARED across both engines)")
+print(f"odds calls: {mock_client.odds.call_count} (expect 2 — one per unique fixture, SHARED across both engines)")
+print(f"goal_rows: {len(goal_rows)} (expect 2 — both the future AND the already-kicked-off fixture)")
+print(f"prop_rows: {len(prop_rows)} (expect 44 — 22 per fixture)")
 
 assert mock_client.fixtures_by_date.call_count == 3
-assert mock_client.lineups.call_count == 1, "lineups must be fetched ONCE and shared, not once per engine"
-assert mock_client.odds.call_count == 1, "odds must be fetched ONCE and shared, not once per engine"
-assert len(goal_rows) == 1
-assert len(prop_rows) == 22
+assert mock_client.lineups.call_count == 2, "lineups must be fetched ONCE PER FIXTURE and shared, not once per engine"
+assert mock_client.odds.call_count == 2, "odds must be fetched ONCE PER FIXTURE and shared, not once per engine"
+assert len(goal_rows) == 2
+assert any(r["fixture_id"] == fixture_past["fixture"]["id"] for r in goal_rows), (
+    "expected the already-kicked-off fixture to still be logged thanks to the widened backward window"
+)
+assert len(prop_rows) == 44
 sample_row = [r for r in prop_rows if r["player"] == home_names[0]][0]
 assert sample_row["odds_shots_gt0.5"] == 1.75, "expected mocked player-shots odds to reach the props row"
 
 upcoming = json.loads(run_all.UPCOMING_LOG.read_text())
-assert upcoming and upcoming[0]["fixture_id"] == fixture["fixture"]["id"], (
-    "expected the mocked fixture to actually reach upcoming_fixtures.json, not just a silent write"
+assert len(upcoming) == 1 and upcoming[0]["fixture_id"] == fixture["fixture"]["id"], (
+    "expected only the still-upcoming fixture in upcoming_fixtures.json - the already-kicked-off "
+    "one must NOT appear there even though it does get a real prediction"
 )
 print(f"upcoming_fixtures.json: {len(upcoming)} row(s), fixture_id={upcoming[0]['fixture_id']}")
 
-print("\nALL CHECKS PASSED — shared fetch confirmed, no duplicate API-Football calls.")
+print("\nALL CHECKS PASSED — shared fetch confirmed, no duplicate API-Football calls, "
+      "past-kickoff fixture recovered.")

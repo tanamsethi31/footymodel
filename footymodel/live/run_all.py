@@ -22,7 +22,7 @@ import pandas as pd
 from ..data import PROCESSED_DIR
 from . import match_detail
 from .client import ApiFootballClient, ApiFootballError
-from .engine import (LEAGUE_API_IDS, LIVE_LOG, DEFAULT_HOURS_AHEAD,
+from .engine import (LEAGUE_API_IDS, LIVE_LOG, DEFAULT_HOURS_AHEAD, DEFAULT_HOURS_BEHIND,
                      LiveWatcher, _load_seen, _save_seen)
 from .shots_engine import LEAGUE as PROPS_LEAGUE
 from .shots_engine import PROPS_LOG, PropsWatcher
@@ -63,7 +63,59 @@ def build_upcoming_list(all_fixtures: list[dict], api_id_to_div: dict[int, str],
     return upcoming
 
 
-def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD) -> tuple[list[dict], list[dict]]:
+def process_one_fixture(fx: dict, client: ApiFootballClient, goals: LiveWatcher,
+                        props: PropsWatcher, div: str) -> tuple[dict | None, list[dict]] | None:
+    """Fetch lineups+odds for one fixture and run both engines against it.
+
+    Returns `None` if lineups aren't confirmed yet (or the lineups fetch
+    itself fails) - the caller should NOT mark this fixture `seen`, since a
+    later poll might still catch it once lineups are published. Returns
+    `(goal_row_or_None, prop_rows)` once lineups ARE confirmed and
+    processing was attempted - the caller SHOULD mark it `seen` at that
+    point regardless of whether a valid prediction came out, since the
+    lineup data won't change on a retry (a team-name mismatch or an
+    insufficient matched-starters count isn't going to fix itself).
+
+    Shared by run_all.py's regular poll loop and scripts/backfill_missed_fixtures.py,
+    so this fetch/process/error-handling logic exists in exactly one place.
+    """
+    fid = fx["fixture"]["id"]
+    try:
+        lineups = client.lineups(fid)
+    except ApiFootballError as e:
+        print(f"  ! lineups fetch failed for fixture {fid}: {e}")
+        return None
+    if len(lineups) < 2:
+        return None  # not confirmed yet — caller will retry on next poll
+
+    print(f"  confirmed lineups: {fx['teams']['home']['name']} v "
+          f"{fx['teams']['away']['name']}")
+
+    try:
+        odds_resp = client.odds(fid)
+    except ApiFootballError as e:
+        print(f"  ! odds fetch failed for fixture {fid}: {e}")
+        odds_resp = []
+
+    try:
+        goal_row = goals.process_fixture(div, fx, lineups, odds_resp)
+    except Exception as e:
+        print(f"  ! goals-engine error: {e}")
+        goal_row = None
+
+    prop_rows = []
+    # Player-props engine is E0-only for now (see shots_engine.py docstring).
+    if div == PROPS_LEAGUE:
+        try:
+            prop_rows = props.player_rows_for_fixture(fx, lineups, odds_resp)
+        except Exception as e:
+            print(f"  ! props-engine error: {e}")
+
+    return goal_row, prop_rows
+
+
+def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
+            hours_behind: int = DEFAULT_HOURS_BEHIND) -> tuple[list[dict], list[dict]]:
     client = ApiFootballClient()
     goals = LiveWatcher(client)
     props = PropsWatcher(client)
@@ -98,41 +150,17 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD) -> tuple[list[dict], list[d
             continue
         kickoff = pd.Timestamp(fx["fixture"]["date"])
         mins_to_ko = (kickoff - now).total_seconds() / 60
-        if not (0 <= mins_to_ko <= hours_ahead * 60):
+        if not (-hours_behind * 60 <= mins_to_ko <= hours_ahead * 60):
             continue
 
-        try:
-            lineups = client.lineups(fid)
-        except ApiFootballError as e:
-            print(f"  ! lineups fetch failed for fixture {fid}: {e}")
-            continue
-        if len(lineups) < 2:
-            continue  # not confirmed yet — caller will retry on next poll
+        result = process_one_fixture(fx, client, goals, props, div)
+        if result is None:
+            continue  # lineups not confirmed yet — caller will retry on next poll
 
-        print(f"  confirmed lineups: {fx['teams']['home']['name']} v "
-              f"{fx['teams']['away']['name']} (kickoff in {mins_to_ko:.0f}min)")
-
-        try:
-            odds_resp = client.odds(fid)
-        except ApiFootballError as e:
-            print(f"  ! odds fetch failed for fixture {fid}: {e}")
-            odds_resp = []
-
-        try:
-            goal_row = goals.process_fixture(div, fx, lineups, odds_resp)
-        except Exception as e:
-            print(f"  ! goals-engine error: {e}")
-            goal_row = None
+        goal_row, fixture_prop_rows = result
         if goal_row is not None:
             goal_rows.append(goal_row)
-
-        # Player-props engine is E0-only for now (see shots_engine.py docstring).
-        if div == PROPS_LEAGUE:
-            try:
-                prop_rows.extend(props.player_rows_for_fixture(fx, lineups, odds_resp))
-            except Exception as e:
-                print(f"  ! props-engine error: {e}")
-
+        prop_rows.extend(fixture_prop_rows)
         seen.add(fid)
 
     match_detail.extract_and_log_details(goal_rows)
