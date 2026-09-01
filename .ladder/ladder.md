@@ -830,3 +830,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Separately investigate/fix GitHub Actions' schedule-trigger reliability itself (external cron service pinging workflow_dispatch, or a self-hosted runner) - bigger, not urgent, same class of problem as R081's SofaScore CI-blocking, likely a platform limitation rather than something fixable in this repo's code alone
   - Blocked by: user hasn't confirmed whether to proceed with the engine fix + backfill the 5 missed matches
   - Status: in progress — root cause fully diagnosed and confirmed (cron gaps + one-way cutoff + lineup data still fetchable), proposed fix presented to user, awaiting go-ahead to brainstorm/implement.
+
+- [ ] **R101** — Fixture window fix + backfill: plan execution mode → *small*
+  - Context: docs/superpowers/plans/2026-09-01-fixture-window-fix-and-backfill.md written, self-reviewed, and committed - standard writing-plans handoff choice, covering the widened kickoff window, extracted process_one_fixture helper, reusable backfill script, and running the real backfill for the 5 missed weekend matches
+  - Why: tracked explicitly for every prior plan this session
+  - [ ] Subagent-driven (Recommended) - fresh subagent per task, two-stage review, same process used for every previous plan this session
+  - [ ] Inline execution - batch execution with checkpoints in this session
+  - Blocked by: waiting on user's choice
+  - Status: pending — question asked, awaiting response.
