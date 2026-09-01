@@ -31,6 +31,21 @@ def _new_rows(path: str) -> list[dict]:
     return list(reader)
 
 
+def build_goals_line(goals: list[dict]) -> str:
+    """One summary line for the newly-logged goals predictions, featuring
+    whichever fixture has the model's most confident call (largest distance
+    from a 50/50 split) - a signal every row always has, unlike EV/odds,
+    which are only present when a market price happened to be fetched at
+    logging time."""
+    featured = max(goals, key=lambda r: abs(float(r["model_p_over25"]) - 0.5))
+    pct = round(float(featured["model_p_over25"]) * 100)
+    exp_goals = float(featured["exp_total_goals"])
+    line = f"{featured['home']} v {featured['away']}: {pct}% O2.5, xG {exp_goals:.2f}"
+    if len(goals) > 1:
+        line += f" (+{len(goals) - 1} more)"
+    return line
+
+
 def main() -> None:
     url = os.environ.get("NOTIFY_URL")
     secret = os.environ.get("NOTIFY_SECRET")
@@ -48,9 +63,7 @@ def main() -> None:
 
     parts = []
     if goals:
-        names = [f"{r['home']} v {r['away']}" for r in goals[:3]]
-        more = f" +{len(goals) - 3} more" if len(goals) > 3 else ""
-        parts.append(f"Goals: {', '.join(names)}{more}")
+        parts.append(build_goals_line(goals))
     if prop_fixtures:
         parts.append(f"Props: {len(prop_fixtures)} fixture(s), {len(props)} player line(s)")
 
