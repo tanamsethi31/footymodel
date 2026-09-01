@@ -37,3 +37,7 @@ jobs:
         run: python scripts/build_players_merge_test.py
       - name: Upcoming-fixture preview list building (pure, data-free)
         run: python scripts/run_all_upcoming_test.py
+      - name: run_all.py shared-fetch orchestration + fixture-window regression (mocked API)
+        run: python scripts/run_all_dryrun.py
+      - name: Missed-fixture backfill script recovery + idempotency (mocked API)
+        run: python scripts/backfill_missed_fixtures_test.py
