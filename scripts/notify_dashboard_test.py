@@ -30,4 +30,15 @@ assert line2 == "Sunderland v Fulham: 36% O2.5, xG 2.14 (+2 more)", (
     f"expected the fixture furthest from 50% (Sunderland v Fulham) to be featured, got: {line2}"
 )
 
-print("ALL CHECKS PASSED — featured-fixture selection and body format are correct.")
+# --- a row missing a required field raises, rather than silently
+# producing a wrong/blank line - this is exactly what main()'s fallback
+# in notify_dashboard.py depends on being able to catch. ---
+missing_field = [{"home": "Chelsea", "away": "Brighton", "model_p_over25": "0.439"}]  # no exp_total_goals
+try:
+    build_goals_line(missing_field)
+    raise AssertionError("expected build_goals_line to raise on a row missing exp_total_goals")
+except KeyError:
+    pass  # expected
+
+print("ALL CHECKS PASSED — featured-fixture selection, body format, and the "
+      "missing-field failure mode are all correct.")

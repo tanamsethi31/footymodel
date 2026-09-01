@@ -65,7 +65,7 @@ def main() -> None:
     if goals:
         try:
             parts.append(build_goals_line(goals))
-        except (ValueError, KeyError) as e:
+        except Exception as e:
             # build_goals_line() trusts that model_p_over25/exp_total_goals
             # are always populated - true for every engine today, but this
             # falls back to a plain team-name list rather than crashing (and
