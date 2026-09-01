@@ -1,2 +1,3 @@
 fixture_id,home,away,kickoff,actual_home_goals,actual_away_goals,actual_total_goals,actual_over_won,model_p_over25,model_correct,bet_side,bet_odds,bet_won,realized_return,graded_at
 1557381,Crystal Palace,Manchester City,2026-08-28T19:00:00+00:00,1,4,5,True,0.606,True,over,1.77,True,0.77,2026-08-29T18:26:20.238416
+1557377,Aston Villa,Arsenal,2026-08-31T19:00:00+00:00,0,1,1,False,0.442,True,under,2.25,True,1.25,2026-09-01T07:26:48.209637
