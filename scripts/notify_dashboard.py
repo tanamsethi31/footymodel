@@ -63,7 +63,17 @@ def main() -> None:
 
     parts = []
     if goals:
-        parts.append(build_goals_line(goals))
+        try:
+            parts.append(build_goals_line(goals))
+        except (ValueError, KeyError) as e:
+            # build_goals_line() trusts that model_p_over25/exp_total_goals
+            # are always populated - true for every engine today, but this
+            # falls back to a plain team-name list rather than crashing (and
+            # losing the notification entirely) if that ever isn't the case.
+            print(f"  ! build_goals_line failed, falling back to team names: {e}")
+            names = [f"{r['home']} v {r['away']}" for r in goals[:3]]
+            more = f" +{len(goals) - 3} more" if len(goals) > 3 else ""
+            parts.append(f"Goals: {', '.join(names)}{more}")
     if prop_fixtures:
         parts.append(f"Props: {len(prop_fixtures)} fixture(s), {len(props)} player line(s)")
 
