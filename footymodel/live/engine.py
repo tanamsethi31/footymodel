@@ -42,6 +42,15 @@ SEEN_FIXTURES_FILE = PROCESSED_DIR / "live_seen_fixtures.json"
 # this window; a shorter default lookahead keeps requests cheap on Free tier.
 DEFAULT_HOURS_AHEAD = 2
 
+# Confirmed-lineup data never expires once published, but a GitHub Actions
+# cron gap (observed up to ~19h between scheduled runs in practice) can push
+# a fixture's kickoff into the past before any poll ever sees it. Without a
+# backward allowance, that fixture is lost forever even though nothing about
+# it actually changed. 24h comfortably covers same-day cron gaps plus a
+# safety margin near a day boundary, at a bounded cost - no extra date-fetch
+# calls, just one extra lineup-check per not-yet-seen fixture per poll.
+DEFAULT_HOURS_BEHIND = 24
+
 
 def _load_seen() -> set:
     if SEEN_FIXTURES_FILE.exists():
@@ -178,7 +187,8 @@ class LiveWatcher:
             fixture_id, home_names, away_names, pred)
         return row
 
-    def run_once(self, hours_ahead: int = DEFAULT_HOURS_AHEAD) -> list[dict]:
+    def run_once(self, hours_ahead: int = DEFAULT_HOURS_AHEAD,
+                hours_behind: int = DEFAULT_HOURS_BEHIND) -> list[dict]:
         """Query fixtures by DATE ONLY (no league/season filter) and filter
         client-side by league id. The API-Football Free tier blocks the
         league+season combo for the current season/date but date-only queries
@@ -206,7 +216,7 @@ class LiveWatcher:
                 continue
             kickoff = pd.Timestamp(fx["fixture"]["date"])
             mins_to_ko = (kickoff - now).total_seconds() / 60
-            if not (0 <= mins_to_ko <= hours_ahead * 60):
+            if not (-hours_behind * 60 <= mins_to_ko <= hours_ahead * 60):
                 continue
             print(f"  checking {fx['teams']['home']['name']} v "
                   f"{fx['teams']['away']['name']} (kickoff in {mins_to_ko:.0f}min)")
