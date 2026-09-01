@@ -931,3 +931,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Discard this work
   - Blocked by: ~none~
   - Status: done — user chose push to origin/main.
+
+- [ ] **R113** — URGENT: API-Football account suspended, live pipeline silently fetching zero fixtures → *medium*
+  - Context: while investigating whether `client.odds()` returns a usable closing-line snapshot (needed for R107 Option B's Phase-B CLV test), a live call failed with `{'access': 'Your account is suspended, check on https://dashboard.api-football.com.'}`. Confirmed via `gh run list`/`gh run view --log` that every `live_poll.yml` run since sometime between 2026-09-01T09:25 and 14:01 UTC has hit this same error on every fixture-date fetch, and the SofaScore fallback is separately failing with HTTP 403 Forbidden on its scheduled-events endpoint - so the live pipeline has had NO working data source for roughly a day. Every run still reports `success` (exit code 0) because the error is caught and printed as a warning, not raised - nothing would have surfaced this without manually reading logs
+  - Why: this is a live production outage, not a design question - it directly blocks the just-requested Phase B brainstorm too (can't verify `odds()`'s post-kickoff behavior against a suspended account), and independently blocks all live predictions/notifications from happening at all right now regardless of what direction the brainstorm takes
+  - [ ] Check the API-Football dashboard now to diagnose/resolve the suspension (needs the user directly - dashboard login isn't something this session can do)
+  - [ ] Defer the dashboard check, start the Phase B brainstorm design-only (can't verify live odds-endpoint behavior until the account is restored)
+  - Blocked by: awaiting user's answer
+  - Status: in progress — question posed to user, not yet answered.
