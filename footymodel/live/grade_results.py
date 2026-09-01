@@ -10,10 +10,16 @@ each source's own fixture_id format.
 
 Real constraint, confirmed live (2026-08-27): the free-tier date query only
 covers a ~3-day rolling window (yesterday/today/tomorrow relative to now).
-A prediction whose kickoff falls further in the past than that is
-PERMANENTLY ungradeable via this method - once missed, it stays missed,
-since the window only ever moves forward. Grade promptly; don't let this
-job go more than ~1 day without running.
+For predictions logged with a plain API-Football fixture_id, grade_row()
+looks the match up directly by id first - unlike fixtures_by_date(), that
+isn't subject to the rolling-window restriction (confirmed live, 2026-09-01:
+/fixtures?id=X still returns real data for a match several days outside the
+date-query window), so those are no longer permanently ungradeable once
+missed. The date+fuzzy-name fallback below only still applies to
+RapidAPI/SofaScore-sourced predictions, which use their own prefixed
+fixture_id formats (e.g. "rapid_5868013") that don't correspond to an
+API-Football fixture id - those remain window-limited. Grade promptly
+regardless; don't let this job go more than ~1 day without running.
 
 Goals-only for v1 - props grading needs per-player post-match stats,
 unverified across all three live sources this project has tried.
@@ -107,30 +113,50 @@ def _load_graded_ids() -> set:
 def grade_row(row: pd.Series, cache: dict[str, list[dict]], client: ApiFootballClient) -> dict | None:
     """cache: date (YYYY-MM-DD) -> that date's E0 fixtures, populated
     lazily so multiple predictions sharing a kickoff day cost one API
-    call, not one per prediction."""
-    kickoff = pd.Timestamp(row["kickoff"])
-    date_str = kickoff.strftime("%Y-%m-%d")
+    call, not one per prediction - only used for the date+fuzzy-name
+    fallback (see below).
 
-    if date_str not in cache:
-        try:
-            fixtures = client.fixtures_by_date(date_str)
-        except ApiFootballError as e:
-            print(f"  ! date {date_str} out of range or errored, skipping: {e}")
-            cache[date_str] = []
+    Tries a direct by-id lookup first: `row["fixture_id"]` is a plain
+    API-Football fixture id for anything engine.py logged (RapidAPI/
+    SofaScore prefix theirs, e.g. "rapid_5868013", so `int(...)` raising
+    ValueError is exactly how those fall through to the fallback below).
+    Unlike fixtures_by_date(), a by-id lookup isn't subject to the free
+    tier's rolling date-query window, so this is both more precise (no
+    fuzzy name matching needed - we already know the exact fixture) and not
+    permanently blocked once a match's date rolls out of that window."""
+    fx = None
+    try:
+        fx = client.fixture_by_id(int(row["fixture_id"]))
+    except ValueError:
+        pass  # not a plain API-Football id (RapidAPI/SofaScore-prefixed) - use the fallback below
+    except ApiFootballError as e:
+        print(f"  ! fixture id {row['fixture_id']} lookup failed: {e}")
+
+    if fx is None:
+        kickoff = pd.Timestamp(row["kickoff"])
+        date_str = kickoff.strftime("%Y-%m-%d")
+
+        if date_str not in cache:
+            try:
+                fixtures = client.fixtures_by_date(date_str)
+            except ApiFootballError as e:
+                print(f"  ! date {date_str} out of range or errored, skipping: {e}")
+                cache[date_str] = []
+                return None
+            cache[date_str] = [f for f in fixtures if f["league"]["id"] == 39]  # E0
+
+        candidates = cache[date_str]
+        if not candidates:
             return None
-        cache[date_str] = [f for f in fixtures if f["league"]["id"] == 39]  # E0
 
-    candidates = cache[date_str]
-    if not candidates:
-        return None
+        names = [f["teams"]["home"]["name"] for f in candidates] + \
+                [f["teams"]["away"]["name"] for f in candidates]
+        home_match = namematch.best_match(row["home"], names, threshold=0.6)
+        away_match = namematch.best_match(row["away"], names, threshold=0.6)
+        fx = next((f for f in candidates
+                  if f["teams"]["home"]["name"] == home_match
+                  and f["teams"]["away"]["name"] == away_match), None)
 
-    names = [f["teams"]["home"]["name"] for f in candidates] + \
-            [f["teams"]["away"]["name"] for f in candidates]
-    home_match = namematch.best_match(row["home"], names, threshold=0.6)
-    away_match = namematch.best_match(row["away"], names, threshold=0.6)
-    fx = next((f for f in candidates
-              if f["teams"]["home"]["name"] == home_match
-              and f["teams"]["away"]["name"] == away_match), None)
     if fx is None or fx["fixture"]["status"]["short"] not in ("FT", "AET", "PEN"):
         return None  # not found, or found but not finished yet
 

@@ -29,6 +29,8 @@ jobs:
         run: python scripts/grade_results_datetime_test.py
       - name: Grade-results ragged-column parsing (pure, data-free)
         run: python scripts/grade_results_columns_test.py
+      - name: Grade-results by-id lookup + fallback (pure, data-free)
+        run: python scripts/grade_results_by_id_test.py
       - name: Match-detail JSONL logging (pure, data-free)
         run: python scripts/match_detail_test.py
       - name: Kelly bankroll simulator (pure, data-free)
