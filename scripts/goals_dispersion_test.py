@@ -44,6 +44,57 @@ def evaluate(leagues: list[str]) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True)
 
 
+def calibrate_league(raw: np.ndarray, target_mean: float) -> np.ndarray:
+    """Binary-search a multiplicative scale on the raw expected total so the
+    Poisson-implied mean P(over) matches the league's actual over-rate -
+    isolates the mean-bias question from the dispersion (tail-shape)
+    question tested below. Local copy of lineup_test.py's own helper -
+    matches this project's existing precedent of each sweep script keeping
+    its own small conversion logic rather than sharing one across two call
+    sites."""
+    lo, hi = 0.5, 1.5
+    for _ in range(40):
+        s = (lo + hi) / 2
+        mp = (1 - poisson.cdf(2, raw * s)).mean()
+        if mp > target_mean:
+            hi = s
+        else:
+            lo = s
+    return raw * (lo + hi) / 2
+
+
+def simulate(evals: pd.DataFrame, dispersion: float | None) -> tuple[float, np.ndarray]:
+    """Scale-calibrate per league, convert to a probability at this
+    dispersion, print Brier + calibration table per league and pooled.
+    Returns (pooled_brier, pooled_squared_error) for the significance check."""
+    all_p, all_y = [], []
+    tag = "Poisson" if dispersion is None else f"NB(disp={dispersion})"
+    for lg, g in evals.groupby("league"):
+        y = g["over_won"].astype(int).values
+        exp_blend = BEST_BLEND_W * g["exp_team"].values + (1 - BEST_BLEND_W) * g["exp_full"].values
+        scaled = calibrate_league(exp_blend, y.mean())
+        if dispersion is None:
+            p = np.clip(1 - poisson.cdf(2, scaled), 1e-9, 1 - 1e-9)
+        else:
+            n, prm = dispersion, dispersion / (dispersion + scaled)
+            p = np.clip(1 - nbinom.cdf(2, n, prm), 1e-9, 1 - 1e-9)
+        brier = np.mean((p - y) ** 2)
+        print(f"=== {lg} [{tag}] — n={len(p)} — Brier {brier:.4f} ===")
+        print(calibration_table(pd.DataFrame({"p": p, "won": y}))
+              .to_string(index=False, float_format=lambda v: f"{v:.3f}"))
+        all_p.append(p)
+        all_y.append(y)
+
+    p_all = np.concatenate(all_p)
+    y_all = np.concatenate(all_y)
+    brier_pooled = np.mean((p_all - y_all) ** 2)
+    print(f"--- POOLED [{tag}] — n={len(p_all)} — Brier {brier_pooled:.4f} ---")
+    print(calibration_table(pd.DataFrame({"p": p_all, "won": y_all}))
+          .to_string(index=False, float_format=lambda v: f"{v:.3f}"))
+    print()
+    return brier_pooled, (p_all - y_all) ** 2
+
+
 if __name__ == "__main__":
     if CACHE.exists():
         evals = pd.read_parquet(CACHE)
@@ -55,4 +106,14 @@ if __name__ == "__main__":
         evals.to_parquet(CACHE, index=False)
         print(f"Saved -> {CACHE}  ({len(evals)} rows)")
 
-    print(evals.groupby("league").size())
+    results = {d: simulate(evals, d) for d in DISPERSIONS}
+
+    baseline_brier, baseline_se = results[None]
+    best_d = min((d for d in DISPERSIONS if d is not None), key=lambda d: results[d][0])
+    best_brier, best_se = results[best_d]
+    diff = baseline_se - best_se
+    t = diff.mean() / (diff.std() / np.sqrt(len(diff)))
+    print("=" * 64)
+    print(f"Poisson baseline pooled Brier: {baseline_brier:.4f}")
+    print(f"Best NB(disp={best_d}) pooled Brier: {best_brier:.4f}")
+    print(f"Paired t-stat: {t:.2f}  ({'significant' if abs(t) > 2 else 'NOT significant'})")
