@@ -861,3 +861,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [x] Recommended instead: keep the existing blanket-interval polling as-is (GitHub Actions cron can't natively do dynamic per-match scheduling without real extra infra, and 20min blanket polling already reliably catches confirmed lineups within their pre-kickoff window - marginal gain for real added complexity), and put the effort into richer notification content (a short reasoning summary) instead
   - Blocked by: ~none~
   - Status: done — user confirmed: proceed with brainstorming the richer notification-content improvement (calendar-driven scheduling deliberately not pursued, per the recommendation above).
+
+- [ ] **R105** — Richer notification content: plan execution mode → *small*
+  - Context: docs/superpowers/plans/2026-09-01-richer-notification-content.md written, self-reviewed, and committed - standard writing-plans handoff choice, covering the build_goals_line() extraction/enrichment and its CI wiring
+  - Why: tracked explicitly for every prior plan this session
+  - [ ] Subagent-driven (Recommended) - fresh subagent per task, two-stage review, same process used for every previous plan this session
+  - [ ] Inline execution - batch execution with checkpoints in this session
+  - Blocked by: waiting on user's choice
+  - Status: pending — question asked, awaiting response.
