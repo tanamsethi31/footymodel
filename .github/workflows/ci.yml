@@ -43,3 +43,5 @@ jobs:
         run: python scripts/run_all_dryrun.py
       - name: Missed-fixture backfill script recovery + idempotency (mocked API)
         run: python scripts/backfill_missed_fixtures_test.py
+      - name: Push notification content - featured-fixture selection (pure, data-free)
+        run: python scripts/notify_dashboard_test.py
