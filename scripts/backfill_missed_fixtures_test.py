@@ -66,4 +66,28 @@ assert goal_rows[0]["fixture_id"] == 999005, "expected the 20-hours-in-the-past 
 goal_rows2, prop_rows2 = backfill_missed_fixtures.backfill(["2026-08-30"])
 assert goal_rows2 == [], "re-running backfill for an already-recovered fixture must not double-log it"
 
-print("ALL CHECKS PASSED — backfill recovers a past-kickoff fixture and is idempotent on re-run.")
+# --- fixture_ids path (bypasses fixtures_by_date entirely, for dates the
+# API-Football free tier has already rolled out of its own date-query
+# window - confirmed live that /fixtures?id=X still works there) ---
+id_fixture = {
+    "fixture": {"id": 999006,
+               "date": (pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=30)).isoformat()},
+    "league": {"id": 39},  # E0
+    "teams": {"home": {"id": 50, "name": home_us}, "away": {"id": 29, "name": away_us}},
+}
+mock_client.fixture_by_id.return_value = id_fixture
+fixtures_by_date_calls_before = mock_client.fixtures_by_date.call_count
+
+goal_rows3, prop_rows3 = backfill_missed_fixtures.backfill(fixture_ids=[999006])
+print(f"fixture_by_id calls: {mock_client.fixture_by_id.call_count} (expect 1)")
+print(f"goal_rows (by id): {len(goal_rows3)} (expect 1)")
+
+assert mock_client.fixture_by_id.call_count == 1
+assert mock_client.fixtures_by_date.call_count == fixtures_by_date_calls_before, (
+    "backfill(fixture_ids=...) must not touch fixtures_by_date at all"
+)
+assert len(goal_rows3) == 1
+assert goal_rows3[0]["fixture_id"] == 999006, "expected the by-id-fetched fixture to be recovered"
+
+print("ALL CHECKS PASSED — backfill recovers a past-kickoff fixture and is idempotent on re-run, "
+      "and the fixture_ids path recovers a fixture without touching fixtures_by_date.")

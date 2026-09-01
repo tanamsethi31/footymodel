@@ -86,6 +86,15 @@ class ApiFootballClient:
             params["season"] = season
         return self._get("fixtures", params)["response"]
 
+    def fixture_by_id(self, fixture_id: int) -> dict | None:
+        """Look up a single fixture by its own id. Unlike fixtures_by_date(),
+        this isn't subject to the free tier's rolling ~3-day date-window
+        restriction - confirmed directly: /fixtures?id=X returns real data
+        for a match several days old that /fixtures?date=... rejects for the
+        same date. None if the id doesn't exist."""
+        resp = self._get("fixtures", {"id": fixture_id})["response"]
+        return resp[0] if resp else None
+
     def lineups(self, fixture_id: int) -> list[dict]:
         """Starting lineups for a fixture. Empty list if not yet announced —
         per API docs, available ~20-40 min before kickoff (competition-dependent)."""
