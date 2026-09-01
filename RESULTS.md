@@ -584,3 +584,50 @@ opponent-suppression, real-minutes, and venue-factor approach is not a
 PL-specific artifact - it generalizes to a second, stylistically different
 big-5 league without any re-tuning. `scripts/whoscored_calibration_test.py`
 now takes `--league`/`--season` flags for testing further leagues.
+
+# Phase H — Goals-level Over/Under: Negative-Binomial dispersion test (NO SIGNAL)
+
+The player-shots submodel (Phase D) found a point-estimate Poisson too
+sharp-tailed for real shot counts and fixed it with a Negative Binomial
+(`SHOTS_DISPERSION = 3.0`). `LineupModel`'s own Over/Under 2.5 prediction
+(`_ou_prob_over25`) has always used a plain Poisson and had never been put
+through the same test - total goals is exactly the kind of count variable
+that could plausibly show the same overdispersion.
+
+Ran the identical methodology (`scripts/goals_dispersion_test.py`): walk-forward
+via the existing `accuracy_test()` across the big-5 (E0/SP1/D1/I1/F1, 7,096
+matches pooled), scale-calibrated per league (isolating the mean-bias
+question from the dispersion/tail-shape question), then swept Negative
+Binomial dispersion against the confirmed production blend (`BEST_BLEND_W =
+0.25`).
+
+| Dispersion | Pooled Brier |
+|-----------:|-------------:|
+| Poisson (baseline) | **0.2413** |
+| NB(1) | 0.2585 |
+| NB(3) | 0.2455 |
+| NB(6) | 0.2428 |
+| NB(10) | 0.2419 |
+| NB(15) (best NB tested) | 0.2416 |
+
+Brier monotonically improves as dispersion rises toward Poisson itself (NB
+converges to Poisson as dispersion → ∞) but never crosses below the Poisson
+baseline - even the best NB candidate is worse, not better:
+
+| League | Poisson Brier | NB(15) Brier |
+|--------|--------------:|--------------:|
+| D1 | 0.2347 | 0.2352 |
+| E0 | 0.2417 | 0.2421 |
+| F1 | 0.2472 | 0.2473 |
+| I1 | 0.2434 | 0.2436 |
+| SP1 | 0.2389 | 0.2394 |
+
+Every single league gets worse under NB, not just the pooled average - the
+opposite of a real, replicating effect. Paired t-stat (NB(15) vs Poisson,
+squared error): **-1.70** (not significant, wrong sign).
+
+**Not adopted.** Unlike shots, the goals-level Poisson assumption is already
+well-calibrated - this specific fix doesn't transfer. Same disciplined stop
+as every other no-edge result in this project: tested against real data,
+didn't hold up, doesn't ship. `LineupModel._ou_prob_over25` remains
+unchanged (plain Poisson).
