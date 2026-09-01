@@ -46,9 +46,14 @@ DEFAULT_HOURS_AHEAD = 2
 # cron gap (observed up to ~19h between scheduled runs in practice) can push
 # a fixture's kickoff into the past before any poll ever sees it. Without a
 # backward allowance, that fixture is lost forever even though nothing about
-# it actually changed. 24h comfortably covers same-day cron gaps plus a
-# safety margin near a day boundary, at a bounded cost - no extra date-fetch
-# calls, just one extra lineup-check per not-yet-seen fixture per poll.
+# it actually changed. 24h comfortably covers same-day cron gaps (the actual
+# observed failure mode) at a bounded cost - no extra date-fetch calls, just
+# one extra lineup-check per not-yet-seen fixture per poll. Note this can
+# only help a fixture that kicked off on the SAME UTC calendar day as `now`
+# falls on, since the fixture list itself is only fetched for today's and
+# tomorrow's date buckets below - a fixture from a previous calendar day is
+# never in the fetched list at all, regardless of this window. Recovering
+# those is a separate concern (see scripts/backfill_missed_fixtures.py).
 DEFAULT_HOURS_BEHIND = 24
 
 
@@ -86,14 +91,27 @@ class LiveWatcher:
     def __init__(self, client: ApiFootballClient | None = None):
         self.client = client or ApiFootballClient()
         self.players = load_players()
-        self._models: dict[str, LineupModel] = {}
+        self._models: dict[tuple, LineupModel] = {}
         self._team_rosters: dict[tuple, dict] = {}
 
-    def _model_for(self, league: str) -> LineupModel:
-        if league not in self._models:
-            self._models[league] = LineupModel.fit(
-                self.players, league, pd.Timestamp.now())
-        return self._models[league]
+    def _model_for(self, league: str, as_of: pd.Timestamp) -> LineupModel:
+        """`as_of` must be the FIXTURE'S OWN kickoff date, not wall-clock
+        "now" - matches the backtest's walk-forward convention (players.py's
+        `LineupModel.fit(players, league, d, ...)`, where `d` is each match's
+        own date) and is what actually prevents a fixture's own final stats
+        from leaking into its own prediction if it's processed well after
+        kickoff. Using "now" was safe only by accident back when a fixture
+        could only be processed before its own kickoff (so its own row
+        couldn't exist in the training data yet regardless of the as_of
+        value) - now that DEFAULT_HOURS_BEHIND allows processing up to 24h
+        after kickoff, a delayed daily training-data refresh could otherwise
+        have already ingested this exact match's own result by the time
+        it's (belatedly) predicted."""
+        key = (league, as_of.normalize())
+        if key not in self._models:
+            self._models[key] = LineupModel.fit(
+                self.players, league, as_of)
+        return self._models[key]
 
     def _roster_for(self, league: str, team_us: str) -> dict:
         key = (league, team_us)
@@ -158,7 +176,13 @@ class LiveWatcher:
                   f"for {home_api} v {away_api}, skipping")
             return None
 
-        model = self._model_for(league)
+        # Truncate to a plain calendar date (matching player_match.parquet's
+        # tz-naive, midnight-truncated `date` column) so `date < as_of` in
+        # LineupModel.fit() reliably excludes this exact match's own row -
+        # see the long comment on _model_for() for why this must be the
+        # fixture's own kickoff date, not wall-clock "now".
+        kickoff_date = pd.Timestamp(fx["date"]).tz_localize(None).normalize()
+        model = self._model_for(league, kickoff_date)
         pred = model.predict(home_ids, away_ids, home_us, away_us)
 
         if odds_resp is None:
