@@ -899,7 +899,7 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — user chose full cross-league replication, matching the project's established validation bar.
 
-- [ ] **R109** — Approach for testing the goals-level NB-dispersion hypothesis → *small*
+- [x] **R109** — Approach for testing the goals-level NB-dispersion hypothesis → *small*
   - Context: R108 confirmed the NB-dispersion hypothesis for `LineupModel`'s Over/Under 2.5 probability should be tested with full cross-league replication. Read `scripts/shots_calibration_test.py` in full to nail the established precedent (two-stage: cache the walk-forward's fitted rate/expected-total once, then cheaply sweep dispersion values and print Brier + `footymodel.backtest.calibration_table` per value)
   - Why: `players.py`'s `accuracy_test()` already returns the raw `exp_team`/`exp_full` walk-forward numbers needed - no `LineupModel` changes required to test the hypothesis, only a downstream script that swaps `poisson.cdf` for a swept `nbinom.cdf`
   - [x] Recommended: new standalone `scripts/goals_dispersion_test.py`, mirroring `shots_calibration_test.py`'s cache-then-sweep pattern exactly, testing E0/SP1/D1/I1/F1 (the same big-5 set the full-lineup fix was validated on) + pooled. Purely investigative, no production code touched until the hypothesis is proven
@@ -908,10 +908,17 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — user confirmed the recommended approach (standalone `goals_dispersion_test.py`).
 
-- [ ] **R110** — Goals-dispersion-test plan: execution mode → *small*
+- [x] **R110** — Goals-dispersion-test plan: execution mode → *small*
   - Context: docs/superpowers/plans/2026-09-01-goals-dispersion-test.md written and committed - 2 tasks (build+cache the walk-forward, then sweep NB dispersion + significance check), standard writing-plans handoff choice
   - Why: tracked explicitly for every prior plan this session
   - [x] Subagent-driven (Recommended) - fresh subagent per task, two-stage review, same process used for every previous plan this session
   - [ ] Inline execution - batch execution with checkpoints in this session
   - Blocked by: ~none~
   - Status: done — user chose subagent-driven.
+
+- [x] **R111** — Goals-level NB-dispersion test: shipped end-to-end, RESULT IS NEGATIVE → *medium*
+  - Context: subagent-driven execution of both tasks from docs/superpowers/plans/2026-09-01-goals-dispersion-test.md - built `scripts/goals_dispersion_test.py` (caches `players.py`'s existing `accuracy_test()` walk-forward across E0/SP1/D1/I1/F1, then sweeps Poisson vs 9 Negative-Binomial dispersion values, reporting Brier + calibration table per league and pooled, plus a paired t-stat vs the shots-model precedent's own significance bar)
+  - Why: closes R106/R107/R108/R109's chain - tests whether the goals-level Over/Under 2.5 probability (still plain Poisson in `LineupModel._ou_prob_over25`) suffers the same overdispersion the shots submodel already found and fixed (`SHOTS_DISPERSION=3.0`). Full cross-league replication was used (not a single-league gut-check) per R108's choice, matching this project's own established bar for trusting a model change (the full-lineup fix wasn't trusted until it replicated across all 5 big-5 leagues either)
+  - Fix: n/a - this is a pure investigation, no production code (`players.py`/`engine.py`/`run_all.py`) touched. Both tasks passed spec review and code-quality review clean on the first pass (no fix-and-re-review loop needed), and a final whole-round reviewer independently re-ran the script from scratch and reproduced the exact same numbers rather than trusting the implementer's report
+  - Blocked by: ~none~
+  - Status: done, but the finding is a clean NO — no NB dispersion value beat the Poisson baseline. Best candidate (disp=15) pooled Brier 0.2416 vs Poisson's 0.2413 (worse, not better); paired t-stat -1.70 (not significant, and the wrong sign - the "best" NB candidate is actually worse on average); every one of the 5 leagues individually got worse under NB(15), not just the pooled average. All three of the design spec's go/no-go conditions fail. Conclusion: unlike shots, the goals model's Poisson assumption is already well-calibrated - this specific hypothesis is ruled out, matching this project's own established discipline of proving a negative result rigorously rather than assuming a fix must exist. Final reviewer suggested (not yet done, small optional follow-up) recording this negative finding in RESULTS.md alongside the project's other ruled-out approaches, matching its existing documentation convention.
