@@ -1030,10 +1030,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — user confirmed. IMPORTANT correction while writing the spec: grade_results.py does NOT currently route to per-engine clients at all (both branches - by-id and date+fuzzy-fallback - only ever use ApiFootballClient); "reuses existing prefix-based client routing" was inaccurate. Genuine new per-source client dispatch (RapidApiClient/SofaScoreClient/ApiFootballClient by fixture_id prefix) is needed - noted honestly in the spec rather than silently building on the wrong premise.
 
-- [ ] **R124** — live-closing-odds-clv plan: execution mode → *small*
+- [x] **R124** — live-closing-odds-clv plan: execution mode → *small*
   - Context: docs/superpowers/plans/2026-09-02-live-closing-odds-clv.md written and committed - 2 tasks (client dispatch + closing-odds fetch + bet_clv + CSV migration, then CI wiring), standard writing-plans handoff choice
   - Why: tracked explicitly for every prior plan this session
-  - [ ] Subagent-driven (Recommended) - fresh subagent per task, two-stage review, same process used for every previous plan this session
+  - [x] Subagent-driven (Recommended) - fresh subagent per task, two-stage review, same process used for every previous plan this session
   - [ ] Inline execution - batch execution with checkpoints in this session
-  - Blocked by: awaiting user's answer
-  - Status: in progress — question posed to user, not yet answered.
+  - Blocked by: ~none~
+  - Status: done — user chose subagent-driven.
