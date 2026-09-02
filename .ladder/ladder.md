@@ -942,9 +942,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
 
 
 - [ ] **R114** — Path forward while the API-Football account is suspended → *small*
-  - Context: with no technical workaround for the suspension (R113) and SofaScore's fallback also separately broken (403), the live pipeline currently has zero working data sources. Two independent, legitimate (non-bypass) paths forward were surfaced
-  - Why: the Phase-B brainstorm the user asked for is blocked either way until at least one data source works again, but the two options differ in effort/scope and aren't mutually exclusive
+  - Context: with no technical workaround for the suspension (R113) and SofaScore's fallback also separately broken (403), the live pipeline currently has zero working data sources. Two independent, legitimate (non-bypass) paths forward were surfaced. User then proposed a third option - create a second API-Football account under a different email to route around the suspension - which was declined: multi-accounting to evade a suspension is ban evasion, almost universally a ToS violation for API/SaaS providers, doesn't address the root cause, and risks the new account (and possibly the whole vendor relationship/payment method) getting flagged too. Same category as the CAPTCHA-bypass/dashboard-login-on-their-behalf declines already given - the rule is about not helping circumvent an access-control decision, not about which specific tool does it
+  - Why: the Phase-B brainstorm the user asked for is blocked either way until at least one data source works again, but the remaining two legitimate options differ in effort/scope and aren't mutually exclusive
   - [ ] Quick path: user checks the dashboard themselves when able (likely a usage-cap/billing/ToS issue, resolved on their end - no engineering work needed here)
   - [ ] Hedge path: add a genuinely independent third data source as a longer-term resilience measure - bigger scope, would need its own proper brainstorm/spec rather than being bolted on ad hoc
-  - Blocked by: awaiting user's answer (or may not need one - could just be an FYI, not a decision, if the user just goes and checks the dashboard on their own time)
-  - Status: in progress — options posed to user, not yet answered.
+  - [x] Rejected: create a second account under a different email to evade the suspension - ban evasion / ToS violation, declined
+  - Blocked by: awaiting user's answer between the two legitimate remaining paths (or may not need one - could just be an FYI, not a decision, if the user just goes and checks the dashboard on their own time)
+  - Status: in progress — options posed to user twice now, not yet answered which of the two legitimate paths (or both) to take.
