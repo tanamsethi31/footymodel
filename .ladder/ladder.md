@@ -960,7 +960,7 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
 - [ ] **R116** — Third-provider scope: full parity (fixtures+lineups+odds) or narrower safety net (fixtures+lineups only)? → *small*
   - Context: confirmed the live product is deliberately scoped to E0 (Premier League) only (`engine.py`'s `LEAGUE_API_IDS`, RESULTS.md Phase A - only league with individually-significant backtested evidence, E0 t=2.23 alone). This narrows the new-provider brainstorm to one league's fixtures/lineups/odds, not multi-league parity
   - Why: odds/EV is the piece most likely to be hard or costly to source from a free/cheap alternative provider (fixtures+lineups are comparatively common); worth confirming whether a fixtures+lineups-only safety net (predictions still logged/graded, just no paper-trade P&L during an outage) is acceptable before scoping a provider search around full parity
-  - [ ] Full parity: new source must supply fixtures + lineups + odds, matching current engine.py capability exactly
+  - [x] Full parity: new source must supply fixtures + lineups + odds, matching current engine.py capability exactly
   - [ ] Narrower safety net: fixtures + lineups only is acceptable; odds/EV can be skipped during an outage
-  - Blocked by: awaiting user's answer
-  - Status: in progress — question posed to user, not yet answered.
+  - Blocked by: ~none~
+  - Status: done — user chose full parity (fixtures + lineups + odds required).
