@@ -981,3 +981,16 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Reconsider: fall back to scoping Flashscore instead, avoiding the unresolved timing risk entirely
   - Blocked by: awaiting user's answer
   - Status: in progress — question posed to user, not yet answered.
+- [x] **R118 (superseded)** — Proceed to ESPN design doc, or reconsider Flashscore? → *small*
+  - Status: superseded — before answering, user redirected to explore Apify marketplace actors as alternative candidates instead (see R119). Note: user's message also contained a live Apify API token in plain text - NOT recorded here or anywhere in this repo; user was told to consider rotating it, and the already-authenticated Apify MCP connector was used instead of the pasted token for all research below.
+
+- [ ] **R119** — Third-provider candidate, round 2: user-suggested Apify actors researched, neither works alone; new stronger candidate found → *small*
+  - Context: dispatched a subagent (with Apify MCP tools, NOT the user's pasted token) to research two user-suggested actors plus search for others
+  - Findings:
+    - `superapis/onefootball`: Standby-mode HTTP wrapper, claims lineups (no timing info) but NO odds at all, `totalUsers: 1` (essentially unused). Not viable alone.
+    - `constructive_calm/understat-football-analytics`: confirmed via a real cheap test call (~$0.02) - fixtures mode returns real upcoming EPL fixtures (5 rows for the 2026 season, e.g. "Ipswich vs Liverpool 2026-09-04"), but has NO lineups and NO odds in any of its 7 modes - xG/analytics data only. Decent traction (113 users) but only solves 1 of 3 needs.
+    - New candidate surfaced during search: `sian.agency/football-api-scraper` (29 users) - README explicitly uses the word "confirmed" for match lineups (the exact signal this project needs) plus "pre-match odds across 18 markets" - the single most promising all-in-one candidate found so far, but not yet schema-checked or test-run for real O/U 2.5 coverage or actual pre-kickoff timing
+    - Other candidates surfaced, not yet tested: `parseforge/sportytrader-scraper`, `romy/flashscore-all-in-one-api` (thin traction), `sian.agency/sports-data-scraper`, `trev0n/oddsportal-com-scraper` + `piotrv1001/oddsportal-scraper` (odds-only, explicit O/U), `zen-studio/bet365-*` (highest traction of anything found, 121-198 users, but README only confirms 1X2 odds not O/U)
+  - Why: this materially changes R118's choice - there's now a third live-candidate family (Apify marketplace actors) in addition to ESPN and Flashscore, and one (`sian.agency/football-api-scraper`) looks like it could beat both on paper (explicit "confirmed" lineup language, explicit odds-market breadth) but is unverified
+  - Blocked by: awaiting user's direction on which candidate to test/pursue next
+  - Status: in progress — findings reported to user, awaiting direction.
