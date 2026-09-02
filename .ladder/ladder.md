@@ -971,4 +971,13 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [x] Spike-test ESPN's public API live first (fixtures/lineups/odds shape + timing for a real EPL fixture) before committing to a design
   - [ ] Skip straight to Flashscore given it's the more proven pattern (accept the bot-detection fragility risk)
   - Blocked by: ~none~
-  - Status: in progress — user chose the ESPN spike-test; running it now against a real live/recent EPL fixture.
+  - Status: done — spike-tested live against real EPL fixtures (`site.api.espn.com`, no key). Fixtures: clean, matches known real fixtures. Lineups: full 20-player roster per team with an explicit `starter: true/false` boolean (cleaner than RapidAPI's own timing-heuristic fallback) - confirmed shape, but timing (does `starter` reflect a true ~20-40min-pre-kickoff confirmation, or an earlier "predicted XI"?) can't be verified without a fixture actually sitting in that live window right now, so this remains an open, forward-testable-only risk. Odds: clean single `overUnder: 2.5` entries with `overOdds`/`underOdds` (American format, needs standard conversion to decimal) across multiple bookmaker providers, matching the existing best-price-across-books pattern. All free, no key, no scraping/bot-detection risk - simplest of the three fallback patterns by far.
+
+
+- [ ] **R118** — Proceed to writing the design doc for the ESPN-based third fallback, or reconsider Flashscore first? → *small*
+  - Context: ESPN spike-test (R117) confirmed fixtures/lineups/odds shape all look usable and simpler than any existing fallback, with one open, only-forward-testable risk (true lineup-confirmation timing vs an early "predicted XI")
+  - Why: recommended proceeding to design on this evidence rather than blocking on an unknown that can only be resolved live, matching the project's own accepted precedent for Phase-B-style live-only risk
+  - [ ] Proceed: write the design doc for an ESPN-based fourth... third fallback engine now, flagging the timing risk explicitly as an open item to verify live
+  - [ ] Reconsider: fall back to scoping Flashscore instead, avoiding the unresolved timing risk entirely
+  - Blocked by: awaiting user's answer
+  - Status: in progress — question posed to user, not yet answered.
