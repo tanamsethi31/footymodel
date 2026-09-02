@@ -964,3 +964,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] Narrower safety net: fixtures + lineups only is acceptable; odds/EV can be skipped during an outage
   - Blocked by: ~none~
   - Status: done — user chose full parity (fixtures + lineups + odds required).
+
+- [ ] **R117** — Third-provider candidate: ESPN's public API (spike-test first) vs Flashscore (Playwright scrape, proven pattern) → *small*
+  - Context: both existing fallbacks (RapidAPI, SofaScore) already do full parity (fixtures+lineups+odds), confirming that's the established bar (matches R116's choice). Ruled out adding another RapidAPI listing outright - several football APIs on that marketplace resell API-Football's own feed under a different brand, which wouldn't be independent of the current suspension
+  - Why: ESPN's unofficial public API (no key, no scraping/bot-detection risk) is simpler to integrate than a third Playwright-based scraper, but its lineup timing and EPL Over/Under odds coverage aren't confirmed from docs alone - needs a live spike-test first, matching this project's own established discipline of verifying API behavior directly rather than trusting documentation (e.g. how the fixture-by-id date-restriction quirk was discovered). Flashscore mirrors sofascore_client.py's exact proven Playwright technique against a genuinely different underlying provider, but inherits the same bot-detection fragility class SofaScore is currently suffering from (its own present 403)
+  - [ ] Spike-test ESPN's public API live first (fixtures/lineups/odds shape + timing for a real EPL fixture) before committing to a design
+  - [ ] Skip straight to Flashscore given it's the more proven pattern (accept the bot-detection fragility risk)
+  - Blocked by: awaiting user's answer
+  - Status: in progress — question posed to user, not yet answered.
