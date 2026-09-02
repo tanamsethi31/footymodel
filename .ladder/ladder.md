@@ -1005,3 +1005,13 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Why: this changes the recommendation - excellent lineup signal, real odds-labeling gap to solve, and a reframing from "third source" to "alternate access path to source #2"
   - Blocked by: awaiting user's direction
   - Status: in progress — findings reported to user, awaiting direction on how to proceed (solve the line-inference problem and treat this as a resilient SofaScore access path, keep testing other genuinely independent candidates instead, or something else).
+
+- [ ] **R121** — Model-tightening direction: which quant approach to pursue first? → *medium*
+  - Context: read RESULTS.md in full (Phases 1-H) to synthesize what's already been tried before proposing anything new - confirmed the classic Dixon-Coles low-score correlation term (rho) is already implemented in model.py, ruling that out as a fresh candidate
+  - Why: the project's own established conclusion is that public data cannot beat the closing line on any tested market/model family (goals, xG, AH, confidence-selection, line-shopping all ruled out) - the only confirmed-real, still-improvable signal is the full-lineup player model (t=3.04 pooled), and the only untested path to real profit is Phase B (live execution edge, never actually tested)
+  - [ ] RAPM-style regularized player ratings (joint regression accounting for teammates/opponents on the pitch simultaneously, vs current independent per-90 decayed rates) - sharpens the one confirmed-real signal
+  - [ ] Hierarchical partial-pooling across leagues for the lineup blend weight (currently each league fits blend_w fully independently, likely why Ligue 1 showed zero effect)
+  - [ ] Live-specific blend weight test for Phase B (BEST_BLEND_W=0.25 is a backtest-average constant; the optimal weight right after live lineup confirmation may genuinely differ)
+  - [ ] Actually test Phase B's live edge for real (R107's original Option B, still never executed - the only remaining untested path to real profit per the project's own conclusion)
+  - Blocked by: awaiting user's answer
+  - Status: in progress — question posed to user, not yet answered.
