@@ -1019,5 +1019,5 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
 - [ ] **R122** — Phase B live-edge test: expectation-setting on timeline + closing-odds gap → *medium*
   - Context: brainstorming how to test Phase B's live edge for real (R121's choice). Confirmed the live pipeline currently captures odds only ONCE per fixture, at lineup-confirmation time (~20-40 min pre-kickoff) - `process_one_fixture()` marks a fixture "seen" once processed specifically to avoid reprocessing, so there is no mechanism today to capture a later "closing" snapshot near actual kickoff. Without that second snapshot, CLV (open vs close - the project's own established gold-standard edge signal per Phase 3b/C) cannot be computed on live picks at all, no matter how much live data accumulates
   - Why: this can't produce a verdict today regardless of design choice - needs real live samples to accumulate over weeks, same as every other CLV verdict in this project's history (thousands of backtest samples were needed each time). Important to set this expectation before designing anything, and to flag the closing-odds capture gap as a real prerequisite fix, not an optional nice-to-have
-  - Blocked by: awaiting user's answer
-  - Status: in progress — question posed to user (build closing-odds-capture infra now + accumulate over weeks, vs a different/faster approach they may have in mind), not yet answered.
+  - Blocked by: ~none~
+  - Status: done — user chose to build the closing-odds-capture infra now and let it accumulate.
