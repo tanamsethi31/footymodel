@@ -1051,3 +1051,11 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Why: standard subagent-driven-development final gate before finishing the branch
   - Blocked by: ~none~
   - Status: done — Critical: none. Important: none. Minor (both documented, deliberate tradeoffs, not defects): (1) `_spend_rapidapi_budget()` is a hand-duplicated copy of `RapidApiWatcher._spend()`, not shared - drift risk if BUDGET_CAP semantics ever change; (2) budget persistence is now once-per-run (in `main()`'s finally) instead of once-per-fetch - correctly fixes the critical test-corruption bug but means a hard process kill mid-batch loses more spend-tracking accuracy than before (small real-world risk given BUDGET_CAP=90/100 headroom and a once-daily job). **Ready to merge/finish.**
+
+- [x] **R127** — live-closing-odds-clv: finish-workflow choice → *small*
+  - Context: all tests pass, no separate branch/worktree (matches every prior round this session - direct on main)
+  - [x] Push to origin/main
+  - [ ] Keep local for now
+  - [ ] Discard this work
+  - Blocked by: ~none~
+  - Status: done — user confirmed push to origin/main (after an ambiguous "continue" was disambiguated via AskUserQuestion, given a destructive discard option was on the table).
