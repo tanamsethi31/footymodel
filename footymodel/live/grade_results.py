@@ -36,8 +36,8 @@ from ..data import PROCESSED_DIR
 from . import namematch, rapidapi_engine, sofascore_engine
 from .client import ApiFootballClient, ApiFootballError
 from .engine import _best_over_under_odds
-from .rapidapi_client import RapidApiClient, RapidApiError
-from .sofascore_client import SofaScoreClient, SofaScoreError
+from .rapidapi_client import RapidApiClient
+from .sofascore_client import SofaScoreClient
 
 PREDICTIONS_LOG = PROCESSED_DIR / "live_recommendations.csv"
 GRADED_LOG = PROCESSED_DIR / "graded_results.csv"
@@ -158,7 +158,11 @@ def _fetch_closing_odds(fixture_id: str, clients: dict) -> tuple[float | None, f
                 return None, None
             resp = client.odds(int(fixture_id))
             return _best_over_under_odds(resp)
-    except (RapidApiError, SofaScoreError, ApiFootballError) as e:
+    except Exception as e:
+        # Broad on purpose - the docstring promises (None, None) on ANY
+        # failure, not just the three known client errors, since a malformed
+        # odds payload (bad market shape, unexpected fraction string, etc.)
+        # from any of the three sources must degrade the same way.
         print(f"  ! closing-odds fetch failed for {fixture_id}: {e}")
         return None, None
 
