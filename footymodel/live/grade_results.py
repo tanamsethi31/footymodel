@@ -33,8 +33,11 @@ import numpy as np
 import pandas as pd
 
 from ..data import PROCESSED_DIR
-from . import namematch
+from . import namematch, rapidapi_engine, sofascore_engine
 from .client import ApiFootballClient, ApiFootballError
+from .engine import _best_over_under_odds
+from .rapidapi_client import RapidApiClient, RapidApiError
+from .sofascore_client import SofaScoreClient, SofaScoreError
 
 PREDICTIONS_LOG = PROCESSED_DIR / "live_recommendations.csv"
 GRADED_LOG = PROCESSED_DIR / "graded_results.csv"
@@ -110,7 +113,58 @@ def _load_graded_ids() -> set:
     return set(pd.read_csv(GRADED_LOG)["fixture_id"].astype(str))
 
 
-def grade_row(row: pd.Series, cache: dict[str, list[dict]], client: ApiFootballClient) -> dict | None:
+def _spend_rapidapi_budget(budget: dict, n: int = 1) -> bool:
+    """Local copy of RapidApiWatcher._spend() (rapidapi_engine.py) - same
+    check-and-deduct logic, kept separate since instantiating the full
+    Watcher here would also load players/build LineupModels for no reason.
+    Shares the SAME rapidapi_budget.json file/BUDGET_CAP the live engine
+    draws from - a closing-odds fetch here must never push total monthly
+    usage over the cap."""
+    if budget["calls_used"] + n > rapidapi_engine.BUDGET_CAP:
+        return False
+    budget["calls_used"] += n
+    return True
+
+
+def _fetch_closing_odds(fixture_id: str, clients: dict) -> tuple[float | None, float | None]:
+    """Same-source closing-odds snapshot, fetched well after kickoff via
+    whichever client originally produced this row's prediction - matching
+    this project's "don't mix apples and oranges" CLV principle
+    (backtest.py). (None, None) on ANY failure - a missing closing snapshot
+    must never block grading the outcome itself."""
+    try:
+        if fixture_id.startswith("rapid_"):
+            client = clients.get("rapidapi")
+            budget = clients.get("rapidapi_budget")
+            if client is None or budget is None:
+                return None, None
+            if not _spend_rapidapi_budget(budget):
+                print(f"  ! rapidapi budget exhausted, skipping closing odds for {fixture_id}")
+                return None, None
+            event_id = int(fixture_id.removeprefix("rapid_"))
+            resp = client.odds(event_id, countrycode=rapidapi_engine.ODDS_COUNTRYCODE)
+            odds = rapidapi_engine._find_25_line(resp)
+            rapidapi_engine._save_budget(budget)
+            return odds
+        elif fixture_id.startswith("sofa_"):
+            client = clients.get("sofascore")
+            if client is None:
+                return None, None
+            event_id = int(fixture_id.removeprefix("sofa_"))
+            resp = client.odds(event_id)
+            return sofascore_engine._find_25_line(resp)
+        else:
+            client = clients.get("apifootball")
+            if client is None:
+                return None, None
+            resp = client.odds(int(fixture_id))
+            return _best_over_under_odds(resp)
+    except (RapidApiError, SofaScoreError, ApiFootballError) as e:
+        print(f"  ! closing-odds fetch failed for {fixture_id}: {e}")
+        return None, None
+
+
+def grade_row(row: pd.Series, cache: dict[str, list[dict]], clients: dict) -> dict | None:
     """cache: date (YYYY-MM-DD) -> that date's E0 fixtures, populated
     lazily so multiple predictions sharing a kickoff day cost one API
     call, not one per prediction - only used for the date+fuzzy-name
@@ -126,7 +180,7 @@ def grade_row(row: pd.Series, cache: dict[str, list[dict]], client: ApiFootballC
     permanently blocked once a match's date rolls out of that window."""
     fx = None
     try:
-        fx = client.fixture_by_id(int(row["fixture_id"]))
+        fx = clients["apifootball"].fixture_by_id(int(row["fixture_id"]))
     except ValueError:
         pass  # not a plain API-Football id (RapidAPI/SofaScore-prefixed) - use the fallback below
     except ApiFootballError as e:
@@ -138,7 +192,7 @@ def grade_row(row: pd.Series, cache: dict[str, list[dict]], client: ApiFootballC
 
         if date_str not in cache:
             try:
-                fixtures = client.fixtures_by_date(date_str)
+                fixtures = clients["apifootball"].fixtures_by_date(date_str)
             except ApiFootballError as e:
                 print(f"  ! date {date_str} out of range or errored, skipping: {e}")
                 cache[date_str] = []
@@ -183,6 +237,14 @@ def grade_row(row: pd.Series, cache: dict[str, list[dict]], client: ApiFootballC
             bet_won = (bet_side == "over") == actual_over_won
             realized_return = round((bet_odds - 1) if bet_won else -1.0, 3)
 
+    closing_odds_over25 = closing_odds_under25 = bet_clv = None
+    if bet_side is not None:
+        closing_odds_over25, closing_odds_under25 = _fetch_closing_odds(
+            str(row["fixture_id"]), clients)
+        closing_bet_odds = closing_odds_over25 if bet_side == "over" else closing_odds_under25
+        if closing_bet_odds:
+            bet_clv = round(bet_odds / closing_bet_odds - 1, 4)
+
     return {
         "fixture_id": row["fixture_id"],
         "home": row["home"], "away": row["away"], "kickoff": row["kickoff"],
@@ -191,6 +253,9 @@ def grade_row(row: pd.Series, cache: dict[str, list[dict]], client: ApiFootballC
         "model_p_over25": round(model_p_over25, 3), "model_correct": model_correct,
         "bet_side": bet_side, "bet_odds": bet_odds, "bet_won": bet_won,
         "realized_return": realized_return,
+        "closing_odds_over25": closing_odds_over25,
+        "closing_odds_under25": closing_odds_under25,
+        "bet_clv": bet_clv,
         "graded_at": pd.Timestamp.now().isoformat(),
     }
 
@@ -220,16 +285,30 @@ def main() -> None:
         print("Nothing new to grade.")
         return
 
-    client = ApiFootballClient()
+    fixture_ids = to_grade["fixture_id"].astype(str)
+    clients: dict = {"apifootball": ApiFootballClient()}
+    if fixture_ids.str.startswith("rapid_").any():
+        clients["rapidapi"] = RapidApiClient()
+        clients["rapidapi_budget"] = rapidapi_engine._load_budget()
+
+    sofascore_client = None
+    if fixture_ids.str.startswith("sofa_").any():
+        sofascore_client = SofaScoreClient()
+        clients["sofascore"] = sofascore_client
+
     cache: dict[str, list[dict]] = {}
     graded_rows = []
-    for _, row in to_grade.iterrows():
-        print(f"  grading {row['home']} v {row['away']} ({row['kickoff']})")
-        result = grade_row(row, cache, client)
-        if result is not None:
-            graded_rows.append(result)
-        else:
-            print("    not gradeable yet (or out of API-Football's date-query window)")
+    try:
+        for _, row in to_grade.iterrows():
+            print(f"  grading {row['home']} v {row['away']} ({row['kickoff']})")
+            result = grade_row(row, cache, clients)
+            if result is not None:
+                graded_rows.append(result)
+            else:
+                print("    not gradeable yet (or out of API-Football's date-query window)")
+    finally:
+        if sofascore_client is not None:
+            sofascore_client.close()
 
     if graded_rows:
         df = pd.DataFrame(graded_rows)

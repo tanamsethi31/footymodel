@@ -1,7 +1,7 @@
-fixture_id,home,away,kickoff,actual_home_goals,actual_away_goals,actual_total_goals,actual_over_won,model_p_over25,model_correct,bet_side,bet_odds,bet_won,realized_return,graded_at
-1557381,Crystal Palace,Manchester City,2026-08-28T19:00:00+00:00,1,4,5,True,0.606,True,over,1.77,True,0.77,2026-08-29T18:26:20.238416
-1557377,Aston Villa,Arsenal,2026-08-31T19:00:00+00:00,0,1,1,False,0.442,True,under,2.25,True,1.25,2026-09-01T07:26:48.209637
-1557379,Chelsea,Brighton,2026-08-30T13:00:00+00:00,4,3,7,True,0.439,False,under,2.35,False,-1.0,2026-09-01T07:45:34.420799
-1557382,Leeds,Brentford,2026-08-30T13:00:00+00:00,1,1,2,False,0.552,False,over,2.25,False,-1.0,2026-09-01T07:45:35.640352
-1557385,Sunderland,Fulham,2026-08-30T13:00:00+00:00,1,0,1,False,0.36,True,under,1.84,True,0.84,2026-09-01T07:45:36.834446
-1557384,Manchester United,Ipswich,2026-08-30T15:30:00+00:00,5,2,7,True,0.591,True,under,2.65,False,-1.0,2026-09-01T07:45:38.028726
+fixture_id,home,away,kickoff,actual_home_goals,actual_away_goals,actual_total_goals,actual_over_won,model_p_over25,model_correct,bet_side,bet_odds,bet_won,realized_return,graded_at,closing_odds_over25,closing_odds_under25,bet_clv
+1557381,Crystal Palace,Manchester City,2026-08-28T19:00:00+00:00,1,4,5,True,0.606,True,over,1.77,True,0.77,2026-08-29T18:26:20.238416,,,
+1557377,Aston Villa,Arsenal,2026-08-31T19:00:00+00:00,0,1,1,False,0.442,True,under,2.25,True,1.25,2026-09-01T07:26:48.209637,,,
+1557379,Chelsea,Brighton,2026-08-30T13:00:00+00:00,4,3,7,True,0.439,False,under,2.35,False,-1.0,2026-09-01T07:45:34.420799,,,
+1557382,Leeds,Brentford,2026-08-30T13:00:00+00:00,1,1,2,False,0.552,False,over,2.25,False,-1.0,2026-09-01T07:45:35.640352,,,
+1557385,Sunderland,Fulham,2026-08-30T13:00:00+00:00,1,0,1,False,0.36,True,under,1.84,True,0.84,2026-09-01T07:45:36.834446,,,
+1557384,Manchester United,Ipswich,2026-08-30T15:30:00+00:00,5,2,7,True,0.591,True,under,2.65,False,-1.0,2026-09-01T07:45:38.028726,,,
