@@ -932,10 +932,19 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Blocked by: ~none~
   - Status: done — user chose push to origin/main.
 
-- [ ] **R113** — URGENT: API-Football account suspended, live pipeline silently fetching zero fixtures → *medium*
+- [x] **R113** — URGENT: API-Football account suspended, live pipeline silently fetching zero fixtures → *medium*
   - Context: while investigating whether `client.odds()` returns a usable closing-line snapshot (needed for R107 Option B's Phase-B CLV test), a live call failed with `{'access': 'Your account is suspended, check on https://dashboard.api-football.com.'}`. Confirmed via `gh run list`/`gh run view --log` that every `live_poll.yml` run since sometime between 2026-09-01T09:25 and 14:01 UTC has hit this same error on every fixture-date fetch, and the SofaScore fallback is separately failing with HTTP 403 Forbidden on its scheduled-events endpoint - so the live pipeline has had NO working data source for roughly a day. Every run still reports `success` (exit code 0) because the error is caught and printed as a warning, not raised - nothing would have surfaced this without manually reading logs
   - Why: this is a live production outage, not a design question - it directly blocks the just-requested Phase B brainstorm too (can't verify `odds()`'s post-kickoff behavior against a suspended account), and independently blocks all live predictions/notifications from happening at all right now regardless of what direction the brainstorm takes
   - [x] Check the API-Football dashboard now to diagnose/resolve the suspension (needs the user directly - dashboard login isn't something this session can do)
   - [ ] Defer the dashboard check, start the Phase B brainstorm design-only (can't verify live odds-endpoint behavior until the account is restored)
   - Blocked by: ~none~
-  - Status: in progress — user chose to check the dashboard now; opening it in the browser pane (read-only, user must log in themselves if needed).
+  - Status: done (partially) — dashboard navigation hit a Cloudflare "Verify you are human" bot-check before any account info was visible. Declined to bypass it (and declined the user's follow-up ask to use Playwright or any other automation to get past it, or to log in on their behalf) - bot-detection bypass and credential entry are both hard-refused regardless of which tool is used. Tried the API's own `/status` endpoint as a legitimate non-bypass alternative (no dashboard/login needed) - it returned a different, less-informative auth error ("Missing application key") than the `/fixtures` endpoint's clear "account is suspended" message, so it added no new diagnostic value. Net: the suspension is confirmed real and account-level: no technical workaround exists for it via any endpoint or automation - genuinely requires the user to check the dashboard themselves when they can log in normally.
+
+
+- [ ] **R114** — Path forward while the API-Football account is suspended → *small*
+  - Context: with no technical workaround for the suspension (R113) and SofaScore's fallback also separately broken (403), the live pipeline currently has zero working data sources. Two independent, legitimate (non-bypass) paths forward were surfaced
+  - Why: the Phase-B brainstorm the user asked for is blocked either way until at least one data source works again, but the two options differ in effort/scope and aren't mutually exclusive
+  - [ ] Quick path: user checks the dashboard themselves when able (likely a usage-cap/billing/ToS issue, resolved on their end - no engineering work needed here)
+  - [ ] Hedge path: add a genuinely independent third data source as a longer-term resilience measure - bigger scope, would need its own proper brainstorm/spec rather than being bolted on ad hoc
+  - Blocked by: awaiting user's answer (or may not need one - could just be an FYI, not a decision, if the user just goes and checks the dashboard on their own time)
+  - Status: in progress — options posed to user, not yet answered.
