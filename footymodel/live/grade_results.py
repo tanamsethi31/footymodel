@@ -144,7 +144,6 @@ def _fetch_closing_odds(fixture_id: str, clients: dict) -> tuple[float | None, f
             event_id = int(fixture_id.removeprefix("rapid_"))
             resp = client.odds(event_id, countrycode=rapidapi_engine.ODDS_COUNTRYCODE)
             odds = rapidapi_engine._find_25_line(resp)
-            rapidapi_engine._save_budget(budget)
             return odds
         elif fixture_id.startswith("sofa_"):
             client = clients.get("sofascore")
@@ -301,12 +300,18 @@ def main() -> None:
     try:
         for _, row in to_grade.iterrows():
             print(f"  grading {row['home']} v {row['away']} ({row['kickoff']})")
-            result = grade_row(row, cache, clients)
+            try:
+                result = grade_row(row, cache, clients)
+            except Exception as e:
+                print(f"  ! grading failed unexpectedly for {row['fixture_id']}: {e}")
+                continue
             if result is not None:
                 graded_rows.append(result)
             else:
                 print("    not gradeable yet (or out of API-Football's date-query window)")
     finally:
+        if "rapidapi_budget" in clients:
+            rapidapi_engine._save_budget(clients["rapidapi_budget"])
         if sofascore_client is not None:
             sofascore_client.close()
 
