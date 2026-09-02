@@ -949,3 +949,10 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [x] Rejected: create a second account under a different email to evade the suspension - ban evasion / ToS violation, declined
   - Blocked by: ~none~
   - Status: done — user chose the hedge path (third independent data source). Per the brainstorming skill's HARD-GATE, starting a proper brainstorm before any implementation - this is genuine creative/architectural work (choosing and integrating a new external data provider), not a mechanical task.
+- [ ] **R115** — Third-data-source brainstorm: investigate existing fallbacks first, or go straight to a new provider? → *small*
+  - Context: exploring project context for the "add a third data source" hedge (R114) found the pipeline already has TWO fallback engines wired in - `rapidapi_engine.py` (a genuinely separate RapidAPI listing, E0-only, 100 req/month cap, only 1/100 used this month per `rapidapi_budget.json`) and `sofascore_engine.py` (Playwright-driven against SofaScore's internal API, currently itself failing with a separate HTTP 403 in the CI logs)
+  - Why: building a brand-new third integration before understanding why the two existing ones aren't already covering this exact outage would risk duplicating what's already there - ponytail's "already in this codebase? reuse it" rung applies before reaching for a new dependency/integration
+  - [ ] Investigate/fix why the existing fallbacks (RapidAPI budget headroom, SofaScore's 403) aren't already covering the gap first - smaller scope, reuses existing code
+  - [ ] Go straight to scoping a genuinely new third provider regardless - existing two are seen as insufficient on their own merits (E0-only scope, tight/no quota)
+  - Blocked by: awaiting user's answer
+  - Status: in progress — question posed to user, not yet answered.
