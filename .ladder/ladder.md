@@ -1012,6 +1012,6 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - [ ] RAPM-style regularized player ratings (joint regression accounting for teammates/opponents on the pitch simultaneously, vs current independent per-90 decayed rates) - sharpens the one confirmed-real signal
   - [ ] Hierarchical partial-pooling across leagues for the lineup blend weight (currently each league fits blend_w fully independently, likely why Ligue 1 showed zero effect)
   - [ ] Live-specific blend weight test for Phase B (BEST_BLEND_W=0.25 is a backtest-average constant; the optimal weight right after live lineup confirmation may genuinely differ)
-  - [ ] Actually test Phase B's live edge for real (R107's original Option B, still never executed - the only remaining untested path to real profit per the project's own conclusion)
-  - Blocked by: awaiting user's answer
-  - Status: in progress — question posed to user, not yet answered.
+  - [x] Actually test Phase B's live edge for real (R107's original Option B, still never executed - the only remaining untested path to real profit per the project's own conclusion)
+  - Blocked by: ~none~
+  - Status: done — user chose to test Phase B's live edge for real. Per the brainstorming skill's HARD-GATE, starting a proper brainstorm before any implementation.
