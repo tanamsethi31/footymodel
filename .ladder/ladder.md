@@ -1025,7 +1025,7 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
 - [ ] **R123** — Closing-odds-capture design: extend grade_results.py vs new pre-kickoff poll step → *medium*
   - Context: proposed extending grade_results.py's existing post-match grading pass to also fetch a closing-odds snapshot via the same client/source that produced the original prediction (routing on fixture_id prefix, same pattern already used for final-score lookup), computing bet_clv = bet_odds/closing_bet_odds - 1 mirroring backtest.py's established CLV formula
   - Why: have direct supporting evidence this is viable - sian.agency/football-api-scraper's matchOdds call (R120's test) returned full pre-match market data for a match played months ago, proving querying odds for a long-finished fixture isn't empty/live-only. This de-risks the simpler approach vs building a whole new near-kickoff poll step with its own scheduling/tracking logic
-  - [ ] Recommended: extend grade_results.py (simple, no new scheduling, reuses existing prefix-based client routing)
+  - [x] Recommended: extend grade_results.py (simple, no new scheduling, reuses existing prefix-based client routing)
   - [ ] Alternative: dedicated new poll step catching already-seen fixtures right before kickoff for an odds-only re-fetch (more bulletproof exact timing, real scheduling complexity, not yet proven necessary)
-  - Blocked by: awaiting user's answer
-  - Status: in progress — design proposed, awaiting user confirmation before writing the spec doc.
+  - Blocked by: ~none~
+  - Status: done — user confirmed. IMPORTANT correction while writing the spec: grade_results.py does NOT currently route to per-engine clients at all (both branches - by-id and date+fuzzy-fallback - only ever use ApiFootballClient); "reuses existing prefix-based client routing" was inaccurate. Genuine new per-source client dispatch (RapidApiClient/SofaScoreClient/ApiFootballClient by fixture_id prefix) is needed - noted honestly in the spec rather than silently building on the wrong premise.
