@@ -216,8 +216,8 @@ export default async function Home() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 sm:py-14 w-full">
-      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-10">
-        <div>
+      <header className="flex flex-row items-start justify-between gap-4 mb-10">
+        <div className="min-w-0 flex-1">
           <Logo />
           <p className="text-sm text-neutral-500 mt-1">
             Live predictions for Premier League goals O/U 2.5 and player shots /
@@ -225,7 +225,7 @@ export default async function Home() {
             is a real bet.
           </p>
         </div>
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex flex-col items-end gap-2 shrink-0">
           <SubscribeButton />
           <ThemeToggle />
         </div>
