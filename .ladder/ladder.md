@@ -992,5 +992,5 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
     - New candidate surfaced during search: `sian.agency/football-api-scraper` (29 users) - README explicitly uses the word "confirmed" for match lineups (the exact signal this project needs) plus "pre-match odds across 18 markets" - the single most promising all-in-one candidate found so far, but not yet schema-checked or test-run for real O/U 2.5 coverage or actual pre-kickoff timing
     - Other candidates surfaced, not yet tested: `parseforge/sportytrader-scraper`, `romy/flashscore-all-in-one-api` (thin traction), `sian.agency/sports-data-scraper`, `trev0n/oddsportal-com-scraper` + `piotrv1001/oddsportal-scraper` (odds-only, explicit O/U), `zen-studio/bet365-*` (highest traction of anything found, 121-198 users, but README only confirms 1X2 odds not O/U)
   - Why: this materially changes R118's choice - there's now a third live-candidate family (Apify marketplace actors) in addition to ESPN and Flashscore, and one (`sian.agency/football-api-scraper`) looks like it could beat both on paper (explicit "confirmed" lineup language, explicit odds-market breadth) but is unverified
-  - Blocked by: awaiting user's direction on which candidate to test/pursue next
-  - Status: in progress — findings reported to user, awaiting direction.
+  - Blocked by: ~none~
+  - Status: in progress — user chose to test `sian.agency/football-api-scraper` next. Fetching its schema/README and running a small, cheap live test now.
