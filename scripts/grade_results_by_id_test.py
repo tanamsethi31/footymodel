@@ -30,7 +30,7 @@ row = pd.Series({
     "kickoff": "2026-08-30T13:00:00+00:00", "model_p_over25": 0.439,
     "ev_over25": float("nan"), "ev_under25": float("nan"), "odds_over25": None, "odds_under25": None,
 })
-result = grade_row(row, {}, mock_client)
+result = grade_row(row, {}, {"apifootball": mock_client})
 
 print(f"fixture_by_id calls: {mock_client.fixture_by_id.call_count} (expect 1)")
 print(f"fixtures_by_date calls: {mock_client.fixtures_by_date.call_count} (expect 0)")
@@ -54,7 +54,7 @@ row2 = pd.Series({
     "ev_over25": float("nan"), "ev_under25": float("nan"), "odds_over25": None, "odds_under25": None,
 })
 cache = {}
-result2 = grade_row(row2, cache, mock_client2)
+result2 = grade_row(row2, cache, {"apifootball": mock_client2})
 
 print(f"fixtures_by_date calls (fallback path): {mock_client2.fixtures_by_date.call_count} (expect 1)")
 assert mock_client2.fixture_by_id.call_count == 0, "a prefixed fixture_id must never reach fixture_by_id"
