@@ -98,61 +98,66 @@ export default function MatchCard({
         <span>{SOURCE_LABEL[match.source ?? ""] ?? match.source}</span>
       </div>
 
-      {open && (
-        <div
-          className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-800 text-sm"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {detail === null ? (
-            <p className="text-xs text-neutral-400">
-              Detailed breakdown not available for this prediction.
-            </p>
-          ) : (
-            <>
-              <div className="text-neutral-500 text-xs mb-2">Model breakdown</div>
-              <div className="grid grid-cols-3 gap-3 font-mono text-xs mb-3">
-                <div>
-                  <div className="text-neutral-400">Team model</div>
+      <div
+        className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+        style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
+      >
+        <div className="overflow-hidden">
+          <div
+            className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-800 text-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {detail === null ? (
+              <p className="text-xs text-neutral-400">
+                Detailed breakdown not available for this prediction.
+              </p>
+            ) : (
+              <>
+                <div className="text-neutral-500 text-xs mb-2">Model breakdown</div>
+                <div className="grid grid-cols-3 gap-3 font-mono text-xs mb-3">
                   <div>
-                    {detail.expTeam.toFixed(2)} xG · {pct(detail.pOver25Team)}
+                    <div className="text-neutral-400">Team model</div>
+                    <div>
+                      {detail.expTeam.toFixed(2)} xG · {pct(detail.pOver25Team)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-neutral-400">Lineup model</div>
+                    <div>
+                      {detail.expFull.toFixed(2)} xG · {pct(detail.pOver25Full)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-neutral-400">Blended</div>
+                    <div>
+                      {match.expTotalGoals.toFixed(2)} xG · {pct(match.modelPOver25)}
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <div className="text-neutral-400">Lineup model</div>
+                <p className="text-xs text-neutral-500 mb-3">{confidenceLine(detail)}</p>
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    {detail.expFull.toFixed(2)} xG · {pct(detail.pOver25Full)}
+                    <div className="text-neutral-500 text-xs mb-1">{match.home}</div>
+                    <ul className="text-xs text-neutral-600 dark:text-neutral-400 space-y-0.5">
+                      {detail.homeStarters.map((n) => (
+                        <li key={n}>{n}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="text-neutral-500 text-xs mb-1">{match.away}</div>
+                    <ul className="text-xs text-neutral-600 dark:text-neutral-400 space-y-0.5">
+                      {detail.awayStarters.map((n) => (
+                        <li key={n}>{n}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-                <div>
-                  <div className="text-neutral-400">Blended</div>
-                  <div>
-                    {match.expTotalGoals.toFixed(2)} xG · {pct(match.modelPOver25)}
-                  </div>
-                </div>
-              </div>
-              <p className="text-xs text-neutral-500 mb-3">{confidenceLine(detail)}</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <div className="text-neutral-500 text-xs mb-1">{match.home}</div>
-                  <ul className="text-xs text-neutral-600 dark:text-neutral-400 space-y-0.5">
-                    {detail.homeStarters.map((n) => (
-                      <li key={n}>{n}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <div className="text-neutral-500 text-xs mb-1">{match.away}</div>
-                  <ul className="text-xs text-neutral-600 dark:text-neutral-400 space-y-0.5">
-                    {detail.awayStarters.map((n) => (
-                      <li key={n}>{n}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
