@@ -953,6 +953,6 @@ Bug found + fixed while verifying: 145 of the 380 PL 2025/26 rows (exactly the o
   - Context: exploring project context for the "add a third data source" hedge (R114) found the pipeline already has TWO fallback engines wired in - `rapidapi_engine.py` (a genuinely separate RapidAPI listing, E0-only, 100 req/month cap, only 1/100 used this month per `rapidapi_budget.json`) and `sofascore_engine.py` (Playwright-driven against SofaScore's internal API, currently itself failing with a separate HTTP 403 in the CI logs)
   - Why: building a brand-new third integration before understanding why the two existing ones aren't already covering this exact outage would risk duplicating what's already there - ponytail's "already in this codebase? reuse it" rung applies before reaching for a new dependency/integration
   - [ ] Investigate/fix why the existing fallbacks (RapidAPI budget headroom, SofaScore's 403) aren't already covering the gap first - smaller scope, reuses existing code
-  - [ ] Go straight to scoping a genuinely new third provider regardless - existing two are seen as insufficient on their own merits (E0-only scope, tight/no quota)
-  - Blocked by: awaiting user's answer
-  - Status: in progress — question posed to user, not yet answered.
+  - [x] Go straight to scoping a genuinely new third provider regardless - existing two are seen as insufficient on their own merits (E0-only scope, tight/no quota)
+  - Blocked by: ~none~
+  - Status: done — user chose to go straight to scoping a new provider. Continuing the brainstorm on provider choice and scope.
