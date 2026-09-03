@@ -308,21 +308,51 @@ export async function getMatchDetails(): Promise<Record<string, MatchDetail>> {
 }
 
 export async function getUpcomingFixtures(): Promise<UpcomingFixture[]> {
-  const rows = (await fetchJson("upcoming_fixtures.json")) as Record<string, unknown>[];
-  return rows
-    // A stray non-object entry (null, a string, ...) would throw on the next
-    // filter's property access - guard against that before anything else.
-    .filter((r) => r && typeof r === "object")
-    // Filter on the raw fields, before stringifying - a missing field would
-    // otherwise become the literal string "undefined" (truthy, so it would
-    // slip past a post-map filter and render as "undefined v undefined").
-    .filter((r) => r.fixture_id != null && r.home && r.away && r.kickoff)
-    .map((r) => ({
-      fixtureId: String(r.fixture_id),
+  const [fromFile, fromCalendar] = await Promise.all([
+    fetchJson("upcoming_fixtures.json"),
+    fetchCalendarFixtures(),
+  ]);
+  const byId = new Map<string, UpcomingFixture>();
+  const add = (r: Record<string, unknown>) => {
+    if (!r || typeof r !== "object") return;
+    if (r.fixture_id == null && r.fixtureId == null) return;
+    if (!r.home || !r.away || !r.kickoff) return;
+    const fixtureId = String(r.fixture_id ?? r.fixtureId);
+    byId.set(fixtureId, {
+      fixtureId,
       home: String(r.home),
       away: String(r.away),
       kickoff: String(r.kickoff),
-    }));
+    });
+  };
+  for (const r of fromCalendar) add(r);
+  for (const r of fromFile) add(r as Record<string, unknown>);
+  return [...byId.values()].sort(
+    (a, b) =>
+      new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime() ||
+      a.home.localeCompare(b.home)
+  );
+}
+
+async function fetchCalendarFixtures(): Promise<Record<string, unknown>[]> {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) throw new Error("GITHUB_TOKEN not set");
+  const res = await fetch(
+    `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/fixture_calendar.json`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.raw+json",
+      },
+      next: { revalidate: 60 },
+    }
+  );
+  if (res.status === 404) return [];
+  if (!res.ok) throw new Error(`Failed to fetch fixture_calendar.json: ${res.status} ${await res.text()}`);
+  const payload = JSON.parse(await res.text()) as { fixtures?: unknown };
+  return Array.isArray(payload.fixtures)
+    ? (payload.fixtures as Record<string, unknown>[])
+    : [];
 }
 
 export async function getPropsPicks(): Promise<PropsPick[]> {

@@ -11,6 +11,7 @@ import {
   type MatchDetail,
   type UpcomingFixture,
 } from "@/lib/data";
+import { selectNextUpcoming, UPCOMING_DISPLAY_LIMIT } from "@/lib/upcoming";
 import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
@@ -132,58 +133,50 @@ function TrackRecordPanel({ graded }: { graded: GradedResult[] }) {
 function GoalsPanel({
   goals,
   matchDetails,
-  upcomingFixtures,
+  nextFixtures,
 }: {
   goals: GoalsPick[];
   matchDetails: Record<string, MatchDetail>;
-  upcomingFixtures: UpcomingFixture[];
+  nextFixtures: UpcomingFixture[];
 }) {
   // A match that's already kicked off isn't a live pick anymore - it moves
   // into the collapsed "past predictions" disclosure below instead of
   // cluttering the upcoming list (still checkable, just out of the way).
   const now = Date.now();
-  const byKickoffAsc = (a: { kickoff: string }, b: { kickoff: string }) =>
-    new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime();
-  const upcoming = goals
-    .filter((g) => new Date(g.kickoff).getTime() > now)
-    .sort(byKickoffAsc);
   const past = goals.filter((g) => new Date(g.kickoff).getTime() <= now);
-  // Any upcoming fixture that doesn't have a real prediction yet shows as a
-  // preview card instead - once its lineup is confirmed it'll show up in
-  // `goals` above and drop out of this list automatically.
-  const predictedFixtureIds = new Set(goals.map((g) => g.fixtureId));
-  const previewFixtures = upcomingFixtures
-    .filter((f) => !predictedFixtureIds.has(f.fixtureId) && new Date(f.kickoff).getTime() > now)
-    .sort(byKickoffAsc);
+  const predictedById = new Map(
+    goals
+      .filter((g) => new Date(g.kickoff).getTime() > now)
+      .map((g) => [g.fixtureId, g])
+  );
   return (
     <section>
       <h2 className="text-lg font-semibold mb-1">Goals: Over/Under 2.5</h2>
       <p className="text-sm text-neutral-500 mb-5">
-        Confirmed-lineup model, pooled t=3.04 backtested (individually
-        significant on the Premier League alone, t=2.23).
+        Next {UPCOMING_DISPLAY_LIMIT} Premier League fixtures, kickoff order.
+        Confirmed-lineup model (pooled t=3.04; PL alone t=2.23) fills in once
+        XIs are announced.
       </p>
-      {upcoming.length === 0 && previewFixtures.length === 0 ? (
+      {nextFixtures.length === 0 ? (
         <p className="text-sm text-neutral-500">
-          No upcoming predictions right now. Check back once a fixture&apos;s
-          lineup is confirmed pre-kickoff.
+          No upcoming Premier League fixtures in the current window.
         </p>
       ) : (
         <div className="space-y-3">
-          {upcoming.map((g, i) => (
-            <MatchCard
-              key={g.fixtureId}
-              match={g}
-              detail={matchDetails[g.fixtureId] ?? null}
-              index={i}
-            />
-          ))}
-          {previewFixtures.map((f, i) => (
-            <PreviewMatchCard
-              key={f.fixtureId}
-              fixture={f}
-              index={upcoming.length + i}
-            />
-          ))}
+          {nextFixtures.map((f, i) => {
+            const match = predictedById.get(f.fixtureId);
+            if (match) {
+              return (
+                <MatchCard
+                  key={f.fixtureId}
+                  match={match}
+                  detail={matchDetails[match.fixtureId] ?? null}
+                  index={i}
+                />
+              );
+            }
+            return <PreviewMatchCard key={f.fixtureId} fixture={f} index={i} />;
+          })}
         </div>
       )}
       <PastDisclosure count={past.length}>
@@ -209,9 +202,11 @@ export default async function Home() {
     getMatchDetails(),
     getUpcomingFixtures(),
   ]);
-  // The highlights strip is about what's coming up next, not a match
-  // that's already been played.
-  const upcomingProps = props.filter((p) => new Date(p.kickoff).getTime() > Date.now());
+  const nextFixtures = selectNextUpcoming(upcomingFixtures, goals);
+  const nextIds = new Set(nextFixtures.map((f) => f.fixtureId));
+  const upcomingProps = props.filter(
+    (p) => nextIds.has(p.fixtureId) && new Date(p.kickoff).getTime() > Date.now()
+  );
   const mostProbable = getMostProbablePicks(upcomingProps);
 
   return (
@@ -237,14 +232,14 @@ export default async function Home() {
           <GoalsPanel
             goals={goals}
             matchDetails={matchDetails}
-            upcomingFixtures={upcomingFixtures}
+            nextFixtures={nextFixtures}
           />
         }
         props={
           <PropsPanel
             props={props}
             mostProbable={mostProbable}
-            upcomingFixtures={upcomingFixtures}
+            nextFixtures={nextFixtures}
           />
         }
         staking={<StakingPanel results={kellySim} />}
