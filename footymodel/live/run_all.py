@@ -20,6 +20,7 @@ import json
 import pandas as pd
 
 from ..data import PROCESSED_DIR
+from . import calendar as fxcal
 from . import match_detail
 from .client import ApiFootballClient, ApiFootballError
 from .engine import (LEAGUE_API_IDS, LIVE_LOG, DEFAULT_HOURS_AHEAD, DEFAULT_HOURS_BEHIND,
@@ -124,17 +125,23 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
     now = pd.Timestamp.now(tz="UTC")
     api_id_to_div = {v: k for k, v in LEAGUE_API_IDS.items()}
 
+    # Default look-ahead is today+2 days. The saved calendar can add an extra
+    # date (typically yesterday) when a delayed poll still has an unseen
+    # fixture inside DEFAULT_HOURS_BEHIND — without that, the 24h backward
+    # window never sees fixtures whose UTC date has already rolled off.
     all_fixtures = []
-    for date_str in {now.strftime("%Y-%m-%d"),
-                     (now + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
-                     (now + pd.Timedelta(days=2)).strftime("%Y-%m-%d")}:
+    for date_str in sorted(fxcal.date_buckets_to_fetch(now)):
         try:
             all_fixtures.extend(client.fixtures_by_date(date_str))
         except ApiFootballError as e:
             print(f"! fixtures fetch failed for {date_str}: {e}")
 
     try:
-        upcoming = build_upcoming_list(all_fixtures, api_id_to_div, now)
+        live_upcoming = build_upcoming_list(all_fixtures, api_id_to_div, now)
+        # Calendar horizon is ~10 days; the live fetch is only ~3. Merge so
+        # the dashboard keeps showing next weekend during a quiet midweek.
+        upcoming = fxcal.merge_upcoming(
+            live_upcoming, fxcal.upcoming_from_calendar(now))
         UPCOMING_LOG.parent.mkdir(parents=True, exist_ok=True)
         UPCOMING_LOG.write_text(json.dumps(upcoming))
     except Exception as e:

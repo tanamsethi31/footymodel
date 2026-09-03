@@ -22,6 +22,7 @@ data/logs/
 !data/processed/live_player_props.csv
 !data/processed/match_detail.jsonl
 !data/processed/upcoming_fixtures.json
+!data/processed/fixture_calendar.json
 !data/processed/live_seen_fixtures.json
 !data/processed/sofascore_seen_fixtures.json
 !data/processed/rapidapi_seen_fixtures.json

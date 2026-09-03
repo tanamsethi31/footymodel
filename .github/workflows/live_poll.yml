@@ -2,11 +2,13 @@ name: Live poll
 
 on:
   schedule:
-    # Runs every 20min from 14:30 IST to 03:10 IST the next day (GitHub
-    # Actions cron is always UTC - this is 9:00-21:40 UTC). Kickoffs across
-    # PL/La Liga/Bundesliga/Serie A/Ligue 1 run roughly 16:30 IST-02:00 IST
-    # (11:00-20:30 UTC) - polling with margin on both ends so the live
-    # engine's 2hr pre-kickoff lookback window always gets covered.
+    # Keep 20-minute ticks (not 30): confirmed lineups only exist in a
+    # ~20-40min pre-kickoff window, and GitHub Actions already delays
+    # scheduled triggers by hours under load. A slower cron would miss more
+    # of that window. Idle ticks are cheap now — the gate step below skips
+    # Playwright + lineup/odds fetches when the saved calendar says nothing
+    # is inside the live window (see footymodel/live/calendar.py).
+    # 09:00-21:59 UTC covers PL kickoffs with margin on both ends.
     - cron: "*/20 9-21 * * *"
   workflow_dispatch: {}
 
@@ -29,26 +31,37 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Refresh calendar if stale and decide whether live engines are needed
+        id: gate
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python -m footymodel.live.calendar --gate
+
       - name: Cache Playwright browsers
+        if: steps.gate.outputs.should_run == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
 
       - name: Install Playwright chromium (for the SofaScore engine)
+        if: steps.gate.outputs.should_run == 'true'
         run: playwright install --with-deps chromium
 
       - name: Run live poller (goals + player-prop engines, paper-trade only)
+        if: steps.gate.outputs.should_run == 'true'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python -m footymodel.live.run_all
 
       - name: Run SofaScore goals engine (API-Football fallback, paper-trade only)
+        if: steps.gate.outputs.should_run == 'true'
         continue-on-error: true  # newer/less-proven than the API-Football path - a crash
                                  # here shouldn't block committing whatever else succeeded
         run: python -m footymodel.live.sofascore_engine
 
       - name: Run RapidAPI goals engine (budget-limited, heuristic-confirmed lineups)
+        if: steps.gate.outputs.should_run == 'true'
         continue-on-error: true  # 100 req/month hard cap - self-throttles via its own
                                  # budget file, but never let it block the commit step
         env:
@@ -67,6 +80,7 @@ jobs:
                    data/processed/live_player_props.csv \
                    data/processed/match_detail.jsonl \
                    data/processed/upcoming_fixtures.json \
+                   data/processed/fixture_calendar.json \
                    data/processed/sofascore_seen_fixtures.json \
                    data/processed/rapidapi_seen_fixtures.json \
                    data/processed/rapidapi_budget.json \

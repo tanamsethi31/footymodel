@@ -48,12 +48,14 @@ DEFAULT_HOURS_AHEAD = 2
 # backward allowance, that fixture is lost forever even though nothing about
 # it actually changed. 24h comfortably covers same-day cron gaps (the actual
 # observed failure mode) at a bounded cost - no extra date-fetch calls, just
-# one extra lineup-check per not-yet-seen fixture per poll. Note this can
-# only help a fixture that kicked off on the SAME UTC calendar day as `now`
-# falls on, since the fixture list itself is only fetched for today's and
-# tomorrow's date buckets below - a fixture from a previous calendar day is
-# never in the fetched list at all, regardless of this window. Recovering
-# those is a separate concern (see scripts/backfill_missed_fixtures.py).
+# one extra lineup-check per not-yet-seen fixture per poll.
+#
+# run_all.py (the production entry point) also consults fixture_calendar.json
+# so a delayed poll can fetch yesterday's date bucket when an unseen fixture
+# is still inside this window. LiveWatcher.run_once() below does not — it
+# only queries today+tomorrow, and is unused in production. Recovering
+# fixtures that have aged out of both the calendar horizon and this window
+# is still scripts/backfill_missed_fixtures.py.
 DEFAULT_HOURS_BEHIND = 24
 
 
