@@ -20,9 +20,9 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -43,11 +43,20 @@ jobs:
       - name: Refresh player rosters (Understat, current season only)
         run: python scripts/build_players.py E0,SP1,D1,I1,F1 2026
 
+      # Next ~10 days of PL kickoffs, used by live_poll.yml to skip idle
+      # ticks and by the dashboard as the upcoming-match preview. Date-only
+      # queries (Free-tier-safe); live_poll also refreshes if this goes stale.
+      - name: Refresh PL fixture calendar
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python -m footymodel.live.calendar --refresh
+        continue-on-error: true
+
       - name: Commit + push any updated training data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/processed/matches.parquet data/processed/matches_xg.parquet data/processed/player_match.parquet
+          git add data/processed/matches.parquet data/processed/matches_xg.parquet data/processed/player_match.parquet data/processed/fixture_calendar.json data/processed/upcoming_fixtures.json
           git diff --cached --quiet && exit 0
           git commit -m "refresh training data: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git push

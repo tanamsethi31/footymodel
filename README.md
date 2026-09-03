@@ -105,10 +105,13 @@ flowchart LR
     RUN --> LOG3[(match_detail.jsonl<br/>lineups + model breakdown)]
     RAE --> LOG3
     SSE --> LOG3
+    CAL[fixture_calendar.json<br/>PL kickoffs, ~10 days]
 
-    LOG1 --> GH[GitHub Actions cron<br/>live_poll.yml, every 20min]
+    CAL --> GH[GitHub Actions cron<br/>live_poll.yml, every 20min]
+    LOG1 --> GH
     LOG2 --> GH
     LOG3 --> GH
+    GH -- skip engines if calendar<br/>says nothing in the live window --> GH
     GH -- commits + pushes --> REPO[(this repo)]
     REPO -- GitHub Contents API --> DASH[Next.js dashboard<br/>on Vercel]
 ```
@@ -132,6 +135,7 @@ footymodel/
     engine.py            # API-Football goals/O-U engine (primary)
     rapidapi_engine.py    # RapidAPI fallback (100 req/month, budget-capped)
     sofascore_engine.py   # SofaScore fallback (browser-scraped, no API key)
+    calendar.py            # saved PL fixture calendar + idle-poll gate
     match_detail.py        # shared JSONL side-log: lineups + model breakdown
     run_all.py             # shares one fetch across goals + props engines
     grade_results.py       # grades logged predictions against real results
@@ -239,13 +243,20 @@ expandable match cards).
 
 Production polling is [`.github/workflows/live_poll.yml`](.github/workflows/live_poll.yml):
 every 20 minutes, 14:30 IST–03:29 IST the next day (9:00–21:59 UTC - GitHub
-Actions cron is always UTC; covering kickoffs across PL/La
-Liga/Bundesliga/Serie A/Ligue 1), it runs all three engines and commits+pushes
-any new rows straight to this repo — no server, no local machine needs to
-stay on. `run_all.py` drives the API-Football goals + player-props engines
+Actions cron is always UTC). A saved PL calendar (`fixture_calendar.json`,
+refreshed daily, ~10-day horizon) is checked first: if no tracked fixture
+is inside the live window (2h before kickoff through 24h after), the poll
+rewrites the dashboard's upcoming list from the calendar and **skips**
+lineup/odds fetches and Playwright. That keeps midweek ticks cheap without
+slowing the cron to 30 minutes — confirmed lineups only exist ~20–40 min
+pre-kickoff, and GitHub's scheduled triggers already slip by hours under
+load, so a slower cadence would miss more of that window. On a real match
+poll, `run_all.py` drives the API-Football goals + player-props engines
 off ONE shared fixtures+lineups fetch (see Phase H in the Roadmap for why
 that matters on a 100-req/day free tier); the other two engines run as
-separate steps in the same workflow.
+separate steps in the same workflow. The calendar also adds yesterday's
+date bucket when a delayed poll still has an unseen fixture in the 24h
+backward window, so that window is not limited to "same UTC calendar day".
 
 To run any engine manually (e.g. local debugging):
 ```bash
@@ -354,6 +365,12 @@ re-scraped after the fact (manual step).
       thousands of redundant requests. Required fixing `build_players.py` to
       merge the refreshed season into the existing file instead of
       overwriting it wholesale (`merge_player_dataset()`, unit tested).
+- [x] Phase M — Saved PL fixture calendar (`live/calendar.py`) → daily
+      10-day kickoff snapshot so the dashboard can preview next weekend
+      during a quiet midweek, idle live_poll ticks skip Playwright/API
+      lineup fetches, and a delayed poll still queries yesterday when an
+      unseen fixture sits in the 24h backward window. Missing/stale
+      calendar fails open (runs the engines) rather than risking a miss.
 
 ## Testing
 
@@ -373,6 +390,7 @@ python scripts/grade_results_datetime_test.py
 python scripts/grade_results_columns_test.py
 python scripts/match_detail_test.py
 python scripts/kelly_simulation_test.py
+python scripts/calendar_test.py
 ```
 
 Everything under `live/` additionally has a dry-run mode (mocked API
