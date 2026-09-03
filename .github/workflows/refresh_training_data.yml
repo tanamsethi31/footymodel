@@ -52,6 +52,9 @@ jobs:
         run: python -m footymodel.live.calendar --refresh
         continue-on-error: true
 
+      - name: Rebuild upcoming PL preview list (Understat fills any API gaps)
+        run: python -m footymodel.live.calendar --from-understat
+
       - name: Commit + push any updated training data
         run: |
           git config user.name "github-actions[bot]"

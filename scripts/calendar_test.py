@@ -17,6 +17,7 @@ from footymodel.live.client import ApiFootballError
 tmp = Path(tempfile.mkdtemp())
 fxcal.CALENDAR_FILE = tmp / "fixture_calendar.json"
 fxcal.UPCOMING_LOG = tmp / "upcoming_fixtures.json"
+fxcal.UNDERSTAT_DIR = tmp
 
 NOW = pd.Timestamp("2026-09-03T12:00:00+00:00")
 
@@ -137,5 +138,36 @@ assert mock.fixtures_by_date.call_count == 11  # 0..10 inclusive
 assert [f["fixture_id"] for f in refreshed["fixtures"]] == [1558001]
 assert json.loads(fxcal.CALENDAR_FILE.read_text())["fixtures"][0]["home"] == "Arsenal"
 assert json.loads(fxcal.UPCOMING_LOG.read_text())[0]["fixture_id"] == 1558001
+
+# --- Understat fills the dashboard list when the API calendar is empty ------
+us_payload = {
+    "dates": [
+        {"id": "31200", "isResult": False,
+         "h": {"title": "Ipswich"}, "a": {"title": "Liverpool"},
+         "datetime": "2026-09-04 19:00:00"},
+        {"id": "31180", "isResult": True,
+         "h": {"title": "Arsenal"}, "a": {"title": "Coventry"},
+         "datetime": "2026-09-21 19:00:00"},
+        {"id": "31999", "isResult": False,
+         "h": {"title": "Too"}, "a": {"title": "Far"},
+         "datetime": "2026-10-01 15:00:00"},
+        {"id": "31201", "isResult": False,
+         "h": {"title": "Newcastle United"}, "a": {"title": "Bournemouth"},
+         "datetime": "2026-09-05 11:30:00"},
+    ]
+}
+(fxcal.UNDERSTAT_DIR / "EPL_2026.json").write_text(json.dumps(us_payload))
+us_rows = fxcal.upcoming_from_understat(NOW, horizon_days=10, year=2026)
+assert [r["fixture_id"] for r in us_rows] == ["us_31200", "us_31201"], us_rows
+assert us_rows[0]["home"] == "Ipswich"
+
+# Same match from the API calendar wins over the Understat placeholder.
+api_same = {"fixture_id": 1559000, "home": "Ipswich", "away": "Liverpool",
+            "kickoff": "2026-09-04T19:00:00+00:00"}
+merged_us = fxcal.merge_upcoming([api_same], us_rows)
+assert [r["fixture_id"] for r in merged_us] == [1559000, "us_31201"], merged_us
+
+filled = fxcal.write_dashboard_upcoming(NOW, _payload([]))
+assert filled[0]["fixture_id"] == "us_31200"
 
 print("calendar_test: OK")

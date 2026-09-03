@@ -61,6 +61,7 @@ def build_upcoming_list(all_fixtures: list[dict], api_id_to_div: dict[int, str],
             "away": fx["teams"]["away"]["name"],
             "kickoff": fx["fixture"]["date"],
         })
+    upcoming.sort(key=lambda r: (r["kickoff"], r["home"]))
     return upcoming
 
 
@@ -141,7 +142,13 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
         # Calendar horizon is ~10 days; the live fetch is only ~3. Merge so
         # the dashboard keeps showing next weekend during a quiet midweek.
         upcoming = fxcal.merge_upcoming(
-            live_upcoming, fxcal.upcoming_from_calendar(now))
+            live_upcoming,
+            fxcal.merge_upcoming(
+                fxcal.upcoming_from_calendar(now),
+                fxcal.upcoming_from_understat(now),
+            ),
+        )
+        upcoming.sort(key=lambda r: (r["kickoff"], r["home"]))
         UPCOMING_LOG.parent.mkdir(parents=True, exist_ok=True)
         UPCOMING_LOG.write_text(json.dumps(upcoming))
     except Exception as e:
