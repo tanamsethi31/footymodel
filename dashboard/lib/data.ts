@@ -42,6 +42,20 @@ export type UpcomingFixture = {
   kickoff: string;
 };
 
+export type WatchPlayer = {
+  player: string;
+  pShotsGt05: number;
+};
+
+export type FixtureWatchlist = {
+  fixtureId: string;
+  home: string;
+  away: string;
+  kickoff: string;
+  homeWatch: WatchPlayer[];
+  awayWatch: WatchPlayer[];
+};
+
 export type GradedResult = {
   fixtureId: string;
   home: string;
@@ -332,6 +346,63 @@ export async function getUpcomingFixtures(): Promise<UpcomingFixture[]> {
       new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime() ||
       a.home.localeCompare(b.home)
   );
+}
+
+function parseWatchPlayers(raw: unknown): WatchPlayer[] {
+  if (!Array.isArray(raw)) return [];
+  const out: WatchPlayer[] = [];
+  for (const p of raw) {
+    if (!p || typeof p !== "object") continue;
+    const rec = p as Record<string, unknown>;
+    const player = rec.player;
+    const prob = num(rec.p_shots_gt0.5);
+    if (!player || prob === null) continue;
+    out.push({ player: String(player), pShotsGt05: prob });
+  }
+  return out;
+}
+
+export async function getWatchlists(): Promise<FixtureWatchlist[]> {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) throw new Error("GITHUB_TOKEN not set");
+  const res = await fetch(
+    `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/upcoming_watchlist.json`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.raw+json",
+      },
+      next: { revalidate: 60 },
+    }
+  );
+  if (res.status === 404) return [];
+  if (!res.ok) throw new Error(`Failed to fetch upcoming_watchlist.json: ${res.status} ${await res.text()}`);
+  let payload: unknown;
+  try {
+    payload = JSON.parse(await res.text());
+  } catch {
+    return [];
+  }
+  const fixtures = Array.isArray(payload)
+    ? payload
+    : payload && typeof payload === "object" && Array.isArray((payload as { fixtures?: unknown }).fixtures)
+      ? (payload as { fixtures: unknown[] }).fixtures
+      : [];
+  const out: FixtureWatchlist[] = [];
+  for (const raw of fixtures) {
+    if (!raw || typeof raw !== "object") continue;
+    const r = raw as Record<string, unknown>;
+    if (r.fixture_id == null || !r.home || !r.away || !r.kickoff) continue;
+    out.push({
+      fixtureId: String(r.fixture_id),
+      home: String(r.home),
+      away: String(r.away),
+      kickoff: String(r.kickoff),
+      homeWatch: parseWatchPlayers(r.home_watch),
+      awayWatch: parseWatchPlayers(r.away_watch),
+    });
+  }
+  return out;
 }
 
 async function fetchCalendarFixtures(): Promise<Record<string, unknown>[]> {
