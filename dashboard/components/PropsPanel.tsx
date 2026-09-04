@@ -1,18 +1,20 @@
-import type { PropsPick, MostProbablePick, UpcomingFixture } from "@/lib/data";
-import { UPCOMING_DISPLAY_LIMIT } from "@/lib/upcoming";
+import type { FixtureWatchlist, PropsPick, MostProbablePick, UpcomingFixture } from "@/lib/data";
+import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
 import MostProbableStrip from "./MostProbableStrip";
 import MatchPropsTable from "./MatchPropsTable";
 import PastDisclosure from "./PastDisclosure";
-import PreviewMatchCard from "./PreviewMatchCard";
+import PropsPreviewCard from "./PropsPreviewCard";
 
 export default function PropsPanel({
   props,
   mostProbable,
   nextFixtures,
+  watchlists,
 }: {
   props: PropsPick[];
   mostProbable: MostProbablePick[];
   nextFixtures: UpcomingFixture[];
+  watchlists: FixtureWatchlist[];
 }) {
   const propsByFixture = new Map<string, PropsPick[]>();
   for (const p of props) {
@@ -47,11 +49,11 @@ export default function PropsPanel({
               return <MatchPropsTable key={f.fixtureId} fixtureId={f.fixtureId} rows={rows} />;
             }
             return (
-              <PreviewMatchCard
+              <PropsPreviewCard
                 key={f.fixtureId}
                 fixture={f}
+                watchlist={watchlistForFixture(watchlists, f)}
                 index={i}
-                pendingLabel="Player-prop lines available once lineups are confirmed (~20-40min pre-kickoff)."
               />
             );
           })}

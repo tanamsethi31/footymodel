@@ -59,7 +59,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/processed/matches.parquet data/processed/matches_xg.parquet data/processed/player_match.parquet data/processed/fixture_calendar.json data/processed/upcoming_fixtures.json
+          git add data/processed/matches.parquet data/processed/matches_xg.parquet data/processed/player_match.parquet data/processed/fixture_calendar.json data/processed/upcoming_fixtures.json data/processed/upcoming_watchlist.json
           git diff --cached --quiet && exit 0
           git commit -m "refresh training data: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git push
