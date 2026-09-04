@@ -255,7 +255,8 @@ def write_upcoming_from_calendar(now: pd.Timestamp | None = None,
 
 
 def write_dashboard_upcoming(now: pd.Timestamp | None = None,
-                             payload: dict[str, Any] | None = None) -> list[dict]:
+                             payload: dict[str, Any] | None = None,
+                             with_watchlist: bool = False) -> list[dict]:
     """What the dashboard reads: API/calendar rows first, Understat fills
     any holes (and the whole list when the API calendar is empty)."""
     now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
@@ -265,6 +266,12 @@ def write_dashboard_upcoming(now: pd.Timestamp | None = None,
     )
     UPCOMING_LOG.parent.mkdir(parents=True, exist_ok=True)
     UPCOMING_LOG.write_text(json.dumps(upcoming, indent=2))
+    if with_watchlist:
+        try:
+            from . import watchlist as wl
+            wl.write_watchlist(upcoming)
+        except Exception as e:
+            print(f"  ! watchlist write failed (upcoming list itself is fine): {e}")
     return upcoming
 
 
@@ -363,10 +370,10 @@ def gate() -> bool:
             refresh_calendar(ApiFootballClient(), now)
         except Exception as e:
             print(f"! calendar refresh failed ({e}); gating on whatever we have")
-            n = len(write_dashboard_upcoming(now))
+            n = len(write_dashboard_upcoming(now, with_watchlist=True))
             print(f"wrote {n} upcoming preview(s) from fallback sources")
     else:
-        n = len(write_dashboard_upcoming(now))
+        n = len(write_dashboard_upcoming(now, with_watchlist=True))
         print(f"calendar fresh - wrote {n} upcoming preview(s)")
     should = should_run_live_engines(now)
     _write_github_output(should)
@@ -382,7 +389,7 @@ if __name__ == "__main__":
         refresh_calendar(ApiFootballClient())
         sys.exit(0)
     if "--from-understat" in sys.argv:
-        rows = write_dashboard_upcoming()
+        rows = write_dashboard_upcoming(with_watchlist=True)
         print(f"upcoming_fixtures.json: {len(rows)} preview(s) from calendar+Understat")
         sys.exit(0)
     print("usage: python -m footymodel.live.calendar --gate|--refresh|--from-understat")

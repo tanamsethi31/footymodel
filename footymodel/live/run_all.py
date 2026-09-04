@@ -151,6 +151,11 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
         upcoming.sort(key=lambda r: (r["kickoff"], r["home"]))
         UPCOMING_LOG.parent.mkdir(parents=True, exist_ok=True)
         UPCOMING_LOG.write_text(json.dumps(upcoming))
+        try:
+            from . import watchlist as wl
+            wl.write_watchlist(upcoming)
+        except Exception as e:
+            print(f"  ! watchlist write failed (upcoming list itself is fine): {e}")
     except Exception as e:
         print(f"  ! failed to write upcoming_fixtures.json (predictions themselves unaffected): {e}")
 

@@ -6,6 +6,7 @@ import {
   getKellySimResults,
   getMatchDetails,
   getUpcomingFixtures,
+  getWatchlists,
   type GoalsPick,
   type GradedResult,
   type MatchDetail,
@@ -194,13 +195,14 @@ function GoalsPanel({
 }
 
 export default async function Home() {
-  const [goals, props, graded, kellySim, matchDetails, upcomingFixtures] = await Promise.all([
+  const [goals, props, graded, kellySim, matchDetails, upcomingFixtures, watchlists] = await Promise.all([
     getGoalsPicks(),
     getPropsPicks(),
     getGradedResults(),
     getKellySimResults(),
     getMatchDetails(),
     getUpcomingFixtures(),
+    getWatchlists(),
   ]);
   const nextFixtures = selectNextUpcoming(upcomingFixtures, goals);
   const nextIds = new Set(nextFixtures.map((f) => f.fixtureId));
@@ -240,6 +242,7 @@ export default async function Home() {
             props={props}
             mostProbable={mostProbable}
             nextFixtures={nextFixtures}
+            watchlists={watchlists}
           />
         }
         staking={<StakingPanel results={kellySim} />}

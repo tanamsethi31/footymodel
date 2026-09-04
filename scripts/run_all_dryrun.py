@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pandas as pd
 
 from footymodel.live import calendar as fxcal
-from footymodel.live import engine, match_detail, run_all, shots_engine
+from footymodel.live import engine, match_detail, run_all, shots_engine, watchlist
 from footymodel.live import namematch
 from footymodel.players import load_players
 
@@ -32,6 +32,7 @@ run_all.UPCOMING_LOG = tmp / "upcoming_fixtures.json"
 fxcal.CALENDAR_FILE = tmp / "fixture_calendar.json"
 fxcal.UPCOMING_LOG = run_all.UPCOMING_LOG
 fxcal.UNDERSTAT_DIR = tmp
+watchlist.write_watchlist = lambda upcoming: []
 
 players = load_players()
 home_us, away_us = "Manchester City", "Everton"

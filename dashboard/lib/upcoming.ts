@@ -1,4 +1,4 @@
-import type { GoalsPick, UpcomingFixture } from "./data";
+import type { FixtureWatchlist, GoalsPick, UpcomingFixture } from "./data";
 
 export const UPCOMING_DISPLAY_LIMIT = 5;
 
@@ -54,4 +54,14 @@ export function selectNextUpcoming(
         a.home.localeCompare(b.home)
     )
     .slice(0, limit);
+}
+
+export function watchlistForFixture(
+  lists: FixtureWatchlist[],
+  fixture: UpcomingFixture
+): FixtureWatchlist | null {
+  const byId = lists.find((w) => w.fixtureId === fixture.fixtureId);
+  if (byId) return byId;
+  const k = matchKey(fixture.home, fixture.away, fixture.kickoff);
+  return lists.find((w) => matchKey(w.home, w.away, w.kickoff) === k) ?? null;
 }
