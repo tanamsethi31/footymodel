@@ -171,7 +171,7 @@ function bool(v: unknown): boolean | null {
 
 async function fetchCsv(name: string): Promise<Record<string, string>[]> {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error("GITHUB_TOKEN not set");
+  if (!token) return [];
   const res = await fetch(
     `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/${name}`,
     {
@@ -196,7 +196,7 @@ async function fetchCsv(name: string): Promise<Record<string, string>[]> {
 
 async function fetchJsonl(name: string): Promise<Record<string, unknown>[]> {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error("GITHUB_TOKEN not set");
+  if (!token) return [];
   const res = await fetch(
     `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/${name}`,
     {
@@ -218,7 +218,7 @@ async function fetchJsonl(name: string): Promise<Record<string, unknown>[]> {
 
 async function fetchJson(name: string): Promise<unknown[]> {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error("GITHUB_TOKEN not set");
+  if (!token) return [];
   const res = await fetch(
     `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/${name}`,
     {
@@ -414,7 +414,7 @@ export async function getWatchlists(): Promise<FixtureWatchlist[]> {
 
 async function fetchCalendarFixtures(): Promise<Record<string, unknown>[]> {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error("GITHUB_TOKEN not set");
+  if (!token) return [];
   const res = await fetch(
     `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/fixture_calendar.json`,
     {
