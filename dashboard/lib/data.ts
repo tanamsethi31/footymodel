@@ -355,7 +355,7 @@ function parseWatchPlayers(raw: unknown): WatchPlayer[] {
     if (!p || typeof p !== "object") continue;
     const rec = p as Record<string, unknown>;
     const player = rec.player;
-    const prob = num(rec.p_shots_gt0.5);
+    const prob = num(rec["p_shots_gt0.5"]);
     if (!player || prob === null) continue;
     out.push({ player: String(player), pShotsGt05: prob });
   }
@@ -364,19 +364,26 @@ function parseWatchPlayers(raw: unknown): WatchPlayer[] {
 
 export async function getWatchlists(): Promise<FixtureWatchlist[]> {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error("GITHUB_TOKEN not set");
-  const res = await fetch(
-    `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/upcoming_watchlist.json`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github.raw+json",
-      },
-      next: { revalidate: 60 },
-    }
-  );
+  // Watchlist is additive UI — never fail the whole dashboard if the file
+  // is missing or GitHub is unhappy (that left production on an old deploy).
+  if (!token) return [];
+  let res: Response;
+  try {
+    res = await fetch(
+      `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/upcoming_watchlist.json`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github.raw+json",
+        },
+        next: { revalidate: 60 },
+      }
+    );
+  } catch {
+    return [];
+  }
   if (res.status === 404) return [];
-  if (!res.ok) throw new Error(`Failed to fetch upcoming_watchlist.json: ${res.status} ${await res.text()}`);
+  if (!res.ok) return [];
   let payload: unknown;
   try {
     payload = JSON.parse(await res.text());

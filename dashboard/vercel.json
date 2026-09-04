@@ -1,3 +1,3 @@
 {
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- ."
+  "ignoreCommand": "git rev-parse -q --verify HEAD^ >/dev/null && git diff --quiet HEAD^ HEAD -- . || exit 1"
 }
