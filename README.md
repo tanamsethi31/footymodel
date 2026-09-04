@@ -79,6 +79,7 @@ flowchart LR
         AF[API-Football<br/>primary live source]
         RA2[RapidAPI<br/>fallback, 90 req/mo budget]
         SS[SofaScore<br/>fallback, browser-scraped]
+        AP[Apify football-api-scraper<br/>fallback, SofaScore via Apify]
     end
 
     FD --> DC[Dixon-Coles goals engine]
@@ -93,6 +94,7 @@ flowchart LR
     AF --> RUN[live/run_all.py<br/>goals + props, one shared poll]
     RA2 --> RAE[live/rapidapi_engine.py]
     SS --> SSE[live/sofascore_engine.py]
+    AP --> APE[live/apify_engine.py]
     LM --> RUN
     LM --> RAE
     LM --> SSE
@@ -102,9 +104,11 @@ flowchart LR
     RUN --> LOG2[(live_player_props.csv)]
     RAE --> LOG1
     SSE --> LOG1
+    APE --> LOG1
     RUN --> LOG3[(match_detail.jsonl<br/>lineups + model breakdown)]
     RAE --> LOG3
     SSE --> LOG3
+    APE --> LOG3
     CAL[fixture_calendar.json<br/>PL kickoffs, ~10 days]
 
     CAL --> GH[GitHub Actions cron<br/>live_poll.yml, every 20min]
@@ -116,8 +120,8 @@ flowchart LR
     REPO -- GitHub Contents API --> DASH[Next.js dashboard<br/>on Vercel]
 ```
 
-All three live engines write to the SAME `live_recommendations.csv`, tagged
-by source — API-Football is primary, RapidAPI and SofaScore exist as
+All four live engines write to the SAME `live_recommendations.csv`, tagged
+by source — API-Football is primary; RapidAPI, SofaScore, and Apify exist as
 fallbacks so a single provider's outage (API-Football's free tier has been
 suspended before) doesn't stop predictions from being logged. The whole
 thing runs unattended on a GitHub Actions cron, not a local machine — the
@@ -135,6 +139,7 @@ footymodel/
     engine.py            # API-Football goals/O-U engine (primary)
     rapidapi_engine.py    # RapidAPI fallback (100 req/month, budget-capped)
     sofascore_engine.py   # SofaScore fallback (browser-scraped, no API key)
+    apify_engine.py       # Apify fallback (SofaScore-shaped, pay-per-run cap)
     calendar.py            # saved PL fixture calendar + idle-poll gate
     match_detail.py        # shared JSONL side-log: lineups + model breakdown
     run_all.py             # shares one fetch across goals + props engines
@@ -263,6 +268,7 @@ To run any engine manually (e.g. local debugging):
 python -m footymodel.live.run_all          # API-Football: goals + props
 python -m footymodel.live.sofascore_engine  # SofaScore fallback (goals only)
 python -m footymodel.live.rapidapi_engine   # RapidAPI fallback (goals only)
+python -m footymodel.live.apify_engine      # Apify fallback (goals only)
 ```
 Each needs its own key/setup, in a local `.env` file at the repo root
 (gitignored, never committed):
@@ -270,6 +276,8 @@ Each needs its own key/setup, in a local `.env` file at the repo root
   100 req/day; Pro is $19/mo for 7,500 req/day if scaling up)
 - `RAPIDAPI_KEY` — subscribe to the "Free API Live Football Data" listing
   on RapidAPI
+- `APIFY_TOKEN` — https://console.apify.com/account/integrations (runs
+  `sian.agency/football-api-scraper`; budget-capped in `apify_budget.json`)
 - SofaScore needs no key, just Playwright installed
   (`playwright install chromium`)
 
@@ -386,6 +394,7 @@ python scripts/goals_odds_parse_test.py
 python scripts/props_odds_parse_test.py
 python scripts/sofascore_odds_parse_test.py
 python scripts/rapidapi_odds_parse_test.py
+python scripts/apify_odds_parse_test.py
 python scripts/grade_results_datetime_test.py
 python scripts/grade_results_columns_test.py
 python scripts/match_detail_test.py

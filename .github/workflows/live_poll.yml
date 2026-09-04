@@ -68,6 +68,13 @@ jobs:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: python -m footymodel.live.rapidapi_engine
 
+      - name: Run Apify goals engine (SofaScore-shaped data via Apify, budget-capped)
+        if: steps.gate.outputs.should_run == 'true'
+        continue-on-error: true
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+        run: python -m footymodel.live.apify_engine
+
       - name: Commit + push any new recommendations/state
         env:
           NOTIFY_URL: https://footymodel.vercel.app/api/notify
@@ -85,7 +92,10 @@ jobs:
                    data/processed/sofascore_seen_fixtures.json \
                    data/processed/rapidapi_seen_fixtures.json \
                    data/processed/rapidapi_budget.json \
-                   data/processed/rapidapi_fixtures_cache.json; do
+                   data/processed/rapidapi_fixtures_cache.json \
+                   data/processed/apify_seen_fixtures.json \
+                   data/processed/apify_budget.json \
+                   data/processed/apify_fixtures_cache.json; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --cached --quiet && exit 0
