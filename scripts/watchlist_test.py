@@ -81,4 +81,31 @@ miss = wl.watchlist_for_fixture(
 )
 assert miss is None
 
+# Prior-season starters must not leak into a new campaign's watchlist.
+old_season_rows = []
+for mid, day, pid, name in [
+    ("o1", "2026-05-20", "p_salah", "Mohamed Salah"),
+    ("o2", "2026-05-24", "p_salah", "Mohamed Salah"),
+]:
+    old_season_rows.append({
+        "league": "E0", "team_us": "Liverpool", "match_id": mid,
+        "date": pd.Timestamp(day), "started": True,
+        "player_id": pid, "player": name, "position": "FW",
+        "minutes": 90, "xg": 0.3, "xa": 0.0, "shots": 3, "goals": 0,
+        "home_us": "Liverpool", "away_us": "Rival FC", "side": "h",
+    })
+new_season_rows = [{
+    "league": "E0", "team_us": "Liverpool", "match_id": "n1",
+    "date": pd.Timestamp("2026-08-23"), "started": True,
+    "player_id": "p_gakpo", "player": "Cody Gakpo", "position": "FW",
+    "minutes": 90, "xg": 0.2, "xa": 0.0, "shots": 2, "goals": 0,
+    "home_us": "Liverpool", "away_us": "Opponent", "side": "h",
+}]
+liverpool_players = pd.DataFrame(old_season_rows + new_season_rows)
+as_of_new = pd.Timestamp("2026-09-04")
+liv_cands = wl.recent_non_gk_starters(liverpool_players, "E0", "Liverpool", as_of_new)
+liv_names = {n for _, n in liv_cands}
+assert "Mohamed Salah" not in liv_names, liv_names
+assert "Cody Gakpo" in liv_names, liv_names
+
 print("watchlist_test: OK")
