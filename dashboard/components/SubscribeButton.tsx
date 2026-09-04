@@ -5,17 +5,20 @@ import {
   persistNotificationPreference,
   readNotificationPreference,
 } from "@/lib/notifications";
+import { BellIcon, BellOffIcon, InfoIcon } from "@/components/icons";
 
 type Status = "checking" | "unsupported" | "denied" | "off" | "on" | "working";
 
-const DESCRIPTIONS: Record<Exclude<Status, "checking">, string> = {
+const INFO_TEXT: Record<Status, string> = {
+  checking:
+    "Checking whether push notifications are available in this browser. This usually takes a moment.",
   unsupported:
     "Push notifications aren't supported in this browser. On iPhone, add this page to your Home Screen first, then reopen it from there.",
   denied:
     "Notifications blocked. Enable them for this site in your browser settings to get alerts.",
   off: "Get notified when new picks are logged. Tap the bell to enable.",
   on: "Notifications on — you'll get alerts when new picks are logged. Tap the bell to turn off.",
-  working: "Working…",
+  working: "Updating your notification preference…",
 };
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -52,6 +55,7 @@ export default function SubscribeButton() {
   const [status, setStatus] = useState<Status>("checking");
   const [infoOpen, setInfoOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const lastStableStatus = useRef<Exclude<Status, "checking" | "working">>("off");
 
   useEffect(() => {
     let cancelled = false;
@@ -64,13 +68,19 @@ export default function SubscribeButton() {
         !("PushManager" in window) ||
         !("Notification" in window)
       ) {
-        if (!cancelled) setStatus("unsupported");
+        if (!cancelled) {
+          lastStableStatus.current = "unsupported";
+          setStatus("unsupported");
+        }
         return;
       }
 
       if (Notification.permission === "denied") {
         persistNotificationPreference("off");
-        if (!cancelled) setStatus("denied");
+        if (!cancelled) {
+          lastStableStatus.current = "denied";
+          setStatus("denied");
+        }
         return;
       }
 
@@ -83,7 +93,10 @@ export default function SubscribeButton() {
         if (pref === "off" && existing) {
           await deleteSubscription(existing.toJSON());
           await existing.unsubscribe().catch(() => {});
-          if (!cancelled) setStatus("off");
+          if (!cancelled) {
+            lastStableStatus.current = "off";
+            setStatus("off");
+          }
           return;
         }
 
@@ -92,9 +105,11 @@ export default function SubscribeButton() {
           if (!cancelled) {
             if (synced) {
               persistNotificationPreference("on");
+              lastStableStatus.current = "on";
               setStatus("on");
             } else {
               persistNotificationPreference("off");
+              lastStableStatus.current = "off";
               setStatus("off");
             }
           }
@@ -110,10 +125,12 @@ export default function SubscribeButton() {
           if (!cancelled) {
             if (synced) {
               persistNotificationPreference("on");
+              lastStableStatus.current = "on";
               setStatus("on");
             } else {
               await sub.unsubscribe().catch(() => {});
               persistNotificationPreference("off");
+              lastStableStatus.current = "off";
               setStatus("off");
             }
           }
@@ -121,13 +138,22 @@ export default function SubscribeButton() {
         }
 
         if (pref === "off") {
-          if (!cancelled) setStatus("off");
+          if (!cancelled) {
+            lastStableStatus.current = "off";
+            setStatus("off");
+          }
           return;
         }
 
-        if (!cancelled) setStatus("off");
+        if (!cancelled) {
+          lastStableStatus.current = "off";
+          setStatus("off");
+        }
       } catch {
-        if (!cancelled) setStatus("unsupported");
+        if (!cancelled) {
+          lastStableStatus.current = "unsupported";
+          setStatus("unsupported");
+        }
       }
     }
 
@@ -149,6 +175,7 @@ export default function SubscribeButton() {
   async function subscribe() {
     const publicKey = vapidPublicKey();
     if (!publicKey) {
+      lastStableStatus.current = "unsupported";
       setStatus("unsupported");
       return;
     }
@@ -158,7 +185,9 @@ export default function SubscribeButton() {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
         persistNotificationPreference("off");
-        setStatus(permission === "denied" ? "denied" : "off");
+        const next = permission === "denied" ? "denied" : "off";
+        lastStableStatus.current = next;
+        setStatus(next);
         return;
       }
       const sub = await reg.pushManager.subscribe({
@@ -169,13 +198,16 @@ export default function SubscribeButton() {
       if (!synced) {
         await sub.unsubscribe().catch(() => {});
         persistNotificationPreference("off");
+        lastStableStatus.current = "off";
         setStatus("off");
         return;
       }
       persistNotificationPreference("on");
+      lastStableStatus.current = "on";
       setStatus("on");
     } catch {
       persistNotificationPreference("off");
+      lastStableStatus.current = "off";
       setStatus("off");
     }
   }
@@ -189,21 +221,25 @@ export default function SubscribeButton() {
         const removed = await deleteSubscription(sub.toJSON());
         await sub.unsubscribe().catch(() => {});
         if (!removed) {
+          lastStableStatus.current = "on";
           setStatus("on");
           return;
         }
       }
       persistNotificationPreference("off");
+      lastStableStatus.current = "off";
       setStatus("off");
     } catch {
+      lastStableStatus.current = "off";
       setStatus("off");
       persistNotificationPreference("off");
     }
   }
 
-  if (status === "checking") return null;
-
   const interactive = status === "off" || status === "on";
+  const bellActive = status === "on";
+  const infoText =
+    status === "working" ? INFO_TEXT[lastStableStatus.current] : INFO_TEXT[status];
 
   function handleBellClick() {
     if (status === "on") void unsubscribe();
@@ -213,6 +249,7 @@ export default function SubscribeButton() {
   return (
     <div ref={wrapperRef} className="relative flex items-center gap-2">
       <button
+        type="button"
         onClick={handleBellClick}
         disabled={!interactive}
         aria-label={
@@ -222,27 +259,35 @@ export default function SubscribeButton() {
               ? "Get notified of new picks"
               : status === "denied"
                 ? "Notifications blocked"
-                : "Notifications unsupported in this browser"
+                : status === "checking"
+                  ? "Checking notification support"
+                  : "Notifications unsupported in this browser"
         }
-        className={`w-9 h-9 rounded-full border flex items-center justify-center text-base transition-opacity duration-300 ${
-          status === "on"
-            ? "border-indigo-800 dark:border-indigo-400 text-indigo-200 animate-bell-glow"
-            : "border-neutral-200 dark:border-neutral-800 text-neutral-400 dark:text-neutral-600"
-        } ${status === "working" ? "opacity-50" : ""} ${interactive ? "" : "cursor-default"}`}
+        className={`w-9 h-9 rounded-full border flex items-center justify-center transition-opacity duration-300 ${
+          bellActive
+            ? "border-indigo-800 dark:border-indigo-400 text-indigo-600 dark:text-indigo-300 animate-bell-glow"
+            : "border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400"
+        } ${status === "working" || status === "checking" ? "opacity-50" : ""} ${
+          interactive ? "hover:border-neutral-300 dark:hover:border-neutral-700" : "cursor-default"
+        }`}
       >
-        {status === "on" ? "🔔" : "🔕"}
+        {bellActive ? <BellIcon /> : <BellOffIcon />}
       </button>
       <button
+        type="button"
         onClick={() => setInfoOpen((o) => !o)}
         aria-expanded={infoOpen}
-        aria-label="What does this mean?"
-        className="w-9 h-9 rounded-full border border-neutral-200 dark:border-neutral-800 flex items-center justify-center text-sm text-neutral-400 dark:text-neutral-600"
+        aria-label="About notifications"
+        className="w-9 h-9 rounded-full border border-neutral-200 dark:border-neutral-800 flex items-center justify-center text-neutral-500 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-700"
       >
-        ⓘ
+        <InfoIcon />
       </button>
       {infoOpen && (
-        <div className="absolute top-full right-0 mt-10 w-64 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-xs text-neutral-500 dark:text-neutral-400 shadow-lg z-20">
-          {DESCRIPTIONS[status]}
+        <div
+          role="tooltip"
+          className="absolute top-full right-0 mt-2 w-64 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400 shadow-lg z-20"
+        >
+          {infoText}
         </div>
       )}
     </div>
