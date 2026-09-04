@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  persistNotificationPreference,
+  readNotificationPreference,
+} from "@/lib/notifications";
 
 type Status = "checking" | "unsupported" | "denied" | "off" | "on" | "working";
 
@@ -21,29 +25,118 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
 }
 
+function vapidPublicKey(): string | null {
+  const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  return key && key.length > 0 ? key : null;
+}
+
+async function postSubscription(sub: PushSubscriptionJSON): Promise<boolean> {
+  const res = await fetch("/api/subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(sub),
+  });
+  return res.ok;
+}
+
+async function deleteSubscription(sub: PushSubscriptionJSON): Promise<boolean> {
+  const res = await fetch("/api/subscribe", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(sub),
+  });
+  return res.ok;
+}
+
 export default function SubscribeButton() {
   const [status, setStatus] = useState<Status>("checking");
   const [infoOpen, setInfoOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-      setStatus("unsupported");
-      return;
+    let cancelled = false;
+
+    async function init() {
+      const publicKey = vapidPublicKey();
+      if (
+        !publicKey ||
+        !("serviceWorker" in navigator) ||
+        !("PushManager" in window) ||
+        !("Notification" in window)
+      ) {
+        if (!cancelled) setStatus("unsupported");
+        return;
+      }
+
+      if (Notification.permission === "denied") {
+        persistNotificationPreference("off");
+        if (!cancelled) setStatus("denied");
+        return;
+      }
+
+      try {
+        await navigator.serviceWorker.register("/sw.js");
+        const reg = await navigator.serviceWorker.ready;
+        const existing = await reg.pushManager.getSubscription();
+        const pref = readNotificationPreference();
+
+        if (pref === "off" && existing) {
+          await deleteSubscription(existing.toJSON());
+          await existing.unsubscribe().catch(() => {});
+          if (!cancelled) setStatus("off");
+          return;
+        }
+
+        if (existing) {
+          const synced = await postSubscription(existing.toJSON());
+          if (!cancelled) {
+            if (synced) {
+              persistNotificationPreference("on");
+              setStatus("on");
+            } else {
+              persistNotificationPreference("off");
+              setStatus("off");
+            }
+          }
+          return;
+        }
+
+        if (pref === "on" && Notification.permission === "granted") {
+          const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(publicKey),
+          });
+          const synced = await postSubscription(sub.toJSON());
+          if (!cancelled) {
+            if (synced) {
+              persistNotificationPreference("on");
+              setStatus("on");
+            } else {
+              await sub.unsubscribe().catch(() => {});
+              persistNotificationPreference("off");
+              setStatus("off");
+            }
+          }
+          return;
+        }
+
+        if (pref === "off") {
+          if (!cancelled) setStatus("off");
+          return;
+        }
+
+        if (!cancelled) setStatus("off");
+      } catch {
+        if (!cancelled) setStatus("unsupported");
+      }
     }
-    if (Notification.permission === "denied") {
-      setStatus("denied");
-      return;
-    }
-    navigator.serviceWorker.register("/sw.js").then(async (reg) => {
-      const existing = await reg.pushManager.getSubscription();
-      setStatus(existing ? "on" : "off");
-    });
+
+    void init();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Close the popover on a click anywhere outside this component - only
-  // attached while it's actually open, removed the moment it closes (or the
-  // component unmounts), so this never leaks a document-level listener.
   useEffect(() => {
     if (!infoOpen) return;
     function onDocClick(e: MouseEvent) {
@@ -54,40 +147,58 @@ export default function SubscribeButton() {
   }, [infoOpen]);
 
   async function subscribe() {
-    setStatus("working");
-    const reg = await navigator.serviceWorker.ready;
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") {
-      setStatus(permission === "denied" ? "denied" : "off");
+    const publicKey = vapidPublicKey();
+    if (!publicKey) {
+      setStatus("unsupported");
       return;
     }
-    const sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-      ),
-    });
-    await fetch("/api/subscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(sub),
-    });
-    setStatus("on");
+    setStatus("working");
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        persistNotificationPreference("off");
+        setStatus(permission === "denied" ? "denied" : "off");
+        return;
+      }
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+      const synced = await postSubscription(sub.toJSON());
+      if (!synced) {
+        await sub.unsubscribe().catch(() => {});
+        persistNotificationPreference("off");
+        setStatus("off");
+        return;
+      }
+      persistNotificationPreference("on");
+      setStatus("on");
+    } catch {
+      persistNotificationPreference("off");
+      setStatus("off");
+    }
   }
 
   async function unsubscribe() {
     setStatus("working");
-    const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.getSubscription();
-    if (sub) {
-      await fetch("/api/subscribe", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sub),
-      });
-      await sub.unsubscribe();
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        const removed = await deleteSubscription(sub.toJSON());
+        await sub.unsubscribe().catch(() => {});
+        if (!removed) {
+          setStatus("on");
+          return;
+        }
+      }
+      persistNotificationPreference("off");
+      setStatus("off");
+    } catch {
+      setStatus("off");
+      persistNotificationPreference("off");
     }
-    setStatus("off");
   }
 
   if (status === "checking") return null;
@@ -95,8 +206,8 @@ export default function SubscribeButton() {
   const interactive = status === "off" || status === "on";
 
   function handleBellClick() {
-    if (status === "on") unsubscribe();
-    else if (status === "off") subscribe();
+    if (status === "on") void unsubscribe();
+    else if (status === "off") void subscribe();
   }
 
   return (
@@ -119,10 +230,6 @@ export default function SubscribeButton() {
             : "border-neutral-200 dark:border-neutral-800 text-neutral-400 dark:text-neutral-600"
         } ${status === "working" ? "opacity-50" : ""} ${interactive ? "" : "cursor-default"}`}
       >
-        {/* During "working", this always shows the muted glyph rather than
-            trying to preserve which direction the transition is going -
-            it's a brief, sub-second state either way, not worth the extra
-            bookkeeping to track the pre-transition glyph. */}
         {status === "on" ? "🔔" : "🔕"}
       </button>
       <button
