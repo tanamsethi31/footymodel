@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MoonIcon, SunIcon } from "@/components/icons";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 
 type Theme = "light" | "dark";
 
@@ -68,7 +68,11 @@ export default function ThemeToggle() {
           theme === "dark" ? "translate-x-6" : "translate-x-0"
         }`}
       >
-        {theme === "dark" ? <MoonIcon /> : <SunIcon />}
+        {theme === "dark" ? (
+          <MdDarkMode className="w-4 h-4" aria-hidden="true" />
+        ) : (
+          <MdLightMode className="w-4 h-4" aria-hidden="true" />
+        )}
       </span>
     </button>
   );

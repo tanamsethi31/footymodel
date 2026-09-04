@@ -5,7 +5,8 @@ import {
   persistNotificationPreference,
   readNotificationPreference,
 } from "@/lib/notifications";
-import { BellIcon, BellOffIcon, InfoIcon } from "@/components/icons";
+import { FaBell, FaBellSlash } from "react-icons/fa";
+import { InfoIcon } from "@/components/icons";
 
 type Status = "checking" | "unsupported" | "denied" | "off" | "on" | "working";
 
@@ -271,7 +272,11 @@ export default function SubscribeButton() {
           interactive ? "hover:border-neutral-300 dark:hover:border-neutral-700" : "cursor-default"
         }`}
       >
-        {bellActive ? <BellIcon /> : <BellOffIcon />}
+        {bellActive ? (
+          <FaBell className="w-[18px] h-[18px]" aria-hidden="true" />
+        ) : (
+          <FaBellSlash className="w-[18px] h-[18px]" aria-hidden="true" />
+        )}
       </button>
       <button
         type="button"
