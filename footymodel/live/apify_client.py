@@ -91,3 +91,6 @@ class ApifyFootballClient:
 
     def match_odds(self, match_id: int) -> list[dict]:
         return self.run("matchOdds", matchId=match_id)
+
+    def team_squad(self, team_id: int) -> list[dict]:
+        return self.run("teamSquad", teamId=team_id)

@@ -3,11 +3,9 @@
 Confirmed-XI prop rows only exist ~20-40 min before kickoff. Between matchdays
 the Props tab still shows the next fixtures as previews; this module ranks
 each team's recent non-GK starters by the same shots model the live engine
-uses (P(shots 1+) vs this opponent, 85 assumed minutes) so a preview can
-expand into a short watchlist without spending API quota on lineups.
-
-Not a substitute for the confirmed-XI table — it's an informed prior from
-who has actually been starting.
+uses (P(shots 1+) vs this opponent, 85 assumed minutes). When a team has no
+current-season Understat starts yet, it falls back to the live Apify/SofaScore
+squad (cached weekly) so previews still list plausible names.
 """
 from __future__ import annotations
 
@@ -20,6 +18,7 @@ from ..data import PROCESSED_DIR
 from ..players import POSITION_GROUPS, LineupModel, load_players
 from . import namematch
 from .shots_engine import LEAGUE, MINUTES_ASSUMED
+from .squad_fallback import SquadFallback, augment_candidates
 
 WATCHLIST_FILE = PROCESSED_DIR / "upcoming_watchlist.json"
 PER_SIDE = 3
@@ -116,6 +115,7 @@ def watchlist_for_fixture(
     league: str = LEAGUE,
     per_side: int = PER_SIDE,
     predict_fn: Callable | None = None,
+    squad: SquadFallback | None = None,
 ) -> dict[str, Any] | None:
     """One dashboard record, or None if we can't map both team names."""
     names = namematch.team_name_index(players, league)
@@ -127,8 +127,22 @@ def watchlist_for_fixture(
         as_of = pd.Timestamp(fx["kickoff"]).tz_localize(None).normalize()
     except (TypeError, ValueError):
         as_of = pd.Timestamp.now().normalize()
-    home_cands = recent_non_gk_starters(players, league, home_us, as_of)
-    away_cands = recent_non_gk_starters(players, league, away_us, as_of)
+    home_cands = augment_candidates(
+        recent_non_gk_starters(players, league, home_us, as_of),
+        players=players,
+        league=league,
+        team_us=home_us,
+        api_team_name=str(fx["home"]),
+        squad=squad,
+    )
+    away_cands = augment_candidates(
+        recent_non_gk_starters(players, league, away_us, as_of),
+        players=players,
+        league=league,
+        team_us=away_us,
+        api_team_name=str(fx["away"]),
+        squad=squad,
+    )
     return {
         "fixture_id": fx["fixture_id"],
         "home": fx["home"],
@@ -144,6 +158,7 @@ def build_watchlist(
     players: pd.DataFrame | None = None,
     model: LineupModel | None = None,
     league: str = LEAGUE,
+    squad: SquadFallback | None = None,
 ) -> list[dict]:
     if not upcoming:
         return []
@@ -152,9 +167,11 @@ def build_watchlist(
     if model is None:
         as_of = pd.Timestamp.now().normalize()
         model = LineupModel.fit(players, league, as_of)
+    if squad is None:
+        squad = SquadFallback.try_create()
     rows = []
     for fx in upcoming:
-        rec = watchlist_for_fixture(fx, players, model, league)
+        rec = watchlist_for_fixture(fx, players, model, league, squad=squad)
         if rec is None:
             continue
         if not rec["home_watch"] and not rec["away_watch"]:

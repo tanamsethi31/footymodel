@@ -108,4 +108,26 @@ liv_names = {n for _, n in liv_cands}
 assert "Mohamed Salah" not in liv_names, liv_names
 assert "Cody Gakpo" in liv_names, liv_names
 
+# Squad fallback only applies when current-season starters are empty.
+from footymodel.live.squad_fallback import SquadFallback, augment_candidates
+
+class FakeSquad:
+    def candidates(self, players, league, team_us, api_team_name):
+        return [("p_live", "Live Striker")]
+
+
+empty_liv = wl.recent_non_gk_starters(liverpool_players, "E0", "Liverpool", as_of_new)
+assert empty_liv == [("p_gakpo", "Cody Gakpo")]
+only_old = pd.DataFrame(old_season_rows)
+assert wl.recent_non_gk_starters(only_old, "E0", "Liverpool", as_of_new) == []
+filled = augment_candidates(
+    [],
+    players=only_old,
+    league="E0",
+    team_us="Liverpool",
+    api_team_name="Liverpool",
+    squad=FakeSquad(),
+)
+assert filled == [("p_live", "Live Striker")]
+
 print("watchlist_test: OK")
