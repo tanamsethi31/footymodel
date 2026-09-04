@@ -33,7 +33,8 @@ import numpy as np
 import pandas as pd
 
 from ..data import PROCESSED_DIR
-from . import namematch, rapidapi_engine, sofascore_engine
+from . import apify_engine, namematch, rapidapi_engine, sofascore_engine
+from .apify_client import ApifyFootballClient
 from .client import ApiFootballClient, ApiFootballError
 from .engine import _best_over_under_odds
 from .rapidapi_client import RapidApiClient
@@ -152,6 +153,18 @@ def _fetch_closing_odds(fixture_id: str, clients: dict) -> tuple[float | None, f
             event_id = int(fixture_id.removeprefix("sofa_"))
             resp = client.odds(event_id)
             return sofascore_engine._find_25_line(resp)
+        elif fixture_id.startswith("apify_"):
+            client = clients.get("apify")
+            budget = clients.get("apify_budget")
+            if client is None or budget is None:
+                return None, None
+            if budget["runs_used"] >= apify_engine.RUNS_CAP:
+                print(f"  ! apify run cap reached, skipping closing odds for {fixture_id}")
+                return None, None
+            event_id = int(fixture_id.removeprefix("apify_"))
+            budget["runs_used"] += 1
+            rows = client.match_odds(event_id)
+            return apify_engine._find_25_line(rows)
         else:
             client = clients.get("apifootball")
             if client is None:
@@ -299,6 +312,10 @@ def main() -> None:
         sofascore_client = SofaScoreClient()
         clients["sofascore"] = sofascore_client
 
+    if fixture_ids.str.startswith("apify_").any():
+        clients["apify"] = ApifyFootballClient()
+        clients["apify_budget"] = apify_engine._load_budget()
+
     cache: dict[str, list[dict]] = {}
     graded_rows = []
     try:
@@ -316,6 +333,8 @@ def main() -> None:
     finally:
         if "rapidapi_budget" in clients:
             rapidapi_engine._save_budget(clients["rapidapi_budget"])
+        if "apify_budget" in clients:
+            apify_engine._save_budget(clients["apify_budget"])
         if sofascore_client is not None:
             sofascore_client.close()
 
