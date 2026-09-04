@@ -31,6 +31,7 @@ match_detail.MATCH_DETAIL_LOG = tmp / "match_detail.jsonl"
 run_all.UPCOMING_LOG = tmp / "upcoming_fixtures.json"
 fxcal.CALENDAR_FILE = tmp / "fixture_calendar.json"
 fxcal.UPCOMING_LOG = run_all.UPCOMING_LOG
+fxcal.UNDERSTAT_DIR = tmp
 
 players = load_players()
 home_us, away_us = "Manchester City", "Everton"

@@ -30,12 +30,15 @@ from typing import Any
 import pandas as pd
 
 from ..data import PROCESSED_DIR
+from ..understat import RAW_XG_DIR
 from .client import ApiFootballClient, ApiFootballError
 from .engine import (DEFAULT_HOURS_AHEAD, DEFAULT_HOURS_BEHIND, LEAGUE_API_IDS,
                      _load_seen)
 
 CALENDAR_FILE = PROCESSED_DIR / "fixture_calendar.json"
 UPCOMING_LOG = PROCESSED_DIR / "upcoming_fixtures.json"
+# Overridable in tests so dry-runs don't pick up the real EPL cache.
+UNDERSTAT_DIR = RAW_XG_DIR
 
 # 10 days covers a typical PL matchweek plus an international-break midweek
 # without spending a date-query per poll. 0..horizon inclusive = 11 calls
@@ -52,6 +55,22 @@ def _as_utc(ts: pd.Timestamp) -> pd.Timestamp:
 
 def utc_date_str(iso_or_ts) -> str:
     return _as_utc(pd.Timestamp(iso_or_ts)).strftime("%Y-%m-%d")
+
+
+def match_key(row: dict) -> tuple[str, str, str]:
+    """Collapse API-Football and Understat rows for the same fixture.
+    Kickoff compared on the UTC calendar day so a timezone suffix vs a
+    naive Understat datetime still matches."""
+    kickoff = utc_date_str(row["kickoff"])
+    return (str(row["home"]).strip().lower(),
+            str(row["away"]).strip().lower(),
+            kickoff)
+
+
+def understat_season_year(now: pd.Timestamp) -> int:
+    """Understat's season label is the starting year (2026 -> 2026/27)."""
+    now = _as_utc(now)
+    return int(now.year if now.month >= 7 else now.year - 1)
 
 
 def load_calendar() -> dict[str, Any] | None:
@@ -137,19 +156,74 @@ def upcoming_from_calendar(now: pd.Timestamp | None = None,
             "away": away,
             "kickoff": kickoff,
         })
-    upcoming.sort(key=lambda r: r["kickoff"])
+    upcoming.sort(key=lambda r: (r["kickoff"], r["home"]))
+    return upcoming
+
+
+def upcoming_from_understat(now: pd.Timestamp | None = None,
+                            horizon_days: int = HORIZON_DAYS,
+                            year: int | None = None) -> list[dict]:
+    """Next PL fixtures from the already-cached Understat season file.
+    No API-Football key, so the dashboard preview still fills on a day
+    the API calendar refresh can't run. IDs are prefixed `us_` so they
+    never collide with API-Football fixture ids used for gating/`seen`."""
+    now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
+    year = year if year is not None else understat_season_year(now)
+    path = UNDERSTAT_DIR / f"EPL_{year}.json"
+    if not path.exists():
+        return []
+    try:
+        payload = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return []
+    horizon_end = now + pd.Timedelta(days=horizon_days)
+    upcoming = []
+    seen_ids: set = set()
+    for rec in payload.get("dates") or []:
+        if not isinstance(rec, dict) or rec.get("isResult"):
+            continue
+        try:
+            kickoff = pd.Timestamp(rec["datetime"])
+            kickoff = _as_utc(kickoff)
+            home = rec["h"]["title"]
+            away = rec["a"]["title"]
+            uid = rec["id"]
+        except (KeyError, TypeError, ValueError):
+            continue
+        if kickoff <= now or kickoff > horizon_end:
+            continue
+        fid = f"us_{uid}"
+        if fid in seen_ids:
+            continue
+        seen_ids.add(fid)
+        upcoming.append({
+            "fixture_id": fid,
+            "home": home,
+            "away": away,
+            "kickoff": kickoff.isoformat(),
+        })
+    upcoming.sort(key=lambda r: (r["kickoff"], r["home"]))
     return upcoming
 
 
 def merge_upcoming(primary: list[dict], extra: list[dict]) -> list[dict]:
-    """Union by fixture_id. `primary` wins on conflict (live fetch is
-    fresher than a calendar snapshot)."""
-    by_id: dict = {}
+    """Union by fixture_id OR (home, away, UTC date). `primary` wins —
+    live API-Football rows beat a calendar snapshot, which beats Understat
+    `us_` placeholders for the same match."""
+    selected: list[dict] = []
+
+    def upsert(row: dict) -> None:
+        k = match_key(row)
+        fid = row["fixture_id"]
+        selected[:] = [r for r in selected
+                       if match_key(r) != k and r["fixture_id"] != fid]
+        selected.append(row)
+
     for row in extra:
-        by_id[row["fixture_id"]] = row
+        upsert(row)
     for row in primary:
-        by_id[row["fixture_id"]] = row
-    return sorted(by_id.values(), key=lambda r: r["kickoff"])
+        upsert(row)
+    return sorted(selected, key=lambda r: (r["kickoff"], r["home"]))
 
 
 def date_buckets_to_fetch(
@@ -177,9 +251,20 @@ def date_buckets_to_fetch(
 
 def write_upcoming_from_calendar(now: pd.Timestamp | None = None,
                                  payload: dict[str, Any] | None = None) -> list[dict]:
-    upcoming = upcoming_from_calendar(now, payload)
+    return write_dashboard_upcoming(now, payload)
+
+
+def write_dashboard_upcoming(now: pd.Timestamp | None = None,
+                             payload: dict[str, Any] | None = None) -> list[dict]:
+    """What the dashboard reads: API/calendar rows first, Understat fills
+    any holes (and the whole list when the API calendar is empty)."""
+    now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
+    upcoming = merge_upcoming(
+        upcoming_from_calendar(now, payload),
+        upcoming_from_understat(now),
+    )
     UPCOMING_LOG.parent.mkdir(parents=True, exist_ok=True)
-    UPCOMING_LOG.write_text(json.dumps(upcoming))
+    UPCOMING_LOG.write_text(json.dumps(upcoming, indent=2))
     return upcoming
 
 
@@ -278,8 +363,10 @@ def gate() -> bool:
             refresh_calendar(ApiFootballClient(), now)
         except Exception as e:
             print(f"! calendar refresh failed ({e}); gating on whatever we have")
+            n = len(write_dashboard_upcoming(now))
+            print(f"wrote {n} upcoming preview(s) from fallback sources")
     else:
-        n = len(write_upcoming_from_calendar(now))
+        n = len(write_dashboard_upcoming(now))
         print(f"calendar fresh - wrote {n} upcoming preview(s)")
     should = should_run_live_engines(now)
     _write_github_output(should)
@@ -294,5 +381,9 @@ if __name__ == "__main__":
     if "--refresh" in sys.argv:
         refresh_calendar(ApiFootballClient())
         sys.exit(0)
-    print("usage: python -m footymodel.live.calendar --gate|--refresh")
+    if "--from-understat" in sys.argv:
+        rows = write_dashboard_upcoming()
+        print(f"upcoming_fixtures.json: {len(rows)} preview(s) from calendar+Understat")
+        sys.exit(0)
+    print("usage: python -m footymodel.live.calendar --gate|--refresh|--from-understat")
     sys.exit(2)
