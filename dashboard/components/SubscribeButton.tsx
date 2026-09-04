@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FaBell, FaBellSlash } from "react-icons/fa";
 import {
   persistNotificationPreference,
   readNotificationPreference,
 } from "@/lib/notifications";
-import { FaBell, FaBellSlash } from "react-icons/fa";
 import { InfoIcon } from "@/components/icons";
 
 type Status = "checking" | "unsupported" | "denied" | "off" | "on" | "working";
@@ -14,9 +14,9 @@ const INFO_TEXT: Record<Status, string> = {
   checking:
     "Checking whether push notifications are available in this browser. This usually takes a moment.",
   unsupported:
-    "Push notifications aren't supported in this browser. On iPhone, add this page to your Home Screen first, then reopen it from there.",
+    "Push notifications aren't supported in this browser, or the server push key isn't configured yet. On iPhone, add this page to your Home Screen first, then reopen it from there.",
   denied:
-    "Notifications blocked. Enable them for this site in your browser settings to get alerts.",
+    "Notifications blocked. Enable them for this site in your browser settings, then tap the bell again.",
   off: "Get notified when new picks are logged. Tap the bell to enable.",
   on: "Notifications on — you'll get alerts when new picks are logged. Tap the bell to turn off.",
   working: "Updating your notification preference…",
@@ -26,12 +26,22 @@ function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const rawData = atob(base64);
-  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+  const output = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; i++) output[i] = rawData.charCodeAt(i);
+  return output;
 }
 
-function vapidPublicKey(): string | null {
-  const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  return key && key.length > 0 ? key : null;
+async function fetchPublicKey(): Promise<string | null> {
+  const buildTimeKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (buildTimeKey) return buildTimeKey;
+  try {
+    const res = await fetch("/api/push-config");
+    if (!res.ok) return null;
+    const body = (await res.json()) as { publicKey?: string };
+    return body.publicKey ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function postSubscription(sub: PushSubscriptionJSON): Promise<boolean> {
@@ -52,117 +62,120 @@ async function deleteSubscription(sub: PushSubscriptionJSON): Promise<boolean> {
   return res.ok;
 }
 
+function pushSupported(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    "serviceWorker" in navigator &&
+    "PushManager" in window &&
+    "Notification" in window
+  );
+}
+
 export default function SubscribeButton() {
   const [status, setStatus] = useState<Status>("checking");
   const [infoOpen, setInfoOpen] = useState(false);
+  const [errorText, setErrorText] = useState<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const publicKeyRef = useRef<string | null>(null);
+  const initDoneRef = useRef(false);
   const lastStableStatus = useRef<Exclude<Status, "checking" | "working">>("off");
+
+  const syncFromBrowser = useCallback(async (publicKey: string | null): Promise<Exclude<Status, "working">> => {
+    if (!pushSupported()) {
+      lastStableStatus.current = "unsupported";
+      setStatus("unsupported");
+      return "unsupported";
+    }
+
+    if (Notification.permission === "denied") {
+      persistNotificationPreference("off");
+      lastStableStatus.current = "denied";
+      setStatus("denied");
+      return "denied";
+    }
+
+    if (!publicKey) {
+      lastStableStatus.current = "unsupported";
+      setStatus("unsupported");
+      return "unsupported";
+    }
+
+    try {
+      await navigator.serviceWorker.register("/sw.js");
+      const reg = await navigator.serviceWorker.ready;
+      const existing = await reg.pushManager.getSubscription();
+      const pref = readNotificationPreference();
+
+      if (pref === "off" && existing) {
+        await deleteSubscription(existing.toJSON());
+        await existing.unsubscribe().catch(() => {});
+        lastStableStatus.current = "off";
+        setStatus("off");
+        return "off";
+      }
+
+      if (existing) {
+        const synced = await postSubscription(existing.toJSON());
+        if (synced) {
+          persistNotificationPreference("on");
+          lastStableStatus.current = "on";
+          setStatus("on");
+          return "on";
+        }
+        persistNotificationPreference("off");
+        lastStableStatus.current = "off";
+        setStatus("off");
+        setErrorText("Could not save your subscription on the server. Tap the bell to try again.");
+        return "off";
+      }
+
+      if (pref === "on" && Notification.permission === "granted") {
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+        const synced = await postSubscription(sub.toJSON());
+        if (synced) {
+          persistNotificationPreference("on");
+          lastStableStatus.current = "on";
+          setStatus("on");
+          return "on";
+        }
+        await sub.unsubscribe().catch(() => {});
+        persistNotificationPreference("off");
+        lastStableStatus.current = "off";
+        setStatus("off");
+        setErrorText("Could not save your subscription on the server. Tap the bell to try again.");
+        return "off";
+      }
+
+      lastStableStatus.current = "off";
+      setStatus("off");
+      return "off";
+    } catch {
+      lastStableStatus.current = "unsupported";
+      setStatus("unsupported");
+      setErrorText("Could not set up notifications in this browser. Try a hard refresh.");
+      return "unsupported";
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
     async function init() {
-      const publicKey = vapidPublicKey();
-      if (
-        !publicKey ||
-        !("serviceWorker" in navigator) ||
-        !("PushManager" in window) ||
-        !("Notification" in window)
-      ) {
-        if (!cancelled) {
-          lastStableStatus.current = "unsupported";
-          setStatus("unsupported");
-        }
-        return;
-      }
-
-      if (Notification.permission === "denied") {
-        persistNotificationPreference("off");
-        if (!cancelled) {
-          lastStableStatus.current = "denied";
-          setStatus("denied");
-        }
-        return;
-      }
-
-      try {
-        await navigator.serviceWorker.register("/sw.js");
-        const reg = await navigator.serviceWorker.ready;
-        const existing = await reg.pushManager.getSubscription();
-        const pref = readNotificationPreference();
-
-        if (pref === "off" && existing) {
-          await deleteSubscription(existing.toJSON());
-          await existing.unsubscribe().catch(() => {});
-          if (!cancelled) {
-            lastStableStatus.current = "off";
-            setStatus("off");
-          }
-          return;
-        }
-
-        if (existing) {
-          const synced = await postSubscription(existing.toJSON());
-          if (!cancelled) {
-            if (synced) {
-              persistNotificationPreference("on");
-              lastStableStatus.current = "on";
-              setStatus("on");
-            } else {
-              persistNotificationPreference("off");
-              lastStableStatus.current = "off";
-              setStatus("off");
-            }
-          }
-          return;
-        }
-
-        if (pref === "on" && Notification.permission === "granted") {
-          const sub = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(publicKey),
-          });
-          const synced = await postSubscription(sub.toJSON());
-          if (!cancelled) {
-            if (synced) {
-              persistNotificationPreference("on");
-              lastStableStatus.current = "on";
-              setStatus("on");
-            } else {
-              await sub.unsubscribe().catch(() => {});
-              persistNotificationPreference("off");
-              lastStableStatus.current = "off";
-              setStatus("off");
-            }
-          }
-          return;
-        }
-
-        if (pref === "off") {
-          if (!cancelled) {
-            lastStableStatus.current = "off";
-            setStatus("off");
-          }
-          return;
-        }
-
-        if (!cancelled) {
-          lastStableStatus.current = "off";
-          setStatus("off");
-        }
-      } catch {
-        if (!cancelled) {
-          lastStableStatus.current = "unsupported";
-          setStatus("unsupported");
-        }
-      }
+      const publicKey = await fetchPublicKey();
+      if (cancelled) return;
+      publicKeyRef.current = publicKey;
+      await syncFromBrowser(publicKey);
+      if (!cancelled) initDoneRef.current = true;
     }
 
     void init();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [syncFromBrowser]);
 
   useEffect(() => {
     if (!infoOpen) return;
@@ -174,46 +187,79 @@ export default function SubscribeButton() {
   }, [infoOpen]);
 
   async function subscribe() {
-    const publicKey = vapidPublicKey();
-    if (!publicKey) {
+    setErrorText(null);
+    const publicKey = publicKeyRef.current ?? (await fetchPublicKey());
+    publicKeyRef.current = publicKey;
+
+    if (!pushSupported() || !publicKey) {
       lastStableStatus.current = "unsupported";
       setStatus("unsupported");
+      setInfoOpen(true);
+      setErrorText("Notifications are not available right now. The push key may not be configured on the server.");
       return;
     }
+
+    if (Notification.permission === "denied") {
+      lastStableStatus.current = "denied";
+      setStatus("denied");
+      setInfoOpen(true);
+      return;
+    }
+
     setStatus("working");
     try {
+      await navigator.serviceWorker.register("/sw.js");
       const reg = await navigator.serviceWorker.ready;
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        persistNotificationPreference("off");
-        const next = permission === "denied" ? "denied" : "off";
-        lastStableStatus.current = next;
-        setStatus(next);
-        return;
+
+      if (Notification.permission !== "granted") {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          persistNotificationPreference("off");
+          const next = permission === "denied" ? "denied" : "off";
+          lastStableStatus.current = next;
+          setStatus(next);
+          if (next === "denied") setInfoOpen(true);
+          return;
+        }
       }
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
-      });
+
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+      }
+
       const synced = await postSubscription(sub.toJSON());
       if (!synced) {
         await sub.unsubscribe().catch(() => {});
         persistNotificationPreference("off");
         lastStableStatus.current = "off";
         setStatus("off");
+        setInfoOpen(true);
+        setErrorText("Could not save your subscription. The notification store may be unavailable — try again in a moment.");
         return;
       }
+
       persistNotificationPreference("on");
       lastStableStatus.current = "on";
       setStatus("on");
-    } catch {
+    } catch (err) {
       persistNotificationPreference("off");
       lastStableStatus.current = "off";
       setStatus("off");
+      setInfoOpen(true);
+      setErrorText(
+        err instanceof Error
+          ? `Could not enable notifications: ${err.message}`
+          : "Could not enable notifications. Check browser permission settings and try again."
+      );
     }
   }
 
   async function unsubscribe() {
+    setErrorText(null);
     setStatus("working");
     try {
       const reg = await navigator.serviceWorker.ready;
@@ -224,6 +270,8 @@ export default function SubscribeButton() {
         if (!removed) {
           lastStableStatus.current = "on";
           setStatus("on");
+          setInfoOpen(true);
+          setErrorText("Could not remove your subscription from the server. Try again.");
           return;
         }
       }
@@ -237,22 +285,43 @@ export default function SubscribeButton() {
     }
   }
 
-  const interactive = status === "off" || status === "on";
   const bellActive = status === "on";
   const infoText =
-    status === "working" ? INFO_TEXT[lastStableStatus.current] : INFO_TEXT[status];
+    errorText ??
+    (status === "working" ? INFO_TEXT[lastStableStatus.current] : INFO_TEXT[status]);
 
-  function handleBellClick() {
-    if (status === "on") void unsubscribe();
-    else if (status === "off") void subscribe();
+  async function handleBellClick() {
+    if (status === "working") return;
+
+    let resolved: Exclude<Status, "working">;
+    if (!initDoneRef.current) {
+      const publicKey = publicKeyRef.current ?? (await fetchPublicKey());
+      publicKeyRef.current = publicKey;
+      resolved = await syncFromBrowser(publicKey);
+      initDoneRef.current = true;
+    } else {
+      resolved = status as Exclude<Status, "working">;
+    }
+
+    if (resolved === "on") {
+      await unsubscribe();
+      return;
+    }
+
+    if (resolved === "off" || resolved === "checking") {
+      await subscribe();
+      return;
+    }
+
+    setInfoOpen(true);
   }
 
   return (
     <div ref={wrapperRef} className="relative flex items-center gap-2">
       <button
         type="button"
-        onClick={handleBellClick}
-        disabled={!interactive}
+        onClick={() => void handleBellClick()}
+        disabled={status === "working"}
         aria-label={
           status === "on"
             ? "Notifications on - tap to turn off"
@@ -268,8 +337,8 @@ export default function SubscribeButton() {
           bellActive
             ? "border-indigo-800 dark:border-indigo-400 text-indigo-600 dark:text-indigo-300 animate-bell-glow"
             : "border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400"
-        } ${status === "working" || status === "checking" ? "opacity-50" : ""} ${
-          interactive ? "hover:border-neutral-300 dark:hover:border-neutral-700" : "cursor-default"
+        } ${status === "working" || status === "checking" ? "opacity-70" : ""} ${
+          status === "working" ? "cursor-wait" : "hover:border-neutral-300 dark:hover:border-neutral-700"
         }`}
       >
         {bellActive ? (
