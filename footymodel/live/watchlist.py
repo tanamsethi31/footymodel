@@ -25,6 +25,19 @@ WATCHLIST_FILE = PROCESSED_DIR / "upcoming_watchlist.json"
 PER_SIDE = 3
 LOOKBACK_MATCHES = 6
 SHOTS_LINE = 0.5  # P(shots 1+)
+# Ignore prior-season appearances when ranking "players to watch" — summer
+# transfers and a new Understat season mean last May's XI is misleading.
+CURRENT_SEASON_START_MONTH = 7
+
+
+def current_season_start(as_of: pd.Timestamp) -> pd.Timestamp:
+    """Understat season label N = season starting in calendar year N (July)."""
+    ts = pd.Timestamp(as_of)
+    if ts.tzinfo is not None:
+        ts = ts.tz_convert("UTC").tz_localize(None)
+    ts = ts.normalize()
+    year = int(ts.year if ts.month >= CURRENT_SEASON_START_MONTH else ts.year - 1)
+    return pd.Timestamp(year=year, month=CURRENT_SEASON_START_MONTH, day=1)
 
 
 def recent_non_gk_starters(
@@ -37,10 +50,15 @@ def recent_non_gk_starters(
     """`(player_id, player_name)` for non-GK players who started any of the
     team's last `n_matches` matches before `as_of`. Empty if we have no
     history for the team."""
+    season_start = current_season_start(as_of)
+    as_of_naive = pd.Timestamp(as_of)
+    if as_of_naive.tzinfo is not None:
+        as_of_naive = as_of_naive.tz_convert("UTC").tz_localize(None)
     hist = players[
         (players["league"] == league)
         & (players["team_us"] == team_us)
-        & (players["date"] < as_of)
+        & (players["date"] >= season_start)
+        & (players["date"] < as_of_naive)
         & (players["started"])
     ]
     if hist.empty:
