@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import type { PushSubscription } from "web-push";
 import { getAllSubscriptions, removeSubscription } from "@/lib/redis";
 import { sendPush } from "@/lib/push";
@@ -30,6 +31,8 @@ export async function POST(req: NextRequest) {
       }
     })
   );
+
+  revalidatePath("/");
 
   return NextResponse.json({ sent, pruned, total: subs.length });
 }

@@ -74,6 +74,19 @@ body {
   animation: bell-glow 2.8s ease-in-out infinite;
 }
 
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 1s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-stagger-in,
   .animate-panel-in {
@@ -82,6 +95,9 @@ body {
     transform: none;
   }
   .animate-bell-glow {
+    animation: none;
+  }
+  .animate-spin-slow {
     animation: none;
   }
 }

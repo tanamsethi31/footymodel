@@ -16,6 +16,7 @@ import { selectNextUpcoming, UPCOMING_DISPLAY_LIMIT } from "@/lib/upcoming";
 import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
+import RefreshButton from "@/components/RefreshButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import DashboardTabs from "@/components/DashboardTabs";
 import MatchCard from "@/components/MatchCard";
@@ -223,7 +224,10 @@ export default async function Home() {
           </p>
         </div>
         <div className="flex flex-col items-end gap-2 shrink-0">
-          <SubscribeButton />
+          <div className="flex items-center gap-2">
+            <RefreshButton />
+            <SubscribeButton />
+          </div>
           <ThemeToggle />
         </div>
       </header>
@@ -250,8 +254,9 @@ export default async function Home() {
       />
 
       <footer className="mt-16 text-xs text-neutral-400">
-        Research project. Paper-trade only, no real money involved. Refreshes
-        automatically as new predictions are logged.
+        Research project. Paper-trade only, no real money involved. Data
+        auto-updates about every minute; tap ↻ to refresh now (once per
+        minute).
       </footer>
     </div>
   );

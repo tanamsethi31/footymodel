@@ -19,15 +19,48 @@ export function getRedis(): Redis {
 
 const SUBS_KEY = "push:subscriptions";
 
+type StoredSubscription = { endpoint?: string };
+
+function serializeSubscription(sub: unknown): string {
+  return JSON.stringify(sub);
+}
+
+async function allSubscriptionEntries(): Promise<Array<{ raw: string; sub: StoredSubscription }>> {
+  const raw = await getRedis().smembers(SUBS_KEY);
+  return raw.map((entry) => {
+    const text = typeof entry === "string" ? entry : JSON.stringify(entry);
+    try {
+      return { raw: text, sub: JSON.parse(text) as StoredSubscription };
+    } catch {
+      return { raw: text, sub: {} };
+    }
+  });
+}
+
 export async function addSubscription(sub: unknown): Promise<void> {
-  await getRedis().sadd(SUBS_KEY, JSON.stringify(sub));
+  // Drop any prior row for the same browser endpoint before re-adding.
+  await removeSubscription(sub);
+  await getRedis().sadd(SUBS_KEY, serializeSubscription(sub));
 }
 
 export async function removeSubscription(sub: unknown): Promise<void> {
-  await getRedis().srem(SUBS_KEY, JSON.stringify(sub));
+  const endpoint = (sub as StoredSubscription)?.endpoint;
+  if (!endpoint) return;
+  const entries = await allSubscriptionEntries();
+  for (const entry of entries) {
+    if (entry.sub.endpoint === endpoint) {
+      await getRedis().srem(SUBS_KEY, entry.raw);
+      return;
+    }
+  }
 }
 
 export async function getAllSubscriptions(): Promise<unknown[]> {
-  const raw = await getRedis().smembers(SUBS_KEY);
-  return raw.map((s) => (typeof s === "string" ? JSON.parse(s) : s));
+  const entries = await allSubscriptionEntries();
+  return entries.map((entry) => entry.sub);
+}
+
+export async function hasSubscription(endpoint: string): Promise<boolean> {
+  const entries = await allSubscriptionEntries();
+  return entries.some((entry) => entry.sub.endpoint === endpoint);
 }
