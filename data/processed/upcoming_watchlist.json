@@ -1,27 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "us_31200",
-      "home": "Ipswich",
-      "away": "Liverpool",
-      "kickoff": "2026-09-04T19:00:00+00:00",
-      "home_watch": [
-        {
-          "player": "Julio Enciso",
-          "p_shots_gt0.5": 0.838
-        },
-        {
-          "player": "Emersonn",
-          "p_shots_gt0.5": 0.796
-        },
-        {
-          "player": "Daizen Maeda",
-          "p_shots_gt0.5": 0.711
-        }
-      ],
-      "away_watch": []
-    },
-    {
       "fixture_id": "us_31205",
       "home": "Brentford",
       "away": "Sunderland",
@@ -371,6 +350,27 @@
         {
           "player": "Bryan Mbeumo",
           "p_shots_gt0.5": 0.713
+        }
+      ],
+      "away_watch": []
+    },
+    {
+      "fixture_id": "us_31219",
+      "home": "Leeds",
+      "away": "Newcastle United",
+      "kickoff": "2026-09-14T19:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Dominic Calvert-Lewin",
+          "p_shots_gt0.5": 0.856
+        },
+        {
+          "player": "Harry Wilson",
+          "p_shots_gt0.5": 0.852
+        },
+        {
+          "player": "Anton Stach",
+          "p_shots_gt0.5": 0.788
         }
       ],
       "away_watch": []

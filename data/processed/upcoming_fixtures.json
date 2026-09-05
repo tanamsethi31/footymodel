@@ -1,11 +1,5 @@
 [
   {
-    "fixture_id": "us_31200",
-    "home": "Ipswich",
-    "away": "Liverpool",
-    "kickoff": "2026-09-04T19:00:00+00:00"
-  },
-  {
     "fixture_id": "us_31201",
     "home": "Newcastle United",
     "away": "Bournemouth",
@@ -112,5 +106,11 @@
     "home": "Manchester United",
     "away": "Manchester City",
     "kickoff": "2026-09-13T15:30:00+00:00"
+  },
+  {
+    "fixture_id": "us_31219",
+    "home": "Leeds",
+    "away": "Newcastle United",
+    "kickoff": "2026-09-14T19:00:00+00:00"
   }
 ]

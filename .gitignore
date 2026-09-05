@@ -32,6 +32,9 @@ data/logs/
 !data/processed/apify_seen_fixtures.json
 !data/processed/apify_budget.json
 !data/processed/apify_fixtures_cache.json
+!data/processed/apify_squad_cache.json
+!data/processed/apify_squad_budget.json
+!data/processed/apify_team_ids.json
 !data/processed/graded_results.csv
 !data/processed/kelly_simulation.csv
 !data/raw_fbref/player_match.jsonl
