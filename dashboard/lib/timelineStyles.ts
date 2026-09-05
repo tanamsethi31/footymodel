@@ -67,3 +67,11 @@ export function bodyEmphasisClass(emphasis: TimelineEmphasis = "preview"): strin
     ? "text-neutral-600 dark:text-neutral-400"
     : "text-neutral-400";
 }
+
+export function liveBadge(): { label: string; className: string } {
+  return {
+    label: "Live",
+    className:
+      "text-[10px] uppercase tracking-wide font-semibold text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/60 border border-red-200 dark:border-red-900 rounded-full px-2 py-0.5 animate-pulse",
+  };
+}

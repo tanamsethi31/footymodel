@@ -7,6 +7,7 @@ import {
   cardEmphasisClass,
   emphasisBadge,
   kickoffEmphasisClass,
+  liveBadge,
   type TimelineEmphasis,
 } from "@/lib/timelineStyles";
 
@@ -91,10 +92,12 @@ export default function MatchPropsTable({
   fixtureId,
   rows,
   emphasis = "preview",
+  live = false,
 }: {
   fixtureId: string;
   rows: PropsPick[];
   emphasis?: TimelineEmphasis;
+  live?: boolean;
 }) {
   const teams = [...new Set(rows.map((r) => r.team))];
   const [activeTeam, setActiveTeam] = useState(0);
@@ -114,6 +117,7 @@ export default function MatchPropsTable({
 
   const teamRows = rows.filter((r) => r.team === teams[activeTeam]);
   const badge = emphasisBadge(emphasis);
+  const livePill = liveBadge();
   const leader = topPlayer(rows);
 
   const summary =
@@ -148,6 +152,7 @@ export default function MatchPropsTable({
           {expandable && <Chevron open={open} />}
           {teams.join(" v ")}
           <span className={badge.className}>{badge.label}</span>
+          {live && <span className={livePill.className}>{livePill.label}</span>}
         </span>
         <span className={`text-xs ${kickoffEmphasisClass(emphasis)}`}>
           {formatKickoff(rows[0].kickoff)}

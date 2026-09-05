@@ -7,6 +7,7 @@ import {
   bodyEmphasisClass,
   emphasisBadge,
   kickoffEmphasisClass,
+  liveBadge,
   previewCardEmphasisClass,
   titleEmphasisClass,
   type TimelineEmphasis,
@@ -65,21 +66,26 @@ export default function PreviewMatchCard({
   index,
   emphasis = "preview",
   pendingLabel = "Analysis available once lineups are confirmed (~20-40min pre-kickoff).",
+  live = false,
 }: {
   fixture: UpcomingFixture;
   watchlist?: FixtureWatchlist | null;
   index: number;
   emphasis?: TimelineEmphasis;
   pendingLabel?: string;
+  live?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const hasPlayers =
     (watchlist?.homeWatch.length ?? 0) > 0 || (watchlist?.awayWatch.length ?? 0) > 0;
   const badge = emphasisBadge(emphasis);
+  const livePill = liveBadge();
   const topPlayer = topWatchPlayer(watchlist);
   const expandable = emphasis === "today";
 
-  const summaryText = hasPlayers && topPlayer
+  const summaryText = live
+    ? "Match in progress — tap for pre-lineup watchlist and any logged analysis."
+    : hasPlayers && topPlayer
     ? `Pre-lineup watch: ${topPlayer.player} leads at ${pct(topPlayer.pShotsGt05)} shots 1+. Tap for full watchlist.`
     : pendingLabel;
 
@@ -111,6 +117,7 @@ export default function PreviewMatchCard({
           {expandable && <Chevron open={open} />}
           {fixture.home} v {fixture.away}
           <span className={badge.className}>{badge.label}</span>
+          {live && <span className={livePill.className}>{livePill.label}</span>}
         </span>
         <span className={`text-xs ${kickoffEmphasisClass(emphasis)}`}>
           {formatKickoff(fixture.kickoff)}

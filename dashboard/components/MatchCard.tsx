@@ -8,6 +8,7 @@ import {
   cardEmphasisClass,
   emphasisBadge,
   kickoffEmphasisClass,
+  liveBadge,
   type TimelineEmphasis,
 } from "@/lib/timelineStyles";
 
@@ -45,18 +46,21 @@ export default function MatchCard({
   match,
   detail,
   graded = null,
+  live = false,
   index,
   emphasis = "preview",
 }: {
   match: GoalsPick;
   detail: MatchDetail | null;
   graded?: GradedResult | null;
+  live?: boolean;
   index: number;
   emphasis?: TimelineEmphasis;
 }) {
   const defaultOpen = emphasis === "today" && detail !== null;
   const [open, setOpen] = useState(defaultOpen);
   const badge = emphasisBadge(emphasis);
+  const livePill = liveBadge();
 
   return (
     <div
@@ -78,6 +82,7 @@ export default function MatchCard({
           <Chevron open={open} />
           {match.home} v {match.away}
           <span className={badge.className}>{badge.label}</span>
+          {live && <span className={livePill.className}>{livePill.label}</span>}
         </span>
         <span className={`text-xs ${kickoffEmphasisClass(emphasis)}`}>
           {formatKickoff(match.kickoff)}

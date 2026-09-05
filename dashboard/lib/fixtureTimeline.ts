@@ -9,7 +9,12 @@ export type FixtureTimeline = {
   preview: UpcomingFixture[];
 };
 
+export type FixtureRef = Pick<UpcomingFixture, "fixtureId" | "home" | "away" | "kickoff">;
+
 type LoggedFixture = Pick<GoalsPick, "fixtureId" | "home" | "away" | "kickoff">;
+
+/** Typical PL match length + half-time + stoppage before treating as finished. */
+export const MATCH_FINISH_BUFFER_MS = 2.5 * 60 * 60 * 1000;
 
 export function kickoffMs(kickoff: string): number {
   const t = new Date(kickoff).getTime();
@@ -26,9 +31,44 @@ export function todayDateKey(nowMs = Date.now()): string {
   return new Date(nowMs).toISOString().slice(0, 10);
 }
 
-export function classifyFixture(kickoff: string, nowMs = Date.now()): FixtureBucket {
-  const t = kickoffMs(kickoff);
-  if (t <= nowMs) return "past";
+export function isFixtureGraded(
+  fixture: FixtureRef,
+  gradedKeys: Set<string>
+): boolean {
+  return (
+    gradedKeys.has(fixture.fixtureId) ||
+    gradedKeys.has(matchKey(fixture.home, fixture.away, fixture.kickoff))
+  );
+}
+
+export function isFixtureFinished(
+  kickoff: string,
+  nowMs = Date.now(),
+  gradedKeys: Set<string> = new Set(),
+  fixture?: FixtureRef
+): boolean {
+  if (fixture && isFixtureGraded(fixture, gradedKeys)) return true;
+  if (utcDateKey(kickoff) < todayDateKey(nowMs)) return true;
+  return kickoffMs(kickoff) + MATCH_FINISH_BUFFER_MS <= nowMs;
+}
+
+export function isFixtureLive(
+  kickoff: string,
+  nowMs = Date.now(),
+  gradedKeys: Set<string> = new Set(),
+  fixture?: FixtureRef
+): boolean {
+  const started = kickoffMs(kickoff) <= nowMs;
+  return started && !isFixtureFinished(kickoff, nowMs, gradedKeys, fixture);
+}
+
+export function classifyFixture(
+  kickoff: string,
+  nowMs = Date.now(),
+  gradedKeys: Set<string> = new Set(),
+  fixture?: FixtureRef
+): FixtureBucket {
+  if (isFixtureFinished(kickoff, nowMs, gradedKeys, fixture)) return "past";
   if (utcDateKey(kickoff) === todayDateKey(nowMs)) return "today";
   return "preview";
 }
@@ -74,7 +114,8 @@ export function buildFixtureTimeline(
   calendar: UpcomingFixture[],
   logged: LoggedFixture[],
   limit = UPCOMING_DISPLAY_LIMIT,
-  nowMs = Date.now()
+  nowMs = Date.now(),
+  gradedKeys: Set<string> = new Set()
 ): FixtureTimeline {
   const merged = mergeUpcomingFixtures(calendar, logged);
   const past: UpcomingFixture[] = [];
@@ -82,11 +123,18 @@ export function buildFixtureTimeline(
   const preview: UpcomingFixture[] = [];
 
   for (const f of merged) {
-    const bucket = classifyFixture(f.kickoff, nowMs);
+    const bucket = classifyFixture(f.kickoff, nowMs, gradedKeys, f);
     if (bucket === "past") past.push(f);
     else if (bucket === "today") today.push(f);
     else preview.push(f);
   }
+
+  today.sort((a, b) => {
+    const aLive = isFixtureLive(a.kickoff, nowMs, gradedKeys, a);
+    const bLive = isFixtureLive(b.kickoff, nowMs, gradedKeys, b);
+    if (aLive !== bLive) return aLive ? -1 : 1;
+    return kickoffMs(a.kickoff) - kickoffMs(b.kickoff);
+  });
 
   return {
     past,

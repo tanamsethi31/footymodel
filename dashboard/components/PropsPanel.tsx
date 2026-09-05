@@ -1,13 +1,14 @@
 import {
   buildFixtureTimeline,
   findLoggedFixture,
-  kickoffMs,
+  isFixtureFinished,
+  isFixtureLive,
   sortPastByKickoff,
   type FixtureTimeline,
 } from "@/lib/fixtureTimeline";
 import type { FixtureWatchlist, GoalsPick, PropsPick, MostProbablePick, UpcomingFixture, GradedResult } from "@/lib/data";
 import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
-import { findGradedResult } from "@/lib/graded";
+import { buildGradedKeys, findGradedResult } from "@/lib/graded";
 import PredictionResultBanner from "./PredictionResultBanner";
 import FixtureTimelineSection from "./FixtureTimelineSection";
 import MostProbableStrip from "./MostProbableStrip";
@@ -44,9 +45,35 @@ export function isActivePropsFixture(
   fixtureId: string,
   kickoff: string,
   timeline: FixtureTimeline,
-  loggedGoals: GoalsPick[]
+  loggedGoals: GoalsPick[],
+  gradedKeys: Set<string>
 ): boolean {
-  if (kickoffMs(kickoff) <= Date.now()) return false;
+  const goal = loggedGoals.find((g) => g.fixtureId === fixtureId);
+  const timelineFixture =
+    [...timeline.today, ...timeline.preview].find((f) => f.fixtureId === fixtureId) ??
+    (goal
+      ? [...timeline.today, ...timeline.preview].find(
+          (f) => findLoggedFixture(f, [goal]) !== undefined
+        )
+      : undefined);
+  const ref = goal ?? timelineFixture;
+  if (
+    isFixtureFinished(
+      kickoff,
+      Date.now(),
+      gradedKeys,
+      ref
+        ? {
+            fixtureId: ref.fixtureId,
+            home: ref.home,
+            away: ref.away,
+            kickoff: ref.kickoff,
+          }
+        : { fixtureId, home: "", away: "", kickoff }
+    )
+  ) {
+    return false;
+  }
   const inBucket = (list: UpcomingFixture[]) =>
     list.some((f) => {
       if (f.fixtureId === fixtureId) return true;
@@ -72,11 +99,21 @@ export default function PropsPanel({
   graded: GradedResult[];
 }) {
   const now = Date.now();
+  const gradedKeys = buildGradedKeys(graded);
   const byFixtureId = buildPropsIndex(props);
 
   const pastGroups = sortPastByKickoff(
     [...byFixtureId.entries()]
-      .filter(([, rows]) => kickoffMs(rows[0].kickoff) <= now)
+      .filter(([fixtureId, rows]) => {
+        const goal = loggedGoals.find((g) => g.fixtureId === fixtureId);
+        const teams = [...new Set(rows.map((r) => r.team))];
+        return isFixtureFinished(rows[0].kickoff, now, gradedKeys, {
+          fixtureId,
+          home: goal?.home ?? teams[0] ?? "",
+          away: goal?.away ?? teams[1] ?? "",
+          kickoff: rows[0].kickoff,
+        });
+      })
       .map(([fixtureId, rows]) => ({ fixtureId, rows, kickoff: rows[0].kickoff }))
   ).map(({ fixtureId, rows }) => [fixtureId, rows] as [string, PropsPick[]]);
 
@@ -86,6 +123,7 @@ export default function PropsPanel({
     emphasis: "today" | "preview"
   ) {
     const rows = findPropsRows(fixture, byFixtureId, loggedGoals);
+    const live = isFixtureLive(fixture.kickoff, now, gradedKeys, fixture);
     if (rows && rows.length > 0) {
       return (
         <MatchPropsTable
@@ -93,6 +131,7 @@ export default function PropsPanel({
           fixtureId={fixture.fixtureId}
           rows={rows}
           emphasis={emphasis}
+          live={live}
         />
       );
     }
@@ -120,7 +159,7 @@ export default function PropsPanel({
 
       <FixtureTimelineSection
         title="Today"
-        description="Matches kicking off today (UTC). Full XI and shots/SOT 1+/2+/3+ analysis appears once lineups are confirmed."
+        description="Matches kicking off today (UTC), including live games until full-time. Full XI and shots/SOT analysis once lineups are confirmed."
         emptyMessage="No Premier League matches scheduled for today."
         count={timeline.today.length}
         variant="today"

@@ -10,6 +10,7 @@ TS = r"""
 import {
   buildFixtureTimeline,
   classifyFixture,
+  isFixtureLive,
   todayDateKey,
 } from "./dashboard/lib/fixtureTimeline.ts";
 
@@ -18,6 +19,7 @@ const calendar = [
   { fixtureId: "past1", home: "A", away: "B", kickoff: "2026-09-04T15:00:00+00:00" },
   { fixtureId: "today1", home: "C", away: "D", kickoff: "2026-09-05T18:00:00+00:00" },
   { fixtureId: "today2", home: "E", away: "F", kickoff: "2026-09-05T20:00:00+00:00" },
+  { fixtureId: "live1", home: "Live", away: "Now", kickoff: "2026-09-05T11:00:00+00:00" },
   { fixtureId: "prev1", home: "G", away: "H", kickoff: "2026-09-06T14:00:00+00:00" },
   { fixtureId: "prev2", home: "I", away: "J", kickoff: "2026-09-07T14:00:00+00:00" },
   { fixtureId: "prev3", home: "K", away: "L", kickoff: "2026-09-08T14:00:00+00:00" },
@@ -34,8 +36,27 @@ if (classifyFixture("2026-09-04T15:00:00+00:00", now) !== "past") throw new Erro
 if (classifyFixture("2026-09-05T18:00:00+00:00", now) !== "today") throw new Error("today");
 if (classifyFixture("2026-09-06T14:00:00+00:00", now) !== "preview") throw new Error("preview");
 
+const liveFixture = { fixtureId: "live1", home: "Live", away: "Now", kickoff: "2026-09-05T11:00:00+00:00" };
+if (classifyFixture(liveFixture.kickoff, now, new Set(), liveFixture) !== "today") {
+  throw new Error("in-progress stays today");
+}
+if (!isFixtureLive(liveFixture.kickoff, now, new Set(), liveFixture)) {
+  throw new Error("in-progress is live");
+}
+
+const finishedToday = Date.parse("2026-09-05T16:00:00.000Z");
+if (classifyFixture(liveFixture.kickoff, finishedToday, new Set(), liveFixture) !== "past") {
+  throw new Error("finished today moves past");
+}
+
+const gradedKeys = new Set(["live1"]);
+if (classifyFixture(liveFixture.kickoff, now, gradedKeys, liveFixture) !== "past") {
+  throw new Error("graded moves past");
+}
+
 const tl = buildFixtureTimeline(calendar, logged, 5, now);
-if (tl.today.length !== 2) throw new Error(`today ${tl.today.length}`);
+if (tl.today.length !== 3) throw new Error(`today ${tl.today.length}`);
+if (tl.today[0].fixtureId !== "live1") throw new Error("live sorts first");
 if (tl.preview.length !== 5) throw new Error(`preview ${tl.preview.length}`);
 if (tl.preview[0].fixtureId !== "prev1") throw new Error("preview order");
 if (!tl.past.some((f) => f.fixtureId === "past_logged")) throw new Error("logged past missing");

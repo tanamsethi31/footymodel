@@ -11,6 +11,15 @@ export function findGradedResult(
   return graded.find((g) => matchKey(g.home, g.away, g.kickoff) === key) ?? null;
 }
 
+export function buildGradedKeys(graded: GradedResult[]): Set<string> {
+  const keys = new Set<string>();
+  for (const g of graded) {
+    keys.add(g.fixtureId);
+    keys.add(matchKey(g.home, g.away, g.kickoff));
+  }
+  return keys;
+}
+
 export function gradedByFixtureId(graded: GradedResult[]): Map<string, GradedResult> {
   const map = new Map<string, GradedResult>();
   for (const g of graded) {

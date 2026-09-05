@@ -12,8 +12,8 @@ import {
   type MatchDetail,
   type FixtureWatchlist,
 } from "@/lib/data";
-import { buildFixtureTimeline, findLoggedFixture, sortPastByKickoff } from "@/lib/fixtureTimeline";
-import { findGradedResult } from "@/lib/graded";
+import { buildFixtureTimeline, findLoggedFixture, isFixtureFinished, isFixtureLive, sortPastByKickoff } from "@/lib/fixtureTimeline";
+import { buildGradedKeys, findGradedResult } from "@/lib/graded";
 import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
 import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
@@ -148,7 +148,10 @@ function GoalsPanel({
   watchlists: FixtureWatchlist[];
   graded: GradedResult[];
 }) {
-  const past = sortPastByKickoff(goals.filter((g) => new Date(g.kickoff).getTime() <= Date.now()));
+  const gradedKeys = buildGradedKeys(graded);
+  const past = sortPastByKickoff(
+    goals.filter((g) => isFixtureFinished(g.kickoff, Date.now(), gradedKeys, g))
+  );
 
   function renderFixture(
     fixture: (typeof timeline.today)[number],
@@ -156,6 +159,7 @@ function GoalsPanel({
     emphasis: "today" | "preview"
   ) {
     const match = findLoggedFixture(fixture, goals);
+    const live = isFixtureLive(fixture.kickoff, Date.now(), gradedKeys, fixture);
     if (match) {
       return (
         <MatchCard
@@ -164,6 +168,7 @@ function GoalsPanel({
           detail={matchDetails[match.fixtureId] ?? null}
           index={index}
           emphasis={emphasis}
+          live={live}
         />
       );
     }
@@ -174,6 +179,7 @@ function GoalsPanel({
         watchlist={watchlistForFixture(watchlists, fixture)}
         index={index}
         emphasis={emphasis}
+        live={live}
       />
     );
   }
@@ -188,7 +194,7 @@ function GoalsPanel({
 
       <FixtureTimelineSection
         title="Today"
-        description="Matches kicking off today (UTC) with goals O/U analysis when lineups are confirmed."
+        description="Matches kicking off today (UTC), including live games until full-time. Goals O/U analysis when lineups are confirmed."
         emptyMessage="No Premier League matches scheduled for today."
         count={timeline.today.length}
         variant="today"
@@ -231,9 +237,16 @@ export default async function Home() {
     getUpcomingFixtures(),
     getWatchlists(),
   ]);
-  const timeline = buildFixtureTimeline(upcomingFixtures, goals);
+  const gradedKeys = buildGradedKeys(graded);
+  const timeline = buildFixtureTimeline(
+    upcomingFixtures,
+    goals,
+    UPCOMING_DISPLAY_LIMIT,
+    Date.now(),
+    gradedKeys
+  );
   const upcomingProps = props.filter((p) =>
-    isActivePropsFixture(p.fixtureId, p.kickoff, timeline, goals)
+    isActivePropsFixture(p.fixtureId, p.kickoff, timeline, goals, gradedKeys)
   );
   const mostProbable = getMostProbablePicks(upcomingProps);
 
