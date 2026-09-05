@@ -3,7 +3,14 @@
 import { useState } from "react";
 import type { FixtureWatchlist, UpcomingFixture, WatchPlayer } from "@/lib/data";
 import { formatKickoff, pct } from "@/lib/format";
-import { emphasisBadge, previewCardEmphasisClass, type TimelineEmphasis } from "@/lib/timelineStyles";
+import {
+  bodyEmphasisClass,
+  emphasisBadge,
+  kickoffEmphasisClass,
+  previewCardEmphasisClass,
+  titleEmphasisClass,
+  type TimelineEmphasis,
+} from "@/lib/timelineStyles";
 
 function Chevron({ open }: { open: boolean }) {
   return (
@@ -78,17 +85,17 @@ export default function PropsPreviewCard({
       style={{ animationDelay: `${index * 40}ms` }}
     >
       <div className="flex items-baseline justify-between gap-2 flex-wrap">
-        <span className={`font-medium flex items-center gap-2 ${emphasis === "today" ? "text-blue-950 dark:text-blue-50" : ""}`}>
+        <span className={`font-medium flex items-center gap-2 ${titleEmphasisClass(emphasis)}`}>
           <Chevron open={open} />
           {fixture.home} v {fixture.away}
           <span className={badge.className}>{badge.label}</span>
         </span>
-        <span className={`text-xs ${emphasis === "today" ? "text-blue-700/80 dark:text-blue-300/80 font-medium" : "text-neutral-500"}`}>
+        <span className={`text-xs ${kickoffEmphasisClass(emphasis)}`}>
           {formatKickoff(fixture.kickoff)}
         </span>
       </div>
       <div className="mt-3 flex items-center gap-2">
-        <p className={`text-xs ${emphasis === "today" ? "text-blue-800/70 dark:text-blue-200/70" : "text-neutral-400"}`}>
+        <p className={`text-xs ${bodyEmphasisClass(emphasis)}`}>
           {hasPlayers
             ? "Tap for key players to watch. Full prop lines after lineups are confirmed."
             : "Player-prop lines available once lineups are confirmed (~20-40min pre-kickoff)."}

@@ -1,4 +1,11 @@
 import type { ReactNode } from "react";
+import {
+  sectionTodayBadgeClass,
+  sectionTodayClass,
+  sectionTodayDescriptionClass,
+  sectionTodayEmptyClass,
+  sectionTodayTitleClass,
+} from "@/lib/timelineStyles";
 
 export type TimelineSectionVariant = "today" | "preview";
 
@@ -20,46 +27,30 @@ export default function FixtureTimelineSection({
   const isToday = variant === "today";
 
   return (
-    <section
-      className={`mb-8 last:mb-0 ${
-        isToday
-          ? "rounded-2xl border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-b from-blue-50/90 to-white dark:from-blue-950/35 dark:to-neutral-950 p-4 sm:p-5 shadow-sm"
-          : ""
-      }`}
-    >
+    <section className={`mb-8 last:mb-0 ${isToday ? sectionTodayClass() : ""}`}>
       <div className={`mb-3 ${isToday ? "" : "opacity-90"}`}>
         <div className="flex items-center gap-2 flex-wrap">
           <h3
             className={`font-semibold ${
-              isToday
-                ? "text-base text-blue-900 dark:text-blue-100"
-                : "text-sm text-neutral-700 dark:text-neutral-300"
+              isToday ? sectionTodayTitleClass() : "text-sm text-neutral-700 dark:text-neutral-300"
             }`}
           >
             {title}
           </h3>
-          {isToday && (
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950 border border-blue-200 dark:border-blue-700 rounded-full px-2.5 py-0.5">
-              Match day
-            </span>
-          )}
+          {isToday && <span className={sectionTodayBadgeClass()}>Match day</span>}
           {!isToday && count > 0 && (
             <span className="text-[10px] uppercase tracking-wide text-neutral-400">
               Upcoming
             </span>
           )}
         </div>
-        <p
-          className={`mt-0.5 ${
-            isToday ? "text-xs text-blue-800/70 dark:text-blue-200/70" : "text-xs text-neutral-500"
-          }`}
-        >
+        <p className={`mt-0.5 ${isToday ? sectionTodayDescriptionClass() : "text-xs text-neutral-500"}`}>
           {description}
         </p>
       </div>
       {count === 0 ? (
         emptyMessage ? (
-          <p className={`text-sm ${isToday ? "text-blue-800/60 dark:text-blue-200/60" : "text-neutral-500"}`}>
+          <p className={isToday ? sectionTodayEmptyClass() : "text-sm text-neutral-500"}>
             {emptyMessage}
           </p>
         ) : null

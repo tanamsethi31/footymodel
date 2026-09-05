@@ -3,7 +3,12 @@
 import { useState } from "react";
 import type { GoalsPick, MatchDetail } from "@/lib/data";
 import { formatKickoff, pct, odds, EvBadge, SOURCE_LABEL } from "@/lib/format";
-import { cardEmphasisClass, emphasisBadge, type TimelineEmphasis } from "@/lib/timelineStyles";
+import {
+  cardEmphasisClass,
+  emphasisBadge,
+  kickoffEmphasisClass,
+  type TimelineEmphasis,
+} from "@/lib/timelineStyles";
 
 const CONFIDENCE_THRESHOLD = 0.05;
 
@@ -46,7 +51,8 @@ export default function MatchCard({
   index: number;
   emphasis?: TimelineEmphasis;
 }) {
-  const [open, setOpen] = useState(false);
+  const defaultOpen = emphasis === "today" && detail !== null;
+  const [open, setOpen] = useState(defaultOpen);
   const badge = emphasisBadge(emphasis);
 
   return (
@@ -70,7 +76,7 @@ export default function MatchCard({
           {match.home} v {match.away}
           <span className={badge.className}>{badge.label}</span>
         </span>
-        <span className={`text-xs ${emphasis === "today" ? "text-blue-700/80 dark:text-blue-300/80 font-medium" : "text-neutral-500"}`}>
+        <span className={`text-xs ${kickoffEmphasisClass(emphasis)}`}>
           {formatKickoff(match.kickoff)}
         </span>
       </div>
@@ -97,12 +103,18 @@ export default function MatchCard({
           </div>
         </div>
       </div>
-      <div className="mt-3 flex items-center gap-2 text-xs text-neutral-400">
+      <div className="mt-3 flex items-center gap-2 text-xs text-neutral-400 flex-wrap">
         <span>
           starters matched {match.nHomeMatched}/{match.nAwayMatched}
         </span>
         <span>·</span>
         <span>{SOURCE_LABEL[match.source ?? ""] ?? match.source}</span>
+        {detail && (
+          <>
+            <span>·</span>
+            <span className="text-neutral-500">Tap for full model breakdown</span>
+          </>
+        )}
       </div>
 
       <div
@@ -121,7 +133,7 @@ export default function MatchCard({
             ) : (
               <>
                 <div className="text-neutral-500 text-xs mb-2">Model breakdown</div>
-                <div className="grid grid-cols-3 gap-3 font-mono text-xs mb-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 font-mono text-xs mb-3">
                   <div>
                     <div className="text-neutral-400">Team model</div>
                     <div>
@@ -142,6 +154,27 @@ export default function MatchCard({
                   </div>
                 </div>
                 <p className="text-xs text-neutral-500 mb-3">{confidenceLine(detail)}</p>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-4">
+                  <div>
+                    <div className="text-neutral-500">Fair P(O2.5)</div>
+                    <div className="font-mono">{pct(match.fairPOver25)}</div>
+                  </div>
+                  <div>
+                    <div className="text-neutral-500">Market O2.5</div>
+                    <div className="font-mono">{odds(match.oddsOver25)}</div>
+                  </div>
+                  <div>
+                    <div className="text-neutral-500">Market U2.5</div>
+                    <div className="font-mono">{odds(match.oddsUnder25)}</div>
+                  </div>
+                  <div>
+                    <div className="text-neutral-500">Logged</div>
+                    <div className="font-mono text-[11px]">{formatKickoff(match.loggedAt)}</div>
+                  </div>
+                </div>
+
+                <div className="text-neutral-500 text-xs mb-2">Confirmed lineups</div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <div className="text-neutral-500 text-xs mb-1">{match.home}</div>

@@ -10,9 +10,10 @@ import {
   type GoalsPick,
   type GradedResult,
   type MatchDetail,
+  type FixtureWatchlist,
 } from "@/lib/data";
 import { buildFixtureTimeline, findLoggedFixture, sortPastByKickoff } from "@/lib/fixtureTimeline";
-import { UPCOMING_DISPLAY_LIMIT } from "@/lib/upcoming";
+import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
 import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
@@ -137,10 +138,12 @@ function GoalsPanel({
   goals,
   matchDetails,
   timeline,
+  watchlists,
 }: {
   goals: GoalsPick[];
   matchDetails: Record<string, MatchDetail>;
   timeline: ReturnType<typeof buildFixtureTimeline>;
+  watchlists: FixtureWatchlist[];
 }) {
   const past = sortPastByKickoff(goals.filter((g) => new Date(g.kickoff).getTime() <= Date.now()));
 
@@ -165,6 +168,7 @@ function GoalsPanel({
       <PreviewMatchCard
         key={fixture.fixtureId}
         fixture={fixture}
+        watchlist={watchlistForFixture(watchlists, fixture)}
         index={index}
         emphasis={emphasis}
       />
@@ -256,6 +260,7 @@ export default async function Home() {
             goals={goals}
             matchDetails={matchDetails}
             timeline={timeline}
+            watchlists={watchlists}
           />
         }
         props={
