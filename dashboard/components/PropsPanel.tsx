@@ -76,10 +76,21 @@ export default function PropsPanel({
       .map(([fixtureId, rows]) => ({ fixtureId, rows, kickoff: rows[0].kickoff }))
   ).map(({ fixtureId, rows }) => [fixtureId, rows] as [string, PropsPick[]]);
 
-  function renderFixture(fixture: UpcomingFixture, index: number) {
+  function renderFixture(
+    fixture: UpcomingFixture,
+    index: number,
+    emphasis: "today" | "preview"
+  ) {
     const rows = findPropsRows(fixture, byFixtureId, loggedGoals);
     if (rows && rows.length > 0) {
-      return <MatchPropsTable key={fixture.fixtureId} fixtureId={fixture.fixtureId} rows={rows} />;
+      return (
+        <MatchPropsTable
+          key={fixture.fixtureId}
+          fixtureId={fixture.fixtureId}
+          rows={rows}
+          emphasis={emphasis}
+        />
+      );
     }
     return (
       <PropsPreviewCard
@@ -87,6 +98,7 @@ export default function PropsPanel({
         fixture={fixture}
         watchlist={watchlistForFixture(watchlists, fixture)}
         index={index}
+        emphasis={emphasis}
       />
     );
   }
@@ -107,8 +119,9 @@ export default function PropsPanel({
         description="Matches kicking off today (UTC). Full XI and shots/SOT 1+/2+/3+ analysis appears once lineups are confirmed."
         emptyMessage="No Premier League matches scheduled for today."
         count={timeline.today.length}
+        variant="today"
       >
-        {timeline.today.map((f, i) => renderFixture(f, i))}
+        {timeline.today.map((f, i) => renderFixture(f, i, "today"))}
       </FixtureTimelineSection>
 
       <FixtureTimelineSection
@@ -116,8 +129,9 @@ export default function PropsPanel({
         description={`Next ${UPCOMING_DISPLAY_LIMIT} scheduled fixtures on future matchdays.`}
         emptyMessage="No further fixtures in the preview window."
         count={timeline.preview.length}
+        variant="preview"
       >
-        {timeline.preview.map((f, i) => renderFixture(f, i))}
+        {timeline.preview.map((f, i) => renderFixture(f, i, "preview"))}
       </FixtureTimelineSection>
 
       <PastDisclosure count={pastGroups.length}>
