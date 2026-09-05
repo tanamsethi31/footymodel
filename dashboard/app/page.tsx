@@ -13,6 +13,7 @@ import {
   type FixtureWatchlist,
 } from "@/lib/data";
 import { buildFixtureTimeline, findLoggedFixture, sortPastByKickoff } from "@/lib/fixtureTimeline";
+import { findGradedResult } from "@/lib/graded";
 import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
 import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
@@ -139,11 +140,13 @@ function GoalsPanel({
   matchDetails,
   timeline,
   watchlists,
+  graded,
 }: {
   goals: GoalsPick[];
   matchDetails: Record<string, MatchDetail>;
   timeline: ReturnType<typeof buildFixtureTimeline>;
   watchlists: FixtureWatchlist[];
+  graded: GradedResult[];
 }) {
   const past = sortPastByKickoff(goals.filter((g) => new Date(g.kickoff).getTime() <= Date.now()));
 
@@ -209,6 +212,7 @@ function GoalsPanel({
             key={g.fixtureId}
             match={g}
             detail={matchDetails[g.fixtureId] ?? null}
+            graded={findGradedResult(g, graded)}
             index={i}
           />
         ))}
@@ -261,6 +265,7 @@ export default async function Home() {
             matchDetails={matchDetails}
             timeline={timeline}
             watchlists={watchlists}
+            graded={graded}
           />
         }
         props={
@@ -270,6 +275,7 @@ export default async function Home() {
             timeline={timeline}
             watchlists={watchlists}
             loggedGoals={goals}
+            graded={graded}
           />
         }
         staking={<StakingPanel results={kellySim} />}

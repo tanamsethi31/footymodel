@@ -5,8 +5,10 @@ import {
   sortPastByKickoff,
   type FixtureTimeline,
 } from "@/lib/fixtureTimeline";
-import type { FixtureWatchlist, GoalsPick, PropsPick, MostProbablePick, UpcomingFixture } from "@/lib/data";
+import type { FixtureWatchlist, GoalsPick, PropsPick, MostProbablePick, UpcomingFixture, GradedResult } from "@/lib/data";
 import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
+import { findGradedResult } from "@/lib/graded";
+import PredictionResultBanner from "./PredictionResultBanner";
 import FixtureTimelineSection from "./FixtureTimelineSection";
 import MostProbableStrip from "./MostProbableStrip";
 import MatchPropsTable from "./MatchPropsTable";
@@ -60,12 +62,14 @@ export default function PropsPanel({
   timeline,
   watchlists,
   loggedGoals,
+  graded,
 }: {
   props: PropsPick[];
   mostProbable: MostProbablePick[];
   timeline: FixtureTimeline;
   watchlists: FixtureWatchlist[];
   loggedGoals: GoalsPick[];
+  graded: GradedResult[];
 }) {
   const now = Date.now();
   const byFixtureId = buildPropsIndex(props);
@@ -135,9 +139,17 @@ export default function PropsPanel({
       </FixtureTimelineSection>
 
       <PastDisclosure count={pastGroups.length}>
-        {pastGroups.map(([fixtureId, rows]) => (
-          <MatchPropsTable key={fixtureId} fixtureId={fixtureId} rows={rows} />
-        ))}
+        {pastGroups.map(([fixtureId, rows]) => {
+          const goal = loggedGoals.find((g) => g.fixtureId === fixtureId);
+          const gradedResult = goal ? findGradedResult(goal, graded) : null;
+
+          return (
+            <div key={fixtureId} className="space-y-2">
+              {gradedResult && <PredictionResultBanner graded={gradedResult} />}
+              <MatchPropsTable fixtureId={fixtureId} rows={rows} />
+            </div>
+          );
+        })}
       </PastDisclosure>
     </section>
   );

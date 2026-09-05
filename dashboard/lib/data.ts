@@ -1,4 +1,6 @@
 import Papa from "papaparse";
+import { readFile } from "fs/promises";
+import path from "path";
 
 // The footymodel repo is private, so raw.githubusercontent.com 404s
 // unauthenticated - fetch through the GitHub Contents API instead, which
@@ -169,9 +171,34 @@ function bool(v: unknown): boolean | null {
   return null;
 }
 
+function parseCsvText(text: string): Record<string, string>[] {
+  const parsed = Papa.parse<Record<string, string>>(text, {
+    header: true,
+    skipEmptyLines: true,
+  });
+  return parsed.data;
+}
+
+async function readLocalCsv(name: string): Promise<Record<string, string>[]> {
+  const candidates = [
+    path.join(process.cwd(), "data", name),
+    path.join(process.cwd(), "..", "data", "processed", name),
+  ];
+  for (const filePath of candidates) {
+    try {
+      const text = await readFile(filePath, "utf-8");
+      const rows = parseCsvText(text);
+      if (rows.length > 0) return rows;
+    } catch {
+      // try next path
+    }
+  }
+  return [];
+}
+
 async function fetchCsv(name: string): Promise<Record<string, string>[]> {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) return [];
+  if (!token) return readLocalCsv(name);
   const res = await fetch(
     `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/${name}`,
     {
@@ -184,14 +211,10 @@ async function fetchCsv(name: string): Promise<Record<string, string>[]> {
       next: { revalidate: 60 },
     }
   );
-  if (res.status === 404) return []; // file doesn't exist yet (no rows logged)
+  if (res.status === 404) return readLocalCsv(name);
   if (!res.ok) throw new Error(`Failed to fetch ${name}: ${res.status} ${await res.text()}`);
-  const text = await res.text();
-  const parsed = Papa.parse<Record<string, string>>(text, {
-    header: true,
-    skipEmptyLines: true,
-  });
-  return parsed.data;
+  const rows = parseCsvText(await res.text());
+  return rows.length > 0 ? rows : readLocalCsv(name);
 }
 
 async function fetchJsonl(name: string): Promise<Record<string, unknown>[]> {

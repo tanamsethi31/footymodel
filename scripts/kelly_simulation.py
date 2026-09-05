@@ -43,6 +43,9 @@ def main():
                    seed=args.seed)
     result["generated_at"] = datetime.now(timezone.utc).isoformat()
     result.to_csv(SIM_OUTPUT_PATH, index=False)
+    dashboard_copy = Path(__file__).resolve().parent.parent / "dashboard" / "data" / "kelly_simulation.csv"
+    dashboard_copy.parent.mkdir(parents=True, exist_ok=True)
+    result.to_csv(dashboard_copy, index=False)
     print(f"Saved -> {SIM_OUTPUT_PATH}\n")
 
     print(f"{'strategy':>13} {'median':>9} {'p5':>9} {'p95':>9} {'maxDD':>7} {'ruin%':>7}")

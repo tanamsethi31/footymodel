@@ -19,8 +19,12 @@ export default function StakingPanel({ results }: { results: KellySimResult[] })
       <section>
         <h2 className="text-lg font-semibold mb-1">Staking: Kelly bankroll simulation</h2>
         <p className="text-sm text-neutral-500">
-          No simulation results yet. Run{" "}
-          <code className="font-mono text-xs">python scripts/kelly_simulation.py</code>.
+          No simulation results available yet. The dashboard reads{" "}
+          <code className="font-mono text-xs">kelly_simulation.csv</code> from the repo
+          (backtested E0 O/U 2.5 value bets). Regenerate with{" "}
+          <code className="font-mono text-xs">python scripts/kelly_simulation.py</code>{" "}
+          once <code className="font-mono text-xs">evals_main.parquet</code> is built, then
+          commit the updated CSV.
         </p>
       </section>
     );

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import type { GoalsPick, MatchDetail } from "@/lib/data";
+import type { GoalsPick, MatchDetail, GradedResult } from "@/lib/data";
 import { formatKickoff, pct, odds, EvBadge, SOURCE_LABEL } from "@/lib/format";
+import PredictionResultBanner from "@/components/PredictionResultBanner";
 import {
   cardEmphasisClass,
   emphasisBadge,
@@ -43,11 +44,13 @@ function Chevron({ open }: { open: boolean }) {
 export default function MatchCard({
   match,
   detail,
+  graded = null,
   index,
   emphasis = "preview",
 }: {
   match: GoalsPick;
   detail: MatchDetail | null;
+  graded?: GradedResult | null;
   index: number;
   emphasis?: TimelineEmphasis;
 }) {
@@ -109,13 +112,15 @@ export default function MatchCard({
         </span>
         <span>·</span>
         <span>{SOURCE_LABEL[match.source ?? ""] ?? match.source}</span>
-        {detail && (
+        {detail && !graded && (
           <>
             <span>·</span>
             <span className="text-neutral-500">Tap for full model breakdown</span>
           </>
         )}
       </div>
+
+      {graded && <PredictionResultBanner graded={graded} />}
 
       <div
         className="grid transition-[grid-template-rows] duration-300 ease-in-out"

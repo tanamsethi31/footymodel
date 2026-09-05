@@ -39,6 +39,15 @@ if (tl.today.length !== 2) throw new Error(`today ${tl.today.length}`);
 if (tl.preview.length !== 5) throw new Error(`preview ${tl.preview.length}`);
 if (tl.preview[0].fixtureId !== "prev1") throw new Error("preview order");
 if (!tl.past.some((f) => f.fixtureId === "past_logged")) throw new Error("logged past missing");
+
+import { sortPastByKickoff } from "./dashboard/lib/fixtureTimeline.ts";
+const pastSorted = sortPastByKickoff([
+  { kickoff: "2026-09-01T15:00:00+00:00" },
+  { kickoff: "2026-09-03T15:00:00+00:00" },
+  { kickoff: "2026-09-02T15:00:00+00:00" },
+]);
+if (pastSorted[0].kickoff !== "2026-09-03T15:00:00+00:00") throw new Error("past sort desc");
+
 console.log("dashboard_timeline_test: OK");
 """
 

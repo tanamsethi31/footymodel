@@ -96,7 +96,7 @@ export function buildFixtureTimeline(
 }
 
 export function sortPastByKickoff<T extends { kickoff: string }>(rows: T[]): T[] {
-  return [...rows].sort((a, b) => kickoffMs(a.kickoff) - kickoffMs(b.kickoff));
+  return [...rows].sort((a, b) => kickoffMs(b.kickoff) - kickoffMs(a.kickoff));
 }
 
 export function findLoggedFixture<T extends LoggedFixture>(
