@@ -7,6 +7,7 @@ import {
   persistLastRefreshAt,
   REFRESH_COOLDOWN_MS,
 } from "@/lib/refresh";
+import { RefreshIcon } from "@/components/icons";
 
 type RefreshState = "idle" | "refreshing" | "cooldown";
 
@@ -86,11 +87,11 @@ export default function RefreshButton() {
       disabled={disabled}
       aria-label={label}
       title={label}
-      className={`w-9 h-9 rounded-full border border-neutral-200 dark:border-neutral-800 flex items-center justify-center text-base transition-opacity duration-300 ${
+      className={`w-9 h-9 rounded-full border border-neutral-200 dark:border-neutral-800 flex items-center justify-center text-neutral-500 dark:text-neutral-400 transition-opacity duration-300 ${
         disabled ? "opacity-50 cursor-not-allowed" : "hover:border-neutral-300 dark:hover:border-neutral-700"
       } ${state === "refreshing" ? "animate-spin-slow" : ""}`}
     >
-      ↻
+      <RefreshIcon />
     </button>
   );
 }
