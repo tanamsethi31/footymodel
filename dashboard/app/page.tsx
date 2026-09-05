@@ -10,9 +10,9 @@ import {
   type GoalsPick,
   type GradedResult,
   type MatchDetail,
-  type UpcomingFixture,
 } from "@/lib/data";
-import { selectNextUpcoming, UPCOMING_DISPLAY_LIMIT } from "@/lib/upcoming";
+import { buildFixtureTimeline, findLoggedFixture, sortPastByKickoff } from "@/lib/fixtureTimeline";
+import { UPCOMING_DISPLAY_LIMIT } from "@/lib/upcoming";
 import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
@@ -21,8 +21,9 @@ import ThemeToggle from "@/components/ThemeToggle";
 import DashboardTabs from "@/components/DashboardTabs";
 import MatchCard from "@/components/MatchCard";
 import PreviewMatchCard from "@/components/PreviewMatchCard";
+import FixtureTimelineSection from "@/components/FixtureTimelineSection";
 import PastDisclosure from "@/components/PastDisclosure";
-import PropsPanel from "@/components/PropsPanel";
+import PropsPanel, { isActivePropsFixture } from "@/components/PropsPanel";
 import StakingPanel from "@/components/StakingPanel";
 import GlossaryPanel from "@/components/GlossaryPanel";
 
@@ -135,52 +136,55 @@ function TrackRecordPanel({ graded }: { graded: GradedResult[] }) {
 function GoalsPanel({
   goals,
   matchDetails,
-  nextFixtures,
+  timeline,
 }: {
   goals: GoalsPick[];
   matchDetails: Record<string, MatchDetail>;
-  nextFixtures: UpcomingFixture[];
+  timeline: ReturnType<typeof buildFixtureTimeline>;
 }) {
-  // A match that's already kicked off isn't a live pick anymore - it moves
-  // into the collapsed "past predictions" disclosure below instead of
-  // cluttering the upcoming list (still checkable, just out of the way).
-  const now = Date.now();
-  const past = goals.filter((g) => new Date(g.kickoff).getTime() <= now);
-  const predictedById = new Map(
-    goals
-      .filter((g) => new Date(g.kickoff).getTime() > now)
-      .map((g) => [g.fixtureId, g])
-  );
+  const past = sortPastByKickoff(goals.filter((g) => new Date(g.kickoff).getTime() <= Date.now()));
+
+  function renderFixture(fixture: (typeof timeline.today)[number], index: number) {
+    const match = findLoggedFixture(fixture, goals);
+    if (match) {
+      return (
+        <MatchCard
+          key={fixture.fixtureId}
+          match={match}
+          detail={matchDetails[match.fixtureId] ?? null}
+          index={index}
+        />
+      );
+    }
+    return <PreviewMatchCard key={fixture.fixtureId} fixture={fixture} index={index} />;
+  }
+
   return (
     <section>
       <h2 className="text-lg font-semibold mb-1">Goals: Over/Under 2.5</h2>
       <p className="text-sm text-neutral-500 mb-5">
-        Next {UPCOMING_DISPLAY_LIMIT} Premier League fixtures, kickoff order.
-        Confirmed-lineup model (pooled t=3.04; PL alone t=2.23) fills in once
-        XIs are announced.
+        Fixtures move Preview → Today → Past by kickoff time. Confirmed-lineup
+        model fills in once XIs are announced (~20–40 min pre-kickoff).
       </p>
-      {nextFixtures.length === 0 ? (
-        <p className="text-sm text-neutral-500">
-          No upcoming Premier League fixtures in the current window.
-        </p>
-      ) : (
-        <div className="space-y-3">
-          {nextFixtures.map((f, i) => {
-            const match = predictedById.get(f.fixtureId);
-            if (match) {
-              return (
-                <MatchCard
-                  key={f.fixtureId}
-                  match={match}
-                  detail={matchDetails[match.fixtureId] ?? null}
-                  index={i}
-                />
-              );
-            }
-            return <PreviewMatchCard key={f.fixtureId} fixture={f} index={i} />;
-          })}
-        </div>
-      )}
+
+      <FixtureTimelineSection
+        title="Today"
+        description="Matches kicking off today (UTC) with goals O/U analysis when lineups are confirmed."
+        emptyMessage="No Premier League matches scheduled for today."
+        count={timeline.today.length}
+      >
+        {timeline.today.map((f, i) => renderFixture(f, i))}
+      </FixtureTimelineSection>
+
+      <FixtureTimelineSection
+        title="Preview"
+        description={`Next ${UPCOMING_DISPLAY_LIMIT} scheduled fixtures on future matchdays.`}
+        emptyMessage="No further fixtures in the preview window."
+        count={timeline.preview.length}
+      >
+        {timeline.preview.map((f, i) => renderFixture(f, i))}
+      </FixtureTimelineSection>
+
       <PastDisclosure count={past.length}>
         {past.map((g, i) => (
           <MatchCard
@@ -205,10 +209,9 @@ export default async function Home() {
     getUpcomingFixtures(),
     getWatchlists(),
   ]);
-  const nextFixtures = selectNextUpcoming(upcomingFixtures, goals);
-  const nextIds = new Set(nextFixtures.map((f) => f.fixtureId));
-  const upcomingProps = props.filter(
-    (p) => nextIds.has(p.fixtureId) && new Date(p.kickoff).getTime() > Date.now()
+  const timeline = buildFixtureTimeline(upcomingFixtures, goals);
+  const upcomingProps = props.filter((p) =>
+    isActivePropsFixture(p.fixtureId, p.kickoff, timeline, goals)
   );
   const mostProbable = getMostProbablePicks(upcomingProps);
 
@@ -238,15 +241,16 @@ export default async function Home() {
           <GoalsPanel
             goals={goals}
             matchDetails={matchDetails}
-            nextFixtures={nextFixtures}
+            timeline={timeline}
           />
         }
         props={
           <PropsPanel
             props={props}
             mostProbable={mostProbable}
-            nextFixtures={nextFixtures}
+            timeline={timeline}
             watchlists={watchlists}
+            loggedGoals={goals}
           />
         }
         staking={<StakingPanel results={kellySim} />}

@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Data-free checks for dashboard fixture timeline bucketing."""
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+TS = r"""
+import {
+  buildFixtureTimeline,
+  classifyFixture,
+  todayDateKey,
+} from "./dashboard/lib/fixtureTimeline.ts";
+
+const now = Date.parse("2026-09-05T12:00:00.000Z");
+const calendar = [
+  { fixtureId: "past1", home: "A", away: "B", kickoff: "2026-09-04T15:00:00+00:00" },
+  { fixtureId: "today1", home: "C", away: "D", kickoff: "2026-09-05T18:00:00+00:00" },
+  { fixtureId: "today2", home: "E", away: "F", kickoff: "2026-09-05T20:00:00+00:00" },
+  { fixtureId: "prev1", home: "G", away: "H", kickoff: "2026-09-06T14:00:00+00:00" },
+  { fixtureId: "prev2", home: "I", away: "J", kickoff: "2026-09-07T14:00:00+00:00" },
+  { fixtureId: "prev3", home: "K", away: "L", kickoff: "2026-09-08T14:00:00+00:00" },
+  { fixtureId: "prev4", home: "M", away: "N", kickoff: "2026-09-09T14:00:00+00:00" },
+  { fixtureId: "prev5", home: "O", away: "P", kickoff: "2026-09-10T14:00:00+00:00" },
+  { fixtureId: "prev6", home: "Q", away: "R", kickoff: "2026-09-11T14:00:00+00:00" },
+];
+const logged = [
+  { fixtureId: "past_logged", home: "Old", away: "Side", kickoff: "2026-09-03T15:00:00+00:00" },
+];
+
+if (todayDateKey(now) !== "2026-09-05") throw new Error("todayDateKey");
+if (classifyFixture("2026-09-04T15:00:00+00:00", now) !== "past") throw new Error("past");
+if (classifyFixture("2026-09-05T18:00:00+00:00", now) !== "today") throw new Error("today");
+if (classifyFixture("2026-09-06T14:00:00+00:00", now) !== "preview") throw new Error("preview");
+
+const tl = buildFixtureTimeline(calendar, logged, 5, now);
+if (tl.today.length !== 2) throw new Error(`today ${tl.today.length}`);
+if (tl.preview.length !== 5) throw new Error(`preview ${tl.preview.length}`);
+if (tl.preview[0].fixtureId !== "prev1") throw new Error("preview order");
+if (!tl.past.some((f) => f.fixtureId === "past_logged")) throw new Error("logged past missing");
+console.log("dashboard_timeline_test: OK");
+"""
+
+proc = subprocess.run(
+    ["npx", "tsx", "-e", TS],
+    cwd=ROOT,
+    capture_output=True,
+    text=True,
+)
+if proc.returncode != 0:
+    print(proc.stdout)
+    print(proc.stderr, file=sys.stderr)
+    sys.exit(proc.returncode)
+print(proc.stdout.strip())
