@@ -148,6 +148,7 @@ export default function PropsPanel({
         watchlist={watchlistForFixture(watchlists, fixture)}
         index={index}
         emphasis={emphasis}
+        live={live}
       />
     );
   }

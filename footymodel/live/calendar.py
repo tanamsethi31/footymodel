@@ -246,6 +246,15 @@ def date_buckets_to_fetch(
             dates.add(utc_date_str(rec["kickoff"]))
         except (KeyError, TypeError, ValueError):
             continue
+    if not payload or not (payload.get("fixtures") or []):
+        for rec in load_upcoming_log():
+            try:
+                kickoff = _as_utc(pd.Timestamp(rec["kickoff"]))
+            except (KeyError, TypeError, ValueError):
+                continue
+            mins = (kickoff - now).total_seconds() / 60
+            if -hours_behind * 60 <= mins <= hours_ahead * 60:
+                dates.add(utc_date_str(rec["kickoff"]))
     return dates
 
 
@@ -321,32 +330,76 @@ def refresh_calendar(client: ApiFootballClient,
     return payload
 
 
+def load_upcoming_log() -> list[dict]:
+    if not UPCOMING_LOG.exists():
+        return []
+    try:
+        payload = json.loads(UPCOMING_LOG.read_text())
+    except (json.JSONDecodeError, OSError):
+        return []
+    return payload if isinstance(payload, list) else []
+
+
+def _unseen_in_live_window(
+    records: list[dict],
+    now: pd.Timestamp,
+    seen: set,
+    hours_ahead: int = DEFAULT_HOURS_AHEAD,
+    hours_behind: int = DEFAULT_HOURS_BEHIND,
+) -> list[dict]:
+    """Return live-window fixtures from an arbitrary record list not in seen."""
+    seen_norm = {int(x) if str(x).isdigit() else x for x in seen}
+    lo = -hours_behind * 60
+    hi = hours_ahead * 60
+    unseen = []
+    for rec in records:
+        fid = rec.get("fixture_id")
+        home, away, kickoff = rec.get("home"), rec.get("away"), rec.get("kickoff")
+        if fid is None or not home or not away or not kickoff:
+            continue
+        try:
+            kickoff_ts = _as_utc(pd.Timestamp(kickoff))
+        except (TypeError, ValueError):
+            continue
+        mins = (kickoff_ts - now).total_seconds() / 60
+        if not (lo <= mins <= hi):
+            continue
+        try:
+            fid_n = int(fid)
+        except (TypeError, ValueError):
+            fid_n = fid
+        if fid_n in seen_norm or fid in seen:
+            continue
+        unseen.append(rec)
+    return unseen
+
+
 def should_run_live_engines(now: pd.Timestamp | None = None,
                             seen: set | None = None,
                             payload: dict[str, Any] | None = None) -> bool:
     """True unless we have a fresh calendar AND every fixture currently in
     the live window is already in the seen set (already processed once
-    lineups confirmed). Missing/stale calendar fails open."""
+    lineups confirmed). Missing/stale/empty calendar fails open."""
     now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
     payload = payload if payload is not None else load_calendar()
     if not calendar_is_fresh(now, payload=payload):
         print("calendar missing or stale - fail open, run live engines")
         return True
+    cal_fixtures = (payload or {}).get("fixtures") or []
+    if not cal_fixtures:
+        print("calendar fresh but empty - fail open, run live engines")
+        return True
     if seen is None:
         seen = _load_seen()
-    seen_norm = {int(x) if str(x).isdigit() else x for x in seen}
-    unseen = []
-    for rec in fixtures_in_live_window(now, payload):
-        fid = rec.get("fixture_id")
-        try:
-            fid_n = int(fid)
-        except (TypeError, ValueError):
-            fid_n = fid
-        if fid_n not in seen_norm and fid not in seen:
-            unseen.append(rec)
+    unseen = _unseen_in_live_window(cal_fixtures, now, seen)
     if unseen:
         print(f"calendar: {len(unseen)} unseen fixture(s) in live window "
               f"- run live engines")
+        return True
+    upcoming_unseen = _unseen_in_live_window(load_upcoming_log(), now, seen)
+    if upcoming_unseen:
+        print(f"upcoming preview: {len(upcoming_unseen)} unseen fixture(s) in "
+              f"live window - run live engines")
         return True
     print("calendar: no unseen fixtures in live window - skip live engines")
     return False

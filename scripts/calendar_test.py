@@ -69,6 +69,12 @@ assert fxcal.should_run_live_engines(NOW, seen=set(), payload=fresh) is False, (
     "fresh calendar with nothing in the live window should skip engines"
 )
 
+empty_fresh = _payload([], refreshed_at="2026-09-03T11:00:00+00:00")
+fxcal.save_calendar(empty_fresh)
+assert fxcal.should_run_live_engines(NOW, seen=set(), payload=empty_fresh) is True, (
+    "fresh but empty calendar must fail open"
+)
+
 
 # --- live window -------------------------------------------------------------
 in_window = fxcal.fixtures_in_live_window(NOW, _payload([WEEKEND, LIVE_SOON, YESTERDAY]))

@@ -75,13 +75,13 @@ export default function PreviewMatchCard({
   pendingLabel?: string;
   live?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
   const hasPlayers =
     (watchlist?.homeWatch.length ?? 0) > 0 || (watchlist?.awayWatch.length ?? 0) > 0;
+  const expandable = emphasis === "today";
+  const [open, setOpen] = useState(expandable && (live || hasPlayers));
   const badge = emphasisBadge(emphasis);
   const livePill = liveBadge();
   const topPlayer = topWatchPlayer(watchlist);
-  const expandable = emphasis === "today";
 
   const summaryText = live
     ? "Match in progress — tap for pre-lineup watchlist and any logged analysis."

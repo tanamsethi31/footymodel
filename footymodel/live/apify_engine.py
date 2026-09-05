@@ -39,6 +39,9 @@ FIXTURES_CACHE_FILE = PROCESSED_DIR / "apify_fixtures_cache.json"
 
 RUNS_CAP = 60  # Actor starts/month — leave headroom on pay-per-event pricing
 DEFAULT_HOURS_AHEAD = 2
+# Allow a short post-kickoff recovery window when the poll was delayed past KO
+# but lineups are still fetchable.
+LINEUP_LOOKBACK_MINUTES = 180
 
 
 def _load_seen() -> set:
@@ -307,7 +310,7 @@ class ApifyWatcher:
                 continue
             kickoff = pd.Timestamp(int(fx["startTimestamp"]), unit="s", tz="UTC")
             mins_to_ko = (kickoff - now).total_seconds() / 60
-            if not (0 <= mins_to_ko <= hours_ahead * 60):
+            if not (-LINEUP_LOOKBACK_MINUTES <= mins_to_ko <= hours_ahead * 60):
                 continue
             if self.budget["runs_used"] >= RUNS_CAP:
                 break
