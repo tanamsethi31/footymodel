@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { GoalsPick, MatchDetail } from "@/lib/data";
 import { formatKickoff, pct, odds, EvBadge, SOURCE_LABEL } from "@/lib/format";
+import { cardEmphasisClass, emphasisBadge, type TimelineEmphasis } from "@/lib/timelineStyles";
 
 const CONFIDENCE_THRESHOLD = 0.05;
 
@@ -38,12 +39,15 @@ export default function MatchCard({
   match,
   detail,
   index,
+  emphasis = "preview",
 }: {
   match: GoalsPick;
   detail: MatchDetail | null;
   index: number;
+  emphasis?: TimelineEmphasis;
 }) {
   const [open, setOpen] = useState(false);
+  const badge = emphasisBadge(emphasis);
 
   return (
     <div
@@ -57,15 +61,18 @@ export default function MatchCard({
           setOpen((o) => !o);
         }
       }}
-      className="animate-stagger-in rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 transition-transform duration-150 hover:-translate-y-0.5 cursor-pointer"
+      className={`animate-stagger-in rounded-xl border p-4 transition-transform duration-150 hover:-translate-y-0.5 cursor-pointer ${cardEmphasisClass(emphasis)}`}
       style={{ animationDelay: `${index * 40}ms` }}
     >
       <div className="flex items-baseline justify-between gap-2 flex-wrap">
-        <span className="font-medium flex items-center gap-2">
+        <span className="font-medium flex items-center gap-2 flex-wrap">
           <Chevron open={open} />
           {match.home} v {match.away}
+          <span className={badge.className}>{badge.label}</span>
         </span>
-        <span className="text-xs text-neutral-500">{formatKickoff(match.kickoff)}</span>
+        <span className={`text-xs ${emphasis === "today" ? "text-blue-700/80 dark:text-blue-300/80 font-medium" : "text-neutral-500"}`}>
+          {formatKickoff(match.kickoff)}
+        </span>
       </div>
       <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
         <div>

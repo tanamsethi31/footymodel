@@ -7,6 +7,7 @@ import {
   readNotificationPreference,
 } from "@/lib/notifications";
 import { InfoIcon } from "@/components/icons";
+import { resolveVapidPublicKey, urlBase64ToUint8Array } from "@/lib/vapid";
 
 type Status = "checking" | "unsupported" | "denied" | "off" | "on" | "working";
 
@@ -22,23 +23,14 @@ const INFO_TEXT: Record<Status, string> = {
   working: "Updating your notification preference…",
 };
 
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const rawData = atob(base64);
-  const output = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; i++) output[i] = rawData.charCodeAt(i);
-  return output;
-}
-
 async function fetchPublicKey(): Promise<string | null> {
-  const buildTimeKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const buildTimeKey = resolveVapidPublicKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
   if (buildTimeKey) return buildTimeKey;
   try {
     const res = await fetch("/api/push-config");
     if (!res.ok) return null;
     const body = (await res.json()) as { publicKey?: string };
-    return body.publicKey ?? null;
+    return resolveVapidPublicKey(body.publicKey);
   } catch {
     return null;
   }
@@ -132,7 +124,7 @@ export default function SubscribeButton() {
       if (pref === "on" && Notification.permission === "granted") {
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey),
+          applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
         });
         const synced = await postSubscription(sub.toJSON());
         if (synced) {
@@ -227,7 +219,7 @@ export default function SubscribeButton() {
       if (!sub) {
         sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey),
+          applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
         });
       }
 

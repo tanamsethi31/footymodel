@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { PropsPick } from "@/lib/data";
 import { formatKickoff, probClass } from "@/lib/format";
+import { cardEmphasisClass, emphasisBadge, type TimelineEmphasis } from "@/lib/timelineStyles";
 
 const THRESHOLDS = ["1+", "2+", "3+"];
 
@@ -14,9 +15,11 @@ function valueAt(row: PropsPick, stat: "shots" | "sot", idx: number): number | n
 export default function MatchPropsTable({
   fixtureId,
   rows,
+  emphasis = "preview",
 }: {
   fixtureId: string;
   rows: PropsPick[];
+  emphasis?: TimelineEmphasis;
 }) {
   const teams = [...new Set(rows.map((r) => r.team))];
   const [activeTeam, setActiveTeam] = useState(0);
@@ -33,12 +36,18 @@ export default function MatchPropsTable({
   }
 
   const teamRows = rows.filter((r) => r.team === teams[activeTeam]);
+  const badge = emphasisBadge(emphasis);
 
   return (
-    <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+    <div className={`rounded-xl border p-4 ${cardEmphasisClass(emphasis)}`}>
       <div className="flex items-baseline justify-between gap-2 flex-wrap mb-3">
-        <span className="font-medium">{teams.join(" v ")}</span>
-        <span className="text-xs text-neutral-500">{formatKickoff(rows[0].kickoff)}</span>
+        <span className="font-medium flex items-center gap-2 flex-wrap">
+          {teams.join(" v ")}
+          <span className={badge.className}>{badge.label}</span>
+        </span>
+        <span className={`text-xs ${emphasis === "today" ? "text-blue-700/80 dark:text-blue-300/80 font-medium" : "text-neutral-500"}`}>
+          {formatKickoff(rows[0].kickoff)}
+        </span>
       </div>
 
       <div className="flex items-center justify-between gap-2 flex-wrap mb-2">

@@ -144,7 +144,11 @@ function GoalsPanel({
 }) {
   const past = sortPastByKickoff(goals.filter((g) => new Date(g.kickoff).getTime() <= Date.now()));
 
-  function renderFixture(fixture: (typeof timeline.today)[number], index: number) {
+  function renderFixture(
+    fixture: (typeof timeline.today)[number],
+    index: number,
+    emphasis: "today" | "preview"
+  ) {
     const match = findLoggedFixture(fixture, goals);
     if (match) {
       return (
@@ -153,10 +157,18 @@ function GoalsPanel({
           match={match}
           detail={matchDetails[match.fixtureId] ?? null}
           index={index}
+          emphasis={emphasis}
         />
       );
     }
-    return <PreviewMatchCard key={fixture.fixtureId} fixture={fixture} index={index} />;
+    return (
+      <PreviewMatchCard
+        key={fixture.fixtureId}
+        fixture={fixture}
+        index={index}
+        emphasis={emphasis}
+      />
+    );
   }
 
   return (
@@ -172,8 +184,9 @@ function GoalsPanel({
         description="Matches kicking off today (UTC) with goals O/U analysis when lineups are confirmed."
         emptyMessage="No Premier League matches scheduled for today."
         count={timeline.today.length}
+        variant="today"
       >
-        {timeline.today.map((f, i) => renderFixture(f, i))}
+        {timeline.today.map((f, i) => renderFixture(f, i, "today"))}
       </FixtureTimelineSection>
 
       <FixtureTimelineSection
@@ -181,8 +194,9 @@ function GoalsPanel({
         description={`Next ${UPCOMING_DISPLAY_LIMIT} scheduled fixtures on future matchdays.`}
         emptyMessage="No further fixtures in the preview window."
         count={timeline.preview.length}
+        variant="preview"
       >
-        {timeline.preview.map((f, i) => renderFixture(f, i))}
+        {timeline.preview.map((f, i) => renderFixture(f, i, "preview"))}
       </FixtureTimelineSection>
 
       <PastDisclosure count={past.length}>
