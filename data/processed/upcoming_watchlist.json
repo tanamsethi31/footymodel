@@ -1,27 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "us_31207",
-      "home": "Hull",
-      "away": "Aston Villa",
-      "kickoff": "2026-09-05T16:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Oliver McBurnie",
-          "p_shots_gt0.5": 0.838
-        },
-        {
-          "player": "Mohamed Belloumi",
-          "p_shots_gt0.5": 0.678
-        },
-        {
-          "player": "Elliot Stroud",
-          "p_shots_gt0.5": 0.612
-        }
-      ],
-      "away_watch": []
-    },
-    {
       "fixture_id": "us_31208",
       "home": "Everton",
       "away": "Manchester United",
