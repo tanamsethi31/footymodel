@@ -12,8 +12,9 @@ import {
   type MatchDetail,
   type FixtureWatchlist,
 } from "@/lib/data";
-import { buildFixtureTimeline, findLoggedFixture, isFixtureFinished, isFixtureLive, sortPastByKickoff } from "@/lib/fixtureTimeline";
-import { buildGradedKeys, findGradedResult } from "@/lib/graded";
+import { buildFixtureTimeline, findLoggedFixture, isFixtureFinished, isFixtureLive } from "@/lib/fixtureTimeline";
+import { buildGradedKeys, findGradedResult, sortPastPredictions } from "@/lib/graded";
+import { PREMIER_LEAGUE } from "@/lib/league";
 import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
 import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
@@ -149,8 +150,12 @@ function GoalsPanel({
   graded: GradedResult[];
 }) {
   const gradedKeys = buildGradedKeys(graded);
-  const past = sortPastByKickoff(
-    goals.filter((g) => isFixtureFinished(g.kickoff, Date.now(), gradedKeys, g))
+  const past = sortPastPredictions(
+    goals.filter(
+      (g) =>
+        g.league === PREMIER_LEAGUE &&
+        isFixtureFinished(g.kickoff, Date.now(), gradedKeys, g)
+    )
   );
 
   function renderFixture(

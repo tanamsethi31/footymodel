@@ -1,4 +1,5 @@
 import type { GoalsPick, GradedResult } from "./data";
+import { kickoffMs } from "./fixtureTimeline";
 import { matchKey } from "./upcoming";
 
 export function findGradedResult(
@@ -27,4 +28,19 @@ export function gradedByFixtureId(graded: GradedResult[]): Map<string, GradedRes
     map.set(matchKey(g.home, g.away, g.kickoff), g);
   }
   return map;
+}
+
+/** Most recently completed first: latest PL kickoff at the top. */
+export function sortPastPredictions<
+  T extends { kickoff: string; home?: string },
+>(rows: T[]): T[] {
+  return [...rows].sort((a, b) => {
+    const byKickoff = kickoffMs(b.kickoff) - kickoffMs(a.kickoff);
+    if (byKickoff !== 0) return byKickoff;
+    return (a.home ?? "").localeCompare(b.home ?? "");
+  });
+}
+
+export function sortGradedResults(graded: GradedResult[]): GradedResult[] {
+  return sortPastPredictions(graded);
 }

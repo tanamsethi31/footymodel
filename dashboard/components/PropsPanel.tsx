@@ -3,12 +3,12 @@ import {
   findLoggedFixture,
   isFixtureFinished,
   isFixtureLive,
-  sortPastByKickoff,
   type FixtureTimeline,
 } from "@/lib/fixtureTimeline";
 import type { FixtureWatchlist, GoalsPick, PropsPick, MostProbablePick, UpcomingFixture, GradedResult } from "@/lib/data";
 import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
-import { buildGradedKeys, findGradedResult } from "@/lib/graded";
+import { buildGradedKeys, findGradedResult, sortPastPredictions } from "@/lib/graded";
+import { PREMIER_LEAGUE } from "@/lib/league";
 import PredictionResultBanner from "./PredictionResultBanner";
 import FixtureTimelineSection from "./FixtureTimelineSection";
 import MostProbableStrip from "./MostProbableStrip";
@@ -102,20 +102,26 @@ export default function PropsPanel({
   const gradedKeys = buildGradedKeys(graded);
   const byFixtureId = buildPropsIndex(props);
 
-  const pastGroups = sortPastByKickoff(
-    [...byFixtureId.entries()]
-      .filter(([fixtureId, rows]) => {
-        const goal = loggedGoals.find((g) => g.fixtureId === fixtureId);
-        const teams = [...new Set(rows.map((r) => r.team))];
-        return isFixtureFinished(rows[0].kickoff, now, gradedKeys, {
-          fixtureId,
-          home: goal?.home ?? teams[0] ?? "",
-          away: goal?.away ?? teams[1] ?? "",
-          kickoff: rows[0].kickoff,
-        });
-      })
-      .map(([fixtureId, rows]) => ({ fixtureId, rows, kickoff: rows[0].kickoff }))
-  ).map(({ fixtureId, rows }) => [fixtureId, rows] as [string, PropsPick[]]);
+  const plGoals = loggedGoals.filter((g) => g.league === PREMIER_LEAGUE);
+  const plFixtureIds = new Set(plGoals.map((g) => g.fixtureId));
+
+  const pastEntries = [...byFixtureId.entries()].filter(([fixtureId, rows]) => {
+    if (!plFixtureIds.has(fixtureId)) return false;
+    const goal = plGoals.find((g) => g.fixtureId === fixtureId);
+    if (!goal) return false;
+    return isFixtureFinished(rows[0].kickoff, now, gradedKeys, goal);
+  });
+
+  const pastGoals = sortPastPredictions(
+    pastEntries.map(([fixtureId]) => plGoals.find((g) => g.fixtureId === fixtureId)!)
+  );
+
+  const pastGroups = pastGoals
+    .map((goal) => {
+      const rows = byFixtureId.get(goal.fixtureId);
+      return rows ? ([goal.fixtureId, rows] as [string, PropsPick[]]) : null;
+    })
+    .filter((entry): entry is [string, PropsPick[]] => entry !== null);
 
   function renderFixture(
     fixture: UpcomingFixture,

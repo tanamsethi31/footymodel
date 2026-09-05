@@ -1,6 +1,7 @@
 import Papa from "papaparse";
 import { readFile } from "fs/promises";
 import path from "path";
+import { sortGradedResults } from "./graded";
 
 // The footymodel repo is private, so raw.githubusercontent.com 404s
 // unauthenticated - fetch through the GitHub Contents API instead, which
@@ -486,29 +487,30 @@ export async function getPropsPicks(): Promise<PropsPick[]> {
 
 export async function getGradedResults(): Promise<GradedResult[]> {
   const rows = await fetchCsv("graded_results.csv");
-  return rows
-    .map((r) => ({
-      fixtureId: r.fixture_id,
-      home: r.home,
-      away: r.away,
-      kickoff: r.kickoff,
-      actualHomeGoals: num(r.actual_home_goals) ?? 0,
-      actualAwayGoals: num(r.actual_away_goals) ?? 0,
-      actualTotalGoals: num(r.actual_total_goals) ?? 0,
-      actualOverWon: bool(r.actual_over_won) ?? false,
-      modelPOver25: num(r.model_p_over25) ?? 0,
-      modelCorrect: bool(r.model_correct) ?? false,
-      betSide: (r.bet_side === "over" || r.bet_side === "under" ? r.bet_side : null) as
-        | "over"
-        | "under"
-        | null,
-      betOdds: num(r.bet_odds),
-      betWon: bool(r.bet_won),
-      realizedReturn: num(r.realized_return),
-      gradedAt: r.graded_at,
-    }))
-    .filter((r) => r.fixtureId)
-    .sort((a, b) => (a.kickoff < b.kickoff ? 1 : -1));
+  return sortGradedResults(
+    rows
+      .map((r) => ({
+        fixtureId: r.fixture_id,
+        home: r.home,
+        away: r.away,
+        kickoff: r.kickoff,
+        actualHomeGoals: num(r.actual_home_goals) ?? 0,
+        actualAwayGoals: num(r.actual_away_goals) ?? 0,
+        actualTotalGoals: num(r.actual_total_goals) ?? 0,
+        actualOverWon: bool(r.actual_over_won) ?? false,
+        modelPOver25: num(r.model_p_over25) ?? 0,
+        modelCorrect: bool(r.model_correct) ?? false,
+        betSide: (r.bet_side === "over" || r.bet_side === "under" ? r.bet_side : null) as
+          | "over"
+          | "under"
+          | null,
+        betOdds: num(r.bet_odds),
+        betWon: bool(r.bet_won),
+        realizedReturn: num(r.realized_return),
+        gradedAt: r.graded_at,
+      }))
+      .filter((r) => r.fixtureId)
+  );
 }
 
 export async function getKellySimResults(): Promise<KellySimResult[]> {
