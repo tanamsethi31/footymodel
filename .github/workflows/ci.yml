@@ -45,6 +45,10 @@ jobs:
         run: python scripts/run_all_upcoming_test.py
       - name: Saved fixture calendar gating + date-bucket expansion (pure, data-free)
         run: python scripts/calendar_test.py
+      - name: Apify season label resolution (pure, data-free)
+        run: python scripts/apify_season_test.py
+      - name: Grade-results Apify score parsing (pure, data-free)
+        run: python scripts/grade_results_apify_test.py
       - name: Pre-lineup player-props watchlist ranking (pure, data-free)
         run: python scripts/watchlist_test.py
       - name: run_all.py shared-fetch orchestration + fixture-window regression (mocked API)

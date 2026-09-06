@@ -1,4 +1,9 @@
 """Unit test for Apify season resolution (no API call)."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from footymodel.live.apify_engine import _season_label, _season_start_year
 
 import pandas as pd

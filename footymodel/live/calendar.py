@@ -33,7 +33,7 @@ from ..data import PROCESSED_DIR
 from ..understat import RAW_XG_DIR
 from .client import ApiFootballClient, ApiFootballError
 from .engine import (DEFAULT_HOURS_AHEAD, DEFAULT_HOURS_BEHIND, LEAGUE_API_IDS,
-                     _load_seen)
+                     _load_seen as _load_apifootball_seen)
 
 CALENDAR_FILE = PROCESSED_DIR / "fixture_calendar.json"
 UPCOMING_LOG = PROCESSED_DIR / "upcoming_fixtures.json"
@@ -284,6 +284,122 @@ def write_dashboard_upcoming(now: pd.Timestamp | None = None,
     return upcoming
 
 
+def _fixture_seen(fid, seen: set) -> bool:
+    """True if any live engine has already processed this fixture id."""
+    fid_s = str(fid)
+    seen_norm = {int(x) if str(x).isdigit() else x for x in seen}
+    if fid_s in seen or fid in seen:
+        return True
+    if fid_s.startswith("apify_"):
+        try:
+            mid = int(fid_s.removeprefix("apify_"))
+            return mid in seen_norm or mid in seen
+        except ValueError:
+            pass
+    if fid_s.startswith("rapid_"):
+        try:
+            rid = int(fid_s.removeprefix("rapid_"))
+            return rid in seen_norm or rid in seen
+        except ValueError:
+            pass
+    if fid_s.isdigit():
+        n = int(fid_s)
+        return n in seen_norm or f"apify_{n}" in seen or f"rapid_{n}" in seen
+    return False
+
+
+def _load_combined_seen() -> set:
+    """Union seen-fixture sets from every live engine (Apify is primary)."""
+    from . import apify_engine, rapidapi_engine
+
+    seen: set = set()
+    seen.update(_load_apifootball_seen())
+    seen.update(apify_engine._load_seen())
+    seen.update(rapidapi_engine._load_seen())
+    return seen
+
+
+def _apify_row_to_calendar_fixture(row: dict) -> dict | None:
+    try:
+        match_id = int(row["matchId"])
+        home = row.get("homeTeamName") or row.get("homeTeam", {}).get("name")
+        away = row.get("awayTeamName") or row.get("awayTeam", {}).get("name")
+        kickoff = _as_utc(
+            pd.Timestamp(int(row["startTimestamp"]), unit="s", tz="UTC")
+        ).isoformat()
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not home or not away:
+        return None
+    return {
+        "fixture_id": f"apify_{match_id}",
+        "league_id": LEAGUE_API_IDS["E0"],
+        "home": str(home),
+        "away": str(away),
+        "kickoff": kickoff,
+    }
+
+
+def refresh_calendar_apify(client,
+                           now: pd.Timestamp | None = None,
+                           horizon_days: int = HORIZON_DAYS) -> dict[str, Any]:
+    """Build the saved calendar from Apify leagueFixtures (no API-Football)."""
+    from .apify_client import ApifyError
+    from .apify_engine import TOURNAMENT_IDS, resolve_season_id
+
+    now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
+    horizon_end = now + pd.Timedelta(days=horizon_days)
+    season_id = resolve_season_id(client, "E0")
+    try:
+        rows = client.league_fixtures(
+            TOURNAMENT_IDS["E0"], season_id, span="next", max_pages=3, max_results=80
+        )
+    except ApifyError as e:
+        raise RuntimeError(f"apify leagueFixtures failed: {e}") from e
+
+    slim: list[dict] = []
+    seen_ids: set[str] = set()
+    for row in rows:
+        rec = _apify_row_to_calendar_fixture(row)
+        if rec is None:
+            continue
+        if _as_utc(pd.Timestamp(rec["kickoff"])) > horizon_end:
+            continue
+        if rec["fixture_id"] in seen_ids:
+            continue
+        seen_ids.add(rec["fixture_id"])
+        slim.append(rec)
+    slim.sort(key=lambda r: r["kickoff"])
+    payload = {
+        "refreshed_at": now.isoformat(),
+        "horizon_days": horizon_days,
+        "source": "apify",
+        "fixtures": slim,
+    }
+    save_calendar(payload)
+    write_upcoming_from_calendar(now, payload)
+    print(f"calendar (apify): {len(slim)} tracked fixture(s) over {horizon_days}d "
+          f"-> {CALENDAR_FILE}")
+    return payload
+
+
+def refresh_calendar_if_possible(now: pd.Timestamp | None = None) -> dict[str, Any] | None:
+    """Refresh the saved calendar via Apify, else API-Football if a key exists."""
+    now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
+    if os.environ.get("APIFY_TOKEN"):
+        try:
+            from .apify_client import ApifyFootballClient
+            return refresh_calendar_apify(ApifyFootballClient(), now)
+        except Exception as e:
+            print(f"! apify calendar refresh failed ({e})")
+    if os.environ.get("API_FOOTBALL_KEY"):
+        try:
+            return refresh_calendar(ApiFootballClient(), now)
+        except Exception as e:
+            print(f"! API-Football calendar refresh failed ({e})")
+    return None
+
+
 def refresh_calendar(client: ApiFootballClient,
                      now: pd.Timestamp | None = None,
                      horizon_days: int = HORIZON_DAYS) -> dict[str, Any]:
@@ -348,7 +464,6 @@ def _unseen_in_live_window(
     hours_behind: int = DEFAULT_HOURS_BEHIND,
 ) -> list[dict]:
     """Return live-window fixtures from an arbitrary record list not in seen."""
-    seen_norm = {int(x) if str(x).isdigit() else x for x in seen}
     lo = -hours_behind * 60
     hi = hours_ahead * 60
     unseen = []
@@ -364,11 +479,7 @@ def _unseen_in_live_window(
         mins = (kickoff_ts - now).total_seconds() / 60
         if not (lo <= mins <= hi):
             continue
-        try:
-            fid_n = int(fid)
-        except (TypeError, ValueError):
-            fid_n = fid
-        if fid_n in seen_norm or fid in seen:
+        if _fixture_seen(fid, seen):
             continue
         unseen.append(rec)
     return unseen
@@ -390,7 +501,7 @@ def should_run_live_engines(now: pd.Timestamp | None = None,
         print("calendar fresh but empty - fail open, run live engines")
         return True
     if seen is None:
-        seen = _load_seen()
+        seen = _load_combined_seen()
     unseen = _unseen_in_live_window(cal_fixtures, now, seen)
     if unseen:
         print(f"calendar: {len(unseen)} unseen fixture(s) in live window "
@@ -414,15 +525,11 @@ def _write_github_output(should_run: bool) -> None:
 
 
 def gate() -> bool:
-    """Entry point for live_poll.yml: refresh a stale calendar (needs
-    API_FOOTBALL_KEY), rewrite upcoming_fixtures.json from it, then decide
-    whether this poll should spend quota on lineups/odds/Playwright."""
+    """Entry point for live_poll.yml: refresh calendar via Apify (primary),
+    rewrite upcoming_fixtures.json, then decide whether live engines run."""
     now = pd.Timestamp.now(tz="UTC")
     if not calendar_is_fresh(now):
-        try:
-            refresh_calendar(ApiFootballClient(), now)
-        except Exception as e:
-            print(f"! calendar refresh failed ({e}); gating on whatever we have")
+        if refresh_calendar_if_possible(now) is None:
             n = len(write_dashboard_upcoming(now, with_watchlist=True))
             print(f"wrote {n} upcoming preview(s) from fallback sources")
     else:
@@ -439,7 +546,9 @@ if __name__ == "__main__":
         print(f"should_run={ok}")
         sys.exit(0)
     if "--refresh" in sys.argv:
-        refresh_calendar(ApiFootballClient())
+        if refresh_calendar_if_possible() is None:
+            print("! no calendar source available (set APIFY_TOKEN or API_FOOTBALL_KEY)")
+            sys.exit(1)
         sys.exit(0)
     if "--from-understat" in sys.argv:
         rows = write_dashboard_upcoming(with_watchlist=True)

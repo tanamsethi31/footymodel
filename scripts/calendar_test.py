@@ -176,4 +176,9 @@ assert [r["fixture_id"] for r in merged_us] == [1559000, "us_31201"], merged_us
 filled = fxcal.write_dashboard_upcoming(NOW, _payload([]))
 assert filled[0]["fixture_id"] == "us_31200"
 
+# --- combined seen: apify numeric ids match apify_ prefixed calendar ids ---
+assert fxcal._fixture_seen("apify_1558002", {1558002}) is True
+assert fxcal._fixture_seen("rapid_99", {99}) is True
+assert fxcal._fixture_seen(1558002, {"apify_1558002"}) is True
+
 print("calendar_test: OK")
