@@ -10,12 +10,11 @@ import {
   type GoalsPick,
   type GradedResult,
   type MatchDetail,
-  type FixtureWatchlist,
 } from "@/lib/data";
 import { buildFixtureTimeline, findLoggedFixture, isFixtureFinished, isFixtureLive } from "@/lib/fixtureTimeline";
 import { buildGradedKeys, findGradedResult, sortPastPredictions } from "@/lib/graded";
 import { PREMIER_LEAGUE } from "@/lib/league";
-import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
+import { UPCOMING_DISPLAY_LIMIT } from "@/lib/upcoming";
 import { formatKickoff, pct, odds, EvBadge } from "@/lib/format";
 import Logo from "@/components/Logo";
 import SubscribeButton from "@/components/SubscribeButton";
@@ -140,13 +139,11 @@ function GoalsPanel({
   goals,
   matchDetails,
   timeline,
-  watchlists,
   graded,
 }: {
   goals: GoalsPick[];
   matchDetails: Record<string, MatchDetail>;
   timeline: ReturnType<typeof buildFixtureTimeline>;
-  watchlists: FixtureWatchlist[];
   graded: GradedResult[];
 }) {
   const gradedKeys = buildGradedKeys(graded);
@@ -181,7 +178,6 @@ function GoalsPanel({
       <PreviewMatchCard
         key={fixture.fixtureId}
         fixture={fixture}
-        watchlist={watchlistForFixture(watchlists, fixture)}
         index={index}
         emphasis={emphasis}
         live={live}
@@ -282,7 +278,6 @@ export default async function Home() {
             goals={goals}
             matchDetails={matchDetails}
             timeline={timeline}
-            watchlists={watchlists}
             graded={graded}
           />
         }
