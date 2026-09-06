@@ -72,6 +72,7 @@ def _save_budget(budget: dict) -> None:
 
 
 def _season_start_year(now: pd.Timestamp) -> int:
+    """Football season label year (Aug–Jul), same convention as calendar.py."""
     now = now.tz_convert("UTC") if now.tzinfo else now.tz_localize("UTC")
     return int(now.year if now.month >= 7 else now.year - 1)
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { FixtureWatchlist, UpcomingFixture, WatchPlayer } from "@/lib/data";
-import { formatKickoff, pct } from "@/lib/format";
+import type { UpcomingFixture } from "@/lib/data";
+import { formatKickoff } from "@/lib/format";
 import {
   bodyEmphasisClass,
   emphasisBadge,
@@ -34,60 +34,26 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-function WatchColumn({ team, players }: { team: string; players: WatchPlayer[] }) {
-  return (
-    <div>
-      <div className="text-neutral-500 text-xs mb-1">{team}</div>
-      {players.length === 0 ? (
-        <p className="text-xs text-neutral-400">No recent starters ranked yet.</p>
-      ) : (
-        <ul className="space-y-1">
-          {players.map((p) => (
-            <li key={p.player} className="flex items-baseline justify-between gap-2 text-xs">
-              <span className="text-neutral-700 dark:text-neutral-300 truncate">{p.player}</span>
-              <span className="font-mono shrink-0 text-neutral-500">{pct(p.pShotsGt05)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function topWatchPlayer(watchlist: FixtureWatchlist | null): WatchPlayer | null {
-  const all = [...(watchlist?.homeWatch ?? []), ...(watchlist?.awayWatch ?? [])];
-  if (all.length === 0) return null;
-  return all.reduce((best, p) => (p.pShotsGt05 > best.pShotsGt05 ? p : best), all[0]);
-}
-
+/** Pre-lineup placeholder for the Goals O/U tab — no player props content. */
 export default function PreviewMatchCard({
   fixture,
-  watchlist = null,
   index,
   emphasis = "preview",
-  pendingLabel = "Analysis available once lineups are confirmed (~20-40min pre-kickoff).",
   live = false,
 }: {
   fixture: UpcomingFixture;
-  watchlist?: FixtureWatchlist | null;
   index: number;
   emphasis?: TimelineEmphasis;
-  pendingLabel?: string;
   live?: boolean;
 }) {
-  const hasPlayers =
-    (watchlist?.homeWatch.length ?? 0) > 0 || (watchlist?.awayWatch.length ?? 0) > 0;
   const expandable = emphasis === "today";
-  const [open, setOpen] = useState(expandable && (live || hasPlayers));
+  const [open, setOpen] = useState(expandable && live);
   const badge = emphasisBadge(emphasis);
   const livePill = liveBadge();
-  const topPlayer = topWatchPlayer(watchlist);
 
   const summaryText = live
-    ? "Match in progress — tap for pre-lineup watchlist and any logged analysis."
-    : hasPlayers && topPlayer
-    ? `Pre-lineup watch: ${topPlayer.player} leads at ${pct(topPlayer.pShotsGt05)} shots 1+. Tap for full watchlist.`
-    : pendingLabel;
+    ? "Match in progress — goals O/U 2.5 analysis lands once confirmed lineups are logged."
+    : "Goals O/U 2.5 analysis available once lineups are confirmed (~20–40 min pre-kickoff).";
 
   return (
     <div
@@ -134,27 +100,22 @@ export default function PreviewMatchCard({
         >
           <div className="overflow-hidden">
             <div
-              className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-800"
+              className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-800 text-xs text-neutral-500 space-y-2"
               onClick={(e) => e.stopPropagation()}
             >
-              {!hasPlayers ? (
-                <p className="text-xs text-neutral-400">
-                  Watchlist not available yet. Full goals O/U analysis lands once lineups are
-                  confirmed (~20–40 min pre-kickoff).
-                </p>
-              ) : (
-                <>
-                  <div className="text-neutral-500 text-xs mb-2">Pre-lineup watchlist</div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <WatchColumn team={fixture.home} players={watchlist?.homeWatch ?? []} />
-                    <WatchColumn team={fixture.away} players={watchlist?.awayWatch ?? []} />
-                  </div>
-                  <p className="text-[11px] text-neutral-400 mt-3">
-                    Recent starters ranked by P(shots 1+) vs this opponent. Confirmed XI and full
-                    team/lineup goals model appear ~20–40 min pre-kickoff.
-                  </p>
-                </>
-              )}
+              <p>
+                Once lineups are confirmed (~20–40 min pre-kickoff), this card fills in with
+                match-level goals output:
+              </p>
+              <ul className="list-disc pl-4 space-y-1 text-neutral-400">
+                <li>Model P(Over 2.5) and expected total goals (xG)</li>
+                <li>Market O/U 2.5 odds and fair probability</li>
+                <li>Expected value on Over and Under</li>
+                <li>Team vs lineup model breakdown and confirmed XIs</li>
+              </ul>
+              <p className="text-neutral-400">
+                Player shots and SOT lines live on the Player props tab.
+              </p>
             </div>
           </div>
         </div>
