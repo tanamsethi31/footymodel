@@ -27,10 +27,12 @@ from .apify_client import ApifyFootballClient, ApifyError
 TOURNAMENT_IDS = {
     "E0": 17,  # Premier League (SofaScore unique tournament id)
 }
-# Premier League 2025/26 — refresh via leagueSeasons if this goes stale.
+# Fallback when leagueSeasons lookup fails — refresh via Apify leagueSeasons.
 SEASON_IDS = {
-    "E0": 76986,
+    "E0": 96668,  # Premier League 26/27 (SofaScore season id)
 }
+
+SEASON_CACHE_FILE = PROCESSED_DIR / "apify_season_cache.json"
 
 LIVE_LOG = PROCESSED_DIR / "live_recommendations.csv"
 SEEN_FIXTURES_FILE = PROCESSED_DIR / "apify_seen_fixtures.json"
@@ -67,6 +69,55 @@ def _load_budget() -> dict:
 def _save_budget(budget: dict) -> None:
     BUDGET_FILE.parent.mkdir(parents=True, exist_ok=True)
     BUDGET_FILE.write_text(json.dumps(budget))
+
+
+def _season_start_year(now: pd.Timestamp) -> int:
+    """Football season label year (Aug–Jul), same convention as calendar.py."""
+    now = now.tz_convert("UTC") if now.tzinfo else now.tz_localize("UTC")
+    return int(now.year if now.month >= 7 else now.year - 1)
+
+
+def _season_label(start_year: int) -> str:
+    return f"{start_year % 100:02d}/{(start_year + 1) % 100:02d}"
+
+
+def resolve_season_id(client: ApifyFootballClient, league: str) -> int:
+    """Resolve the active SofaScore season id for a league via leagueSeasons."""
+    fallback = SEASON_IDS.get(league)
+    if fallback is None:
+        raise ApifyError(f"No season fallback configured for league {league}")
+
+    now = pd.Timestamp.now(tz="UTC")
+    label = _season_label(_season_start_year(now))
+    if SEASON_CACHE_FILE.exists():
+        try:
+            cached = json.loads(SEASON_CACHE_FILE.read_text())
+            if cached.get("league") == league and cached.get("season_label") == label:
+                return int(cached["season_id"])
+        except (json.JSONDecodeError, TypeError, ValueError):
+            pass
+
+    tournament_id = TOURNAMENT_IDS.get(league)
+    if tournament_id is None:
+        return fallback
+
+    try:
+        rows = client.run("leagueSeasons", tournamentId=tournament_id)
+    except ApifyError:
+        return fallback
+
+    for row in rows:
+        if row.get("seasonYear") == label:
+            sid = int(row["seasonId"])
+            SEASON_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            SEASON_CACHE_FILE.write_text(json.dumps({
+                "league": league,
+                "season_label": label,
+                "season_id": sid,
+                "resolved_at": now.isoformat(),
+            }))
+            return sid
+    return fallback
 
 
 def _load_fixtures_cache(today: str) -> list[dict] | None:
@@ -283,8 +334,9 @@ class ApifyWatcher:
                 print("! Apify monthly run cap exhausted, cannot scan fixtures")
                 return []
             try:
+                season_id = resolve_season_id(self.client, "E0")
                 rows = self.client.league_fixtures(
-                    TOURNAMENT_IDS["E0"], SEASON_IDS["E0"], span="next"
+                    TOURNAMENT_IDS["E0"], season_id, span="next"
                 )
             except ApifyError as e:
                 print(f"! fixtures scan failed: {e}")

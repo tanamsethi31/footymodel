@@ -95,7 +95,8 @@ jobs:
                    data/processed/rapidapi_fixtures_cache.json \
                    data/processed/apify_seen_fixtures.json \
                    data/processed/apify_budget.json \
-                   data/processed/apify_fixtures_cache.json; do
+                   data/processed/apify_fixtures_cache.json \
+                   data/processed/apify_season_cache.json; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --cached --quiet && exit 0
