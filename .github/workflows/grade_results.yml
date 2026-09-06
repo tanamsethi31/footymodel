@@ -30,7 +30,8 @@ jobs:
 
       - name: Grade past predictions against real results (goals only, v1)
         env:
-          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: python -m footymodel.live.grade_results
 
       - name: Commit + push any newly graded results

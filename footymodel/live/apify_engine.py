@@ -1,13 +1,12 @@
-"""Apify-based fallback for the goals O/U live engine.
+"""Apify-based primary engine for the goals O/U live pipeline.
 
 Uses sian.agency/football-api-scraper on Apify — SofaScore-shaped data via
-Apify's infrastructure when direct sofascore_engine.py Playwright scraping
-is blocked. Shares the same LineupModel / EV math as engine.py; logs to the
-same live_recommendations.csv with source="apify" and fixture ids prefixed
+Apify's infrastructure. Shares the same LineupModel / EV math as engine.py;
+logs to live_recommendations.csv with source="apify" and fixture ids prefixed
 apify_{matchId}.
 
-Budget: pay-per-run Actor (~$0.05 start + per-row). A monthly run cap in
-apify_budget.json prevents surprise bills (same pattern as rapidapi_engine).
+This is the production path now that API-Football is unavailable. RapidAPI
+runs as a budget-capped secondary in live_poll.yml.
 """
 from __future__ import annotations
 
@@ -27,10 +26,13 @@ from .apify_client import ApifyFootballClient, ApifyError
 TOURNAMENT_IDS = {
     "E0": 17,  # Premier League (SofaScore unique tournament id)
 }
-# Premier League 2025/26 — refresh via leagueSeasons if this goes stale.
+# Fallback when leagueSeasons lookup fails — refresh via Apify leagueSeasons.
 SEASON_IDS = {
-    "E0": 76986,
+    "E0": 96668,  # Premier League 26/27 (SofaScore season id)
 }
+
+SEASON_CACHE_FILE = PROCESSED_DIR / "apify_season_cache.json"
+UPCOMING_LOG = PROCESSED_DIR / "upcoming_fixtures.json"
 
 LIVE_LOG = PROCESSED_DIR / "live_recommendations.csv"
 SEEN_FIXTURES_FILE = PROCESSED_DIR / "apify_seen_fixtures.json"
@@ -67,6 +69,89 @@ def _load_budget() -> dict:
 def _save_budget(budget: dict) -> None:
     BUDGET_FILE.parent.mkdir(parents=True, exist_ok=True)
     BUDGET_FILE.write_text(json.dumps(budget))
+
+
+def _season_start_year(now: pd.Timestamp) -> int:
+    now = now.tz_convert("UTC") if now.tzinfo else now.tz_localize("UTC")
+    return int(now.year if now.month >= 7 else now.year - 1)
+
+
+def _season_label(start_year: int) -> str:
+    return f"{start_year % 100:02d}/{(start_year + 1) % 100:02d}"
+
+
+def resolve_season_id(client: ApifyFootballClient, league: str) -> int:
+    """Resolve the active SofaScore season id for a league via leagueSeasons."""
+    fallback = SEASON_IDS.get(league)
+    if fallback is None:
+        raise ApifyError(f"No season fallback configured for league {league}")
+
+    now = pd.Timestamp.now(tz="UTC")
+    label = _season_label(_season_start_year(now))
+    if SEASON_CACHE_FILE.exists():
+        try:
+            cached = json.loads(SEASON_CACHE_FILE.read_text())
+            if cached.get("league") == league and cached.get("season_label") == label:
+                return int(cached["season_id"])
+        except (json.JSONDecodeError, TypeError, ValueError):
+            pass
+
+    tournament_id = TOURNAMENT_IDS.get(league)
+    if tournament_id is None:
+        return fallback
+
+    try:
+        rows = client.run("leagueSeasons", tournamentId=tournament_id)
+    except ApifyError:
+        return fallback
+
+    for row in rows:
+        if row.get("seasonYear") == label:
+            sid = int(row["seasonId"])
+            SEASON_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            SEASON_CACHE_FILE.write_text(json.dumps({
+                "league": league,
+                "season_label": label,
+                "season_id": sid,
+                "resolved_at": now.isoformat(),
+            }))
+            return sid
+    return fallback
+
+
+def sync_upcoming_fixtures(fixtures: list[dict], now: pd.Timestamp) -> None:
+    """Merge Apify-scanned fixtures into upcoming_fixtures.json for the dashboard."""
+    from . import calendar as fxcal
+
+    apify_rows = []
+    for fx in fixtures:
+        try:
+            kickoff = pd.Timestamp(int(fx["startTimestamp"]), unit="s", tz="UTC")
+        except (KeyError, TypeError, ValueError):
+            continue
+        if kickoff <= now:
+            continue
+        apify_rows.append({
+            "fixture_id": f"apify_{int(fx['matchId'])}",
+            "home": str(fx["homeTeamName"]),
+            "away": str(fx["awayTeamName"]),
+            "kickoff": kickoff.isoformat(),
+        })
+    merged = fxcal.merge_upcoming(
+        apify_rows,
+        fxcal.merge_upcoming(
+            fxcal.upcoming_from_calendar(now),
+            fxcal.upcoming_from_understat(now),
+        ),
+    )
+    merged.sort(key=lambda r: (r["kickoff"], r["home"]))
+    UPCOMING_LOG.parent.mkdir(parents=True, exist_ok=True)
+    UPCOMING_LOG.write_text(json.dumps(merged, indent=2))
+    try:
+        from . import watchlist as wl
+        wl.write_watchlist(merged)
+    except Exception as e:
+        print(f"  ! watchlist write failed (upcoming list itself is fine): {e}")
 
 
 def _load_fixtures_cache(today: str) -> list[dict] | None:
@@ -283,8 +368,9 @@ class ApifyWatcher:
                 print("! Apify monthly run cap exhausted, cannot scan fixtures")
                 return []
             try:
+                season_id = resolve_season_id(self.client, "E0")
                 rows = self.client.league_fixtures(
-                    TOURNAMENT_IDS["E0"], SEASON_IDS["E0"], span="next"
+                    TOURNAMENT_IDS["E0"], season_id, span="next"
                 )
             except ApifyError as e:
                 print(f"! fixtures scan failed: {e}")
@@ -302,6 +388,10 @@ class ApifyWatcher:
                 })
             _save_fixtures_cache(today, fixtures)
             print(f"  cached {len(fixtures)} upcoming E0 fixtures for {today}")
+            try:
+                sync_upcoming_fixtures(fixtures, now)
+            except Exception as e:
+                print(f"  ! upcoming_fixtures sync failed: {e}")
 
         new_rows = []
         for fx in fixtures:

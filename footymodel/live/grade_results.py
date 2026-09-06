@@ -1,33 +1,16 @@
 """Daily grading of past goals-engine predictions against real results.
 
-Separate from the 20-min live poller (live_poll.yml) - grading a match a
-few hours late is fine, and this avoids competing for RapidAPI's scarce
-100/month budget. Works regardless of which engine originally logged the
-prediction (API-Football, SofaScore, or RapidAPI) - the real-world match
-is the same match, so results are looked up fresh via API-Football's own
-date-based fixtures endpoint and matched by date + fuzzy team name, not by
-each source's own fixture_id format.
+Separate from the 20-min live poller (live_poll.yml). Works for predictions
+logged by Apify, RapidAPI, SofaScore, or legacy API-Football engines.
 
-Real constraint, confirmed live (2026-08-27): the free-tier date query only
-covers a ~3-day rolling window (yesterday/today/tomorrow relative to now).
-For predictions logged with a plain API-Football fixture_id, grade_row()
-looks the match up directly by id first - unlike fixtures_by_date(), that
-isn't subject to the rolling-window restriction (confirmed live, 2026-09-01:
-/fixtures?id=X still returns real data for a match several days outside the
-date-query window), so those are no longer permanently ungradeable once
-missed. The date+fuzzy-name fallback below only still applies to
-RapidAPI/SofaScore-sourced predictions, which use their own prefixed
-fixture_id formats (e.g. "rapid_5868013") that don't correspond to an
-API-Football fixture id - those remain window-limited. Grade promptly
-regardless; don't let this job go more than ~1 day without running.
-
-Goals-only for v1 - props grading needs per-player post-match stats,
-unverified across all three live sources this project has tried.
+Primary result lookup is Apify matchDetails (API-Football account suspended).
+Legacy plain integer fixture ids still try API-Football when a key is set.
 """
 from __future__ import annotations
 
 import csv
 import json
+import os
 
 import numpy as np
 import pandas as pd
@@ -180,45 +163,122 @@ def _fetch_closing_odds(fixture_id: str, clients: dict) -> tuple[float | None, f
         return None, None
 
 
-def grade_row(row: pd.Series, cache: dict[str, list[dict]], clients: dict) -> dict | None:
-    """cache: date (YYYY-MM-DD) -> that date's E0 fixtures, populated
-    lazily so multiple predictions sharing a kickoff day cost one API
-    call, not one per prediction - only used for the date+fuzzy-name
-    fallback (see below).
+def _parse_apify_scores(rows: list[dict]) -> tuple[int, int] | None:
+    if not rows:
+        return None
+    row = rows[0]
+    status = str(
+        (row.get("rawStatus") or {}).get("type")
+        or row.get("matchStatus")
+        or ""
+    ).lower()
+    if status not in ("finished", "ended"):
+        return None
+    home = row.get("homeScore")
+    away = row.get("awayScore")
+    if home is None or away is None:
+        return None
+    return int(home), int(away)
 
-    Tries a direct by-id lookup first: `row["fixture_id"]` is a plain
-    API-Football fixture id for anything engine.py logged (RapidAPI/
-    SofaScore prefix theirs, e.g. "rapid_5868013", so `int(...)` raising
-    ValueError is exactly how those fall through to the fallback below).
-    Unlike fixtures_by_date(), a by-id lookup isn't subject to the free
-    tier's rolling date-query window, so this is both more precise (no
-    fuzzy name matching needed - we already know the exact fixture) and not
-    permanently blocked once a match's date rolls out of that window."""
+
+def _lookup_finished_apify_match(
+    client: ApifyFootballClient,
+    budget: dict,
+    match_id: int,
+) -> tuple[int, int] | None:
+    if budget["runs_used"] >= apify_engine.RUNS_CAP:
+        print(f"  ! apify run cap reached, cannot look up match {match_id}")
+        return None
+    budget["runs_used"] += 1
+    rows = client.run("matchDetails", matchId=match_id)
+    return _parse_apify_scores(rows)
+
+
+def _lookup_finished_apify_by_teams(
+    row: pd.Series,
+    client: ApifyFootballClient,
+    budget: dict,
+    cache: dict[str, list[dict]],
+) -> tuple[int, int] | None:
+    kickoff = pd.Timestamp(row["kickoff"])
+    date_str = kickoff.strftime("%Y-%m-%d")
+    if date_str not in cache:
+        if budget["runs_used"] >= apify_engine.RUNS_CAP:
+            cache[date_str] = []
+            return None
+        budget["runs_used"] += 1
+        season_id = apify_engine.resolve_season_id(client, "E0")
+        rows = client.league_fixtures(
+            apify_engine.TOURNAMENT_IDS["E0"],
+            season_id,
+            span="last",
+            max_pages=2,
+            max_results=60,
+        )
+        cache[date_str] = rows
+
+    names = []
+    for r in cache[date_str]:
+        names.append(r.get("homeTeamName") or "")
+        names.append(r.get("awayTeamName") or "")
+    home_match = namematch.best_match(row["home"], names, threshold=0.6)
+    away_match = namematch.best_match(row["away"], names, threshold=0.6)
+    for r in cache[date_str]:
+        if (r.get("homeTeamName") == home_match and r.get("awayTeamName") == away_match):
+            scores = _parse_apify_scores([r])
+            if scores is not None:
+                return scores
+    return None
+
+
+def _lookup_finished_fixture(
+    row: pd.Series,
+    cache: dict[str, list[dict]],
+    clients: dict,
+) -> tuple[int, int] | None:
+    fixture_id = str(row["fixture_id"])
+    apify = clients.get("apify")
+    apify_budget = clients.get("apify_budget")
+
+    if fixture_id.startswith("apify_") and apify and apify_budget is not None:
+        try:
+            match_id = int(fixture_id.removeprefix("apify_"))
+        except ValueError:
+            return None
+        return _lookup_finished_apify_match(apify, apify_budget, match_id)
+
+    if apify and apify_budget is not None:
+        scores = _lookup_finished_apify_by_teams(row, apify, apify_budget, cache)
+        if scores is not None:
+            return scores
+
+    apifootball = clients.get("apifootball")
+    if apifootball is None:
+        return None
+
     fx = None
     try:
-        fx = clients["apifootball"].fixture_by_id(int(row["fixture_id"]))
+        fx = apifootball.fixture_by_id(int(fixture_id))
     except ValueError:
-        pass  # not a plain API-Football id (RapidAPI/SofaScore-prefixed) - use the fallback below
+        pass
     except ApiFootballError as e:
-        print(f"  ! fixture id {row['fixture_id']} lookup failed: {e}")
+        print(f"  ! fixture id {fixture_id} lookup failed: {e}")
 
     if fx is None:
         kickoff = pd.Timestamp(row["kickoff"])
         date_str = kickoff.strftime("%Y-%m-%d")
-
         if date_str not in cache:
             try:
-                fixtures = clients["apifootball"].fixtures_by_date(date_str)
+                fixtures = apifootball.fixtures_by_date(date_str)
             except ApiFootballError as e:
                 print(f"  ! date {date_str} out of range or errored, skipping: {e}")
                 cache[date_str] = []
                 return None
-            cache[date_str] = [f for f in fixtures if f["league"]["id"] == 39]  # E0
+            cache[date_str] = [f for f in fixtures if f["league"]["id"] == 39]
 
         candidates = cache[date_str]
         if not candidates:
             return None
-
         names = [f["teams"]["home"]["name"] for f in candidates] + \
                 [f["teams"]["away"]["name"] for f in candidates]
         home_match = namematch.best_match(row["home"], names, threshold=0.6)
@@ -228,12 +288,20 @@ def grade_row(row: pd.Series, cache: dict[str, list[dict]], clients: dict) -> di
                   and f["teams"]["away"]["name"] == away_match), None)
 
     if fx is None or fx["fixture"]["status"]["short"] not in ("FT", "AET", "PEN"):
-        return None  # not found, or found but not finished yet
-
+        return None
     home_goals = fx["goals"]["home"]
     away_goals = fx["goals"]["away"]
     if home_goals is None or away_goals is None:
         return None
+    return int(home_goals), int(away_goals)
+
+
+def grade_row(row: pd.Series, cache: dict[str, list[dict]], clients: dict) -> dict | None:
+    """Grade one prediction row against the finished match score."""
+    scores = _lookup_finished_fixture(row, cache, clients)
+    if scores is None:
+        return None
+    home_goals, away_goals = scores
     total_goals = home_goals + away_goals
     actual_over_won = total_goals > 2.5
 
@@ -302,7 +370,20 @@ def main() -> None:
         return
 
     fixture_ids = to_grade["fixture_id"].astype(str)
-    clients: dict = {"apifootball": ApiFootballClient()}
+    clients: dict = {}
+    if os.environ.get("API_FOOTBALL_KEY"):
+        try:
+            clients["apifootball"] = ApiFootballClient()
+        except ApiFootballError as e:
+            print(f"! API-Football client unavailable ({e}); grading via Apify only")
+
+    try:
+        clients["apify"] = ApifyFootballClient()
+        clients["apify_budget"] = apify_engine._load_budget()
+    except Exception as e:
+        print(f"! Apify client unavailable ({e})")
+        if not clients:
+            return
     if fixture_ids.str.startswith("rapid_").any():
         clients["rapidapi"] = RapidApiClient()
         clients["rapidapi_budget"] = rapidapi_engine._load_budget()
@@ -311,10 +392,6 @@ def main() -> None:
     if fixture_ids.str.startswith("sofa_").any():
         sofascore_client = SofaScoreClient()
         clients["sofascore"] = sofascore_client
-
-    if fixture_ids.str.startswith("apify_").any():
-        clients["apify"] = ApifyFootballClient()
-        clients["apify_budget"] = apify_engine._load_budget()
 
     cache: dict[str, list[dict]] = {}
     graded_rows = []
@@ -329,7 +406,7 @@ def main() -> None:
             if result is not None:
                 graded_rows.append(result)
             else:
-                print("    not gradeable yet (or out of API-Football's date-query window)")
+                print("    not gradeable yet (match not finished or lookup failed)")
     finally:
         if "rapidapi_budget" in clients:
             rapidapi_engine._save_budget(clients["rapidapi_budget"])
