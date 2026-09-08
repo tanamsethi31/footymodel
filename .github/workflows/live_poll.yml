@@ -34,18 +34,11 @@ jobs:
       - name: Refresh calendar if stale and decide whether live engines are needed
         id: gate
         env:
-          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: python -m footymodel.live.calendar --gate
 
-      - name: Run Apify goals engine (primary — goals O/U, paper-trade only)
+      - name: Run RapidAPI goals engine (primary — goals O/U, paper-trade only)
         if: steps.gate.outputs.should_run == 'true'
-        env:
-          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
-        run: python -m footymodel.live.apify_engine
-
-      - name: Run RapidAPI goals engine (budget-limited secondary)
-        if: steps.gate.outputs.should_run == 'true'
-        continue-on-error: true
         env:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: python -m footymodel.live.rapidapi_engine
