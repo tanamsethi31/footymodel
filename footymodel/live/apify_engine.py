@@ -1,12 +1,12 @@
-"""Apify-based primary engine for the goals O/U live pipeline.
+"""Apify-based engine for the goals O/U live pipeline (optional fallback).
 
 Uses sian.agency/football-api-scraper on Apify — SofaScore-shaped data via
 Apify's infrastructure. Shares the same LineupModel / EV math as engine.py;
 logs to live_recommendations.csv with source="apify" and fixture ids prefixed
 apify_{matchId}.
 
-This is the production path now that API-Football is unavailable. RapidAPI
-runs as a budget-capped secondary in live_poll.yml.
+Demoted from production now that Apify credits are exhausted; RapidAPI is
+the primary path in live_poll.yml.
 """
 from __future__ import annotations
 
