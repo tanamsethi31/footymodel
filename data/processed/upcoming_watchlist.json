@@ -246,7 +246,7 @@
       "home_watch": [
         {
           "player": "Ellis Simms",
-          "p_shots_gt0.5": 0.797
+          "p_shots_gt0.5": 0.798
         },
         {
           "player": "Loum Tchaouna",
@@ -358,6 +358,40 @@
         {
           "player": "Est\u00eav\u00e3o",
           "p_shots_gt0.5": 0.835
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31221",
+      "home": "Tottenham",
+      "away": "Aston Villa",
+      "kickoff": "2026-09-19T11:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Richarlison",
+          "p_shots_gt0.5": 0.876
+        },
+        {
+          "player": "Dominic Solanke",
+          "p_shots_gt0.5": 0.837
+        },
+        {
+          "player": "James Maddison",
+          "p_shots_gt0.5": 0.828
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Tammy Abraham",
+          "p_shots_gt0.5": 0.831
+        },
+        {
+          "player": "Emiliano Buend\u00eda",
+          "p_shots_gt0.5": 0.791
+        },
+        {
+          "player": "Ross Barkley",
+          "p_shots_gt0.5": 0.738
         }
       ]
     }

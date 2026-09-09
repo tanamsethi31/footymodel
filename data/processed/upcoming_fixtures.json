@@ -64,5 +64,11 @@
     "home": "Brentford",
     "away": "Chelsea",
     "kickoff": "2026-09-18T19:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31221",
+    "home": "Tottenham",
+    "away": "Aston Villa",
+    "kickoff": "2026-09-19T11:30:00+00:00"
   }
 ]
