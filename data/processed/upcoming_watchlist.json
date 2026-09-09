@@ -394,6 +394,197 @@
           "p_shots_gt0.5": 0.738
         }
       ]
+    },
+    {
+      "fixture_id": "us_31224",
+      "home": "Brighton",
+      "away": "Arsenal",
+      "kickoff": "2026-09-19T14:00:00+00:00",
+      "home_watch": [],
+      "away_watch": [
+        {
+          "player": "Bukayo Saka",
+          "p_shots_gt0.5": 0.818
+        },
+        {
+          "player": "Kai Havertz",
+          "p_shots_gt0.5": 0.778
+        },
+        {
+          "player": "Christos Tzolis",
+          "p_shots_gt0.5": 0.765
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31226",
+      "home": "Everton",
+      "away": "Ipswich",
+      "kickoff": "2026-09-19T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Tyrique George",
+          "p_shots_gt0.5": 0.89
+        },
+        {
+          "player": "Thierno Barry",
+          "p_shots_gt0.5": 0.845
+        },
+        {
+          "player": "Merlin R\u00f6hl",
+          "p_shots_gt0.5": 0.798
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Julio Enciso",
+          "p_shots_gt0.5": 0.869
+        },
+        {
+          "player": "Emersonn",
+          "p_shots_gt0.5": 0.832
+        },
+        {
+          "player": "Daizen Maeda",
+          "p_shots_gt0.5": 0.754
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31225",
+      "home": "Leeds",
+      "away": "Crystal Palace",
+      "kickoff": "2026-09-19T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Dominic Calvert-Lewin",
+          "p_shots_gt0.5": 0.845
+        },
+        {
+          "player": "Harry Wilson",
+          "p_shots_gt0.5": 0.84
+        },
+        {
+          "player": "Anton Stach",
+          "p_shots_gt0.5": 0.773
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Eddie Nketiah",
+          "p_shots_gt0.5": 0.873
+        },
+        {
+          "player": "Jean-Philippe Mateta",
+          "p_shots_gt0.5": 0.819
+        },
+        {
+          "player": "Dwight McNeil",
+          "p_shots_gt0.5": 0.705
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31222",
+      "home": "Manchester City",
+      "away": "Sunderland",
+      "kickoff": "2026-09-19T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Erling Haaland",
+          "p_shots_gt0.5": 0.924
+        },
+        {
+          "player": "Antoine Semenyo",
+          "p_shots_gt0.5": 0.874
+        },
+        {
+          "player": "Mathis Cherki",
+          "p_shots_gt0.5": 0.873
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Nilson Angulo",
+          "p_shots_gt0.5": 0.596
+        },
+        {
+          "player": "Brian Brobbey",
+          "p_shots_gt0.5": 0.593
+        },
+        {
+          "player": "Enzo Le F\u00e9e",
+          "p_shots_gt0.5": 0.466
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31223",
+      "home": "Newcastle United",
+      "away": "Hull",
+      "kickoff": "2026-09-19T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Harvey Barnes",
+          "p_shots_gt0.5": 0.941
+        },
+        {
+          "player": "William Osula",
+          "p_shots_gt0.5": 0.934
+        },
+        {
+          "player": "Yoane Wissa",
+          "p_shots_gt0.5": 0.93
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Oliver McBurnie",
+          "p_shots_gt0.5": 0.802
+        },
+        {
+          "player": "Mohamed Belloumi",
+          "p_shots_gt0.5": 0.63
+        },
+        {
+          "player": "Elliot Stroud",
+          "p_shots_gt0.5": 0.563
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31227",
+      "home": "Nottingham Forest",
+      "away": "Coventry",
+      "kickoff": "2026-09-19T16:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Igor Jesus",
+          "p_shots_gt0.5": 0.928
+        },
+        {
+          "player": "Morgan Gibbs-White",
+          "p_shots_gt0.5": 0.903
+        },
+        {
+          "player": "Dan Ndoye",
+          "p_shots_gt0.5": 0.836
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Ellis Simms",
+          "p_shots_gt0.5": 0.8
+        },
+        {
+          "player": "Loum Tchaouna",
+          "p_shots_gt0.5": 0.684
+        },
+        {
+          "player": "Frank Onyeka",
+          "p_shots_gt0.5": 0.597
+        }
+      ]
     }
   ]
 }
