@@ -112,5 +112,11 @@
     "home": "Bournemouth",
     "away": "Liverpool",
     "kickoff": "2026-09-20T13:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31229",
+    "home": "Fulham",
+    "away": "Manchester United",
+    "kickoff": "2026-09-20T15:30:00+00:00"
   }
 ]
