@@ -106,5 +106,11 @@
     "home": "Nottingham Forest",
     "away": "Coventry",
     "kickoff": "2026-09-19T16:30:00+00:00"
+  },
+  {
+    "fixture_id": "us_31228",
+    "home": "Bournemouth",
+    "away": "Liverpool",
+    "kickoff": "2026-09-20T13:00:00+00:00"
   }
 ]
