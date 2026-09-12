@@ -1,35 +1,5 @@
 [
   {
-    "fixture_id": "us_31211",
-    "home": "Aston Villa",
-    "away": "Nottingham Forest",
-    "kickoff": "2026-09-12T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "us_31210",
-    "home": "Bournemouth",
-    "away": "Brentford",
-    "kickoff": "2026-09-12T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "us_31212",
-    "home": "Chelsea",
-    "away": "Hull",
-    "kickoff": "2026-09-12T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "us_31213",
-    "home": "Crystal Palace",
-    "away": "Ipswich",
-    "kickoff": "2026-09-12T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "us_31214",
-    "home": "Liverpool",
-    "away": "Fulham",
-    "kickoff": "2026-09-12T14:00:00+00:00"
-  },
-  {
     "fixture_id": "us_31215",
     "home": "Tottenham",
     "away": "Everton",
