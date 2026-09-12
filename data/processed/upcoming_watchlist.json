@@ -1,40 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "us_31215",
-      "home": "Tottenham",
-      "away": "Everton",
-      "kickoff": "2026-09-12T16:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Richarlison",
-          "p_shots_gt0.5": 0.882
-        },
-        {
-          "player": "Dominic Solanke",
-          "p_shots_gt0.5": 0.844
-        },
-        {
-          "player": "James Maddison",
-          "p_shots_gt0.5": 0.835
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Tyrique George",
-          "p_shots_gt0.5": 0.815
-        },
-        {
-          "player": "Thierno Barry",
-          "p_shots_gt0.5": 0.756
-        },
-        {
-          "player": "Merlin R\u00f6hl",
-          "p_shots_gt0.5": 0.698
-        }
-      ]
-    },
-    {
       "fixture_id": "us_31216",
       "home": "Sunderland",
       "away": "Arsenal",
