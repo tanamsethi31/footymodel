@@ -1,40 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "us_31216",
-      "home": "Sunderland",
-      "away": "Arsenal",
-      "kickoff": "2026-09-12T19:00:00+00:00",
-      "home_watch": [
-        {
-          "player": "Nilson Angulo",
-          "p_shots_gt0.5": 0.728
-        },
-        {
-          "player": "Brian Brobbey",
-          "p_shots_gt0.5": 0.725
-        },
-        {
-          "player": "Enzo Le F\u00e9e",
-          "p_shots_gt0.5": 0.601
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Bukayo Saka",
-          "p_shots_gt0.5": 0.862
-        },
-        {
-          "player": "Kai Havertz",
-          "p_shots_gt0.5": 0.829
-        },
-        {
-          "player": "Christos Tzolis",
-          "p_shots_gt0.5": 0.817
-        }
-      ]
-    },
-    {
       "fixture_id": "us_31217",
       "home": "Coventry",
       "away": "Brighton",
