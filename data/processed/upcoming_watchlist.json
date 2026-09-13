@@ -1,40 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "us_31218",
-      "home": "Manchester United",
-      "away": "Manchester City",
-      "kickoff": "2026-09-13T15:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Matheus Cunha",
-          "p_shots_gt0.5": 0.783
-        },
-        {
-          "player": "Bruno Fernandes",
-          "p_shots_gt0.5": 0.731
-        },
-        {
-          "player": "Bryan Mbeumo",
-          "p_shots_gt0.5": 0.714
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Erling Haaland",
-          "p_shots_gt0.5": 0.876
-        },
-        {
-          "player": "Antoine Semenyo",
-          "p_shots_gt0.5": 0.809
-        },
-        {
-          "player": "Mathis Cherki",
-          "p_shots_gt0.5": 0.809
-        }
-      ]
-    },
-    {
       "fixture_id": "us_31219",
       "home": "Leeds",
       "away": "Newcastle United",
