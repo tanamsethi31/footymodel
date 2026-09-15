@@ -1,9 +1,9 @@
 """Daily grading of past goals-engine predictions against real results.
 
 Separate from the 20-min live poller (live_poll.yml). Works for predictions
-logged by Apify, RapidAPI, SofaScore, or legacy API-Football engines.
+logged by RapidAPI, Apify, SofaScore, or legacy API-Football engines.
 
-Primary result lookup is Apify matchDetails (API-Football account suspended).
+Primary result lookup is RapidAPI matches-by-date (Apify credits exhausted).
 Legacy plain integer fixture ids still try API-Football when a key is set.
 """
 from __future__ import annotations
@@ -181,6 +181,100 @@ def _parse_apify_scores(rows: list[dict]) -> tuple[int, int] | None:
     return int(home), int(away)
 
 
+def _team_score(team: dict | None) -> int | None:
+    if not isinstance(team, dict):
+        return None
+    for key in ("score", "current", "display"):
+        val = team.get(key)
+        if val is not None and str(val).isdigit():
+            return int(val)
+    return None
+
+
+def _parse_rapidapi_scores(match: dict) -> tuple[int, int] | None:
+    """Extract full-time goals from a RapidAPI matches-by-date row."""
+    status = match.get("status") or {}
+    if isinstance(status, dict):
+        finished = status.get("finished")
+        reason = status.get("reason") or {}
+        short = str(reason.get("short") or "").upper()
+        if finished is False and short not in ("FT", "AET", "PEN"):
+            long_name = str(status.get("long") or status.get("description") or "").lower()
+            if not any(x in long_name for x in ("finished", "ended", "full")):
+                return None
+    home = _team_score(match.get("home"))
+    away = _team_score(match.get("away"))
+    if home is None or away is None:
+        home = match.get("homeScore")
+        away = match.get("awayScore")
+    if home is None or away is None:
+        score_str = status.get("scoreStr") if isinstance(status, dict) else None
+        if score_str and "-" in str(score_str):
+            parts = str(score_str).replace(" ", "").split("-")
+            if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+                home, away = int(parts[0]), int(parts[1])
+    if home is None or away is None:
+        return None
+    return int(home), int(away)
+
+
+def _lookup_finished_rapidapi_match(
+    client: RapidApiClient,
+    budget: dict,
+    event_id: int,
+    kickoff: pd.Timestamp,
+) -> tuple[int, int] | None:
+    if not _spend_rapidapi_budget(budget):
+        print(f"  ! rapidapi budget exhausted, cannot look up event {event_id}")
+        return None
+    try:
+        leagues = client.matches_by_date(kickoff.strftime("%Y%m%d"))
+    except Exception as e:
+        print(f"  ! rapidapi date lookup failed for {event_id}: {e}")
+        return None
+    for lg in leagues:
+        for m in lg.get("matches", []):
+            if int(m.get("id", -1)) == event_id:
+                return _parse_rapidapi_scores(m)
+    return None
+
+
+def _lookup_finished_rapidapi_by_teams(
+    row: pd.Series,
+    client: RapidApiClient,
+    budget: dict,
+    cache: dict[str, list[dict]],
+) -> tuple[int, int] | None:
+    kickoff = pd.Timestamp(row["kickoff"])
+    date_str = kickoff.strftime("%Y%m%d")
+    if date_str not in cache:
+        if not _spend_rapidapi_budget(budget):
+            cache[date_str] = []
+            return None
+        try:
+            cache[date_str] = client.matches_by_date(date_str)
+        except Exception as e:
+            print(f"  ! rapidapi date {date_str} lookup failed: {e}")
+            cache[date_str] = []
+            return None
+
+    names = []
+    for lg in cache[date_str]:
+        for m in lg.get("matches", []):
+            names.append(m.get("home", {}).get("name") or "")
+            names.append(m.get("away", {}).get("name") or "")
+    home_match = namematch.best_match(row["home"], names, threshold=0.6)
+    away_match = namematch.best_match(row["away"], names, threshold=0.6)
+    for lg in cache[date_str]:
+        for m in lg.get("matches", []):
+            if (m.get("home", {}).get("name") == home_match
+                    and m.get("away", {}).get("name") == away_match):
+                scores = _parse_rapidapi_scores(m)
+                if scores is not None:
+                    return scores
+    return None
+
+
 def _lookup_finished_apify_match(
     client: ApifyFootballClient,
     budget: dict,
@@ -237,6 +331,26 @@ def _lookup_finished_fixture(
     clients: dict,
 ) -> tuple[int, int] | None:
     fixture_id = str(row["fixture_id"])
+    rapidapi = clients.get("rapidapi")
+    rapidapi_budget = clients.get("rapidapi_budget")
+
+    if fixture_id.startswith("rapid_") and rapidapi and rapidapi_budget is not None:
+        try:
+            event_id = int(fixture_id.removeprefix("rapid_"))
+        except ValueError:
+            return None
+        kickoff = pd.Timestamp(row["kickoff"])
+        scores = _lookup_finished_rapidapi_match(
+            rapidapi, rapidapi_budget, event_id, kickoff)
+        if scores is not None:
+            return scores
+
+    if rapidapi and rapidapi_budget is not None:
+        scores = _lookup_finished_rapidapi_by_teams(
+            row, rapidapi, rapidapi_budget, cache)
+        if scores is not None:
+            return scores
+
     apify = clients.get("apify")
     apify_budget = clients.get("apify_budget")
 
@@ -371,22 +485,29 @@ def main() -> None:
 
     fixture_ids = to_grade["fixture_id"].astype(str)
     clients: dict = {}
+    if os.environ.get("RAPIDAPI_KEY"):
+        try:
+            clients["rapidapi"] = RapidApiClient()
+            clients["rapidapi_budget"] = rapidapi_engine._load_budget()
+        except Exception as e:
+            print(f"! RapidAPI client unavailable ({e})")
+
     if os.environ.get("API_FOOTBALL_KEY"):
         try:
             clients["apifootball"] = ApiFootballClient()
         except ApiFootballError as e:
-            print(f"! API-Football client unavailable ({e}); grading via Apify only")
+            print(f"! API-Football client unavailable ({e})")
 
-    try:
-        clients["apify"] = ApifyFootballClient()
-        clients["apify_budget"] = apify_engine._load_budget()
-    except Exception as e:
-        print(f"! Apify client unavailable ({e})")
-        if not clients:
-            return
-    if fixture_ids.str.startswith("rapid_").any():
-        clients["rapidapi"] = RapidApiClient()
-        clients["rapidapi_budget"] = rapidapi_engine._load_budget()
+    if os.environ.get("APIFY_TOKEN"):
+        try:
+            clients["apify"] = ApifyFootballClient()
+            clients["apify_budget"] = apify_engine._load_budget()
+        except Exception as e:
+            print(f"! Apify client unavailable ({e})")
+
+    if not clients:
+        print("! no grading data source available (set RAPIDAPI_KEY)")
+        return
 
     sofascore_client = None
     if fixture_ids.str.startswith("sofa_").any():
