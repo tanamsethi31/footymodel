@@ -1,40 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "us_31227",
-      "home": "Nottingham Forest",
-      "away": "Coventry",
-      "kickoff": "2026-09-19T16:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Igor Jesus",
-          "p_shots_gt0.5": 0.928
-        },
-        {
-          "player": "Morgan Gibbs-White",
-          "p_shots_gt0.5": 0.903
-        },
-        {
-          "player": "Dan Ndoye",
-          "p_shots_gt0.5": 0.836
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Ellis Simms",
-          "p_shots_gt0.5": 0.8
-        },
-        {
-          "player": "Loum Tchaouna",
-          "p_shots_gt0.5": 0.683
-        },
-        {
-          "player": "Frank Onyeka",
-          "p_shots_gt0.5": 0.598
-        }
-      ]
-    },
-    {
       "fixture_id": "us_31228",
       "home": "Bournemouth",
       "away": "Liverpool",
