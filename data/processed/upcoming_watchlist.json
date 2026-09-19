@@ -94,7 +94,20 @@
       "home": "Manchester City",
       "away": "Sunderland",
       "kickoff": "2026-09-19T14:00:00+00:00",
-      "home_watch": [],
+      "home_watch": [
+        {
+          "player": "Erling Haaland",
+          "p_shots_gt0.5": 0.924
+        },
+        {
+          "player": "Antoine Semenyo",
+          "p_shots_gt0.5": 0.873
+        },
+        {
+          "player": "Mathis Cherki",
+          "p_shots_gt0.5": 0.873
+        }
+      ],
       "away_watch": [
         {
           "player": "Nilson Angulo",
@@ -115,7 +128,20 @@
       "home": "Newcastle United",
       "away": "Hull",
       "kickoff": "2026-09-19T14:00:00+00:00",
-      "home_watch": [],
+      "home_watch": [
+        {
+          "player": "Harvey Barnes",
+          "p_shots_gt0.5": 0.941
+        },
+        {
+          "player": "William Osula",
+          "p_shots_gt0.5": 0.934
+        },
+        {
+          "player": "Yoane Wissa",
+          "p_shots_gt0.5": 0.93
+        }
+      ],
       "away_watch": [
         {
           "player": "Oliver McBurnie",
@@ -166,11 +192,58 @@
       ]
     },
     {
+      "fixture_id": "us_31228",
+      "home": "Bournemouth",
+      "away": "Liverpool",
+      "kickoff": "2026-09-20T13:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "David Brooks",
+          "p_shots_gt0.5": 0.815
+        },
+        {
+          "player": "Eli Junior Kroupi",
+          "p_shots_gt0.5": 0.782
+        },
+        {
+          "player": "Evanilson",
+          "p_shots_gt0.5": 0.772
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Hugo Ekitike",
+          "p_shots_gt0.5": 0.866
+        },
+        {
+          "player": "Federico Chiesa",
+          "p_shots_gt0.5": 0.862
+        },
+        {
+          "player": "Alexander Isak",
+          "p_shots_gt0.5": 0.853
+        }
+      ]
+    },
+    {
       "fixture_id": "us_31229",
       "home": "Fulham",
       "away": "Manchester United",
       "kickoff": "2026-09-20T15:30:00+00:00",
-      "home_watch": [],
+      "home_watch": [
+        {
+          "player": "Rodrigo Muniz",
+          "p_shots_gt0.5": 0.885
+        },
+        {
+          "player": "Kevin",
+          "p_shots_gt0.5": 0.808
+        },
+        {
+          "player": "Joshua King",
+          "p_shots_gt0.5": 0.78
+        }
+      ],
       "away_watch": [
         {
           "player": "Matheus Cunha",
