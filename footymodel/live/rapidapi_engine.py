@@ -1,27 +1,12 @@
-"""RapidAPI-based fallback for the goals/O-U live engine, using the free
-"Free API Live Football Data" listing (see rapidapi_client.py).
+"""RapidAPI-based primary engine for the goals O/U live pipeline.
 
-Two constraints shape this differently from engine.py / sofascore_engine.py:
+Uses the "Free API Live Football Data" listing (see rapidapi_client.py).
+Shares the same LineupModel / EV math as engine.py; logs to
+live_recommendations.csv with source="rapidapi" and fixture ids prefixed
+rapid_{eventId}.
 
-1. Free-tier quota is 100 requests/MONTH (hard limit), not per-day. A
-   budget file (rapidapi_budget.json) tracks usage and resets each
-   calendar month; every call site checks remaining budget first.
-2. The lineup endpoints have no confirmed/predicted flag (checked
-   2026-08-27 - see .ladder/ladder.md R025). Heuristic instead of a real
-   signal: only fetch lineups within LINEUP_WINDOW_MINUTES of kickoff, on
-   the assumption that this close in, whatever's returned is very likely
-   the real XI. Not guaranteed - a known, accepted risk given the budget
-   doesn't support re-checking anyway.
-
-To avoid spending the fixtures-scan call on every 20-min cron tick (that
-alone would be ~1500/month), today's fixtures are scanned once per day and
-cached locally (rapidapi_fixtures_cache.json); every cron tick just checks
-the cache against the current time, no API call needed for that part.
-
-Same LineupModel/namematch/EV logic as engine.py - only the data source,
-transport, and budget/timing constraints differ. Logs to the SAME
-live_recommendations.csv, tagged source="rapidapi", with its own
-seen-fixtures file.
+Production path now that Apify credits are exhausted. Free-tier quota is
+100 requests/MONTH (hard limit); rapidapi_budget.json tracks usage.
 """
 from __future__ import annotations
 
@@ -53,8 +38,16 @@ SEEN_FIXTURES_FILE = PROCESSED_DIR / "rapidapi_seen_fixtures.json"
 BUDGET_FILE = PROCESSED_DIR / "rapidapi_budget.json"
 FIXTURES_CACHE_FILE = PROCESSED_DIR / "rapidapi_fixtures_cache.json"
 
+UPCOMING_LOG = PROCESSED_DIR / "upcoming_fixtures.json"
+
 BUDGET_CAP = 90  # out of 100/month - leave headroom, never chase the hard limit
-LINEUP_WINDOW_MINUTES = 30  # the "probably confirmed by now" heuristic window
+LINEUP_WINDOW_MINUTES = 30  # pre-kickoff heuristic window (no confirmed flag)
+# Recover delayed polls that missed the pre-kickoff window but lineups may
+# still be fetchable (same rationale as apify_engine LINEUP_LOOKBACK_MINUTES).
+LINEUP_LOOKBACK_MINUTES = 180
+# Scan today + next two days once per day (3 calls max) so delayed polls
+# and post-kickoff recovery still see fixtures without re-scanning every tick.
+FIXTURE_SCAN_DAYS = 3
 ODDS_COUNTRYCODE = "DE"  # verified to carry the "Total goals over/under" market;
                          # GB did not for the same fixture - untested elsewhere
 
@@ -84,16 +77,71 @@ def _save_budget(budget: dict) -> None:
     BUDGET_FILE.write_text(json.dumps(budget))
 
 
-def _load_fixtures_cache(today: str) -> list[dict] | None:
+def _load_fixtures_cache(today: str) -> dict[str, list[dict]] | None:
     if not FIXTURES_CACHE_FILE.exists():
         return None
     c = json.loads(FIXTURES_CACHE_FILE.read_text())
-    return c.get("fixtures") if c.get("date") == today else None
+    if c.get("anchor_date") != today:
+        return None
+    dates = c.get("dates")
+    return dates if isinstance(dates, dict) else None
 
 
-def _save_fixtures_cache(today: str, fixtures: list[dict]) -> None:
+def _save_fixtures_cache(anchor_date: str, dates: dict[str, list[dict]]) -> None:
     FIXTURES_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    FIXTURES_CACHE_FILE.write_text(json.dumps({"date": today, "fixtures": fixtures}))
+    FIXTURES_CACHE_FILE.write_text(json.dumps({"anchor_date": anchor_date, "dates": dates}))
+
+
+def _fixtures_from_leagues(leagues: list[dict]) -> list[dict]:
+    fixtures = []
+    id_to_div = {v: k for k, v in LEAGUE_IDS.items()}
+    for lg in leagues:
+        div = id_to_div.get(lg.get("id"))
+        if div is None:
+            continue
+        for m in lg.get("matches", []):
+            fixtures.append({
+                "id": m["id"], "div": div,
+                "home": m["home"], "away": m["away"],
+                "kickoff_iso": m["status"]["utcTime"],
+                "timeTS": m["timeTS"],
+            })
+    return fixtures
+
+
+def sync_upcoming_fixtures(fixtures: list[dict], now: pd.Timestamp) -> None:
+    """Merge RapidAPI-scanned fixtures into upcoming_fixtures.json."""
+    from . import calendar as fxcal
+
+    rapid_rows = []
+    for fx in fixtures:
+        try:
+            kickoff = pd.Timestamp(int(fx["timeTS"]), unit="ms", tz="UTC")
+        except (KeyError, TypeError, ValueError):
+            continue
+        if kickoff <= now:
+            continue
+        rapid_rows.append({
+            "fixture_id": f"rapid_{int(fx['id'])}",
+            "home": str(fx["home"]["name"]),
+            "away": str(fx["away"]["name"]),
+            "kickoff": kickoff.isoformat(),
+        })
+    merged = fxcal.merge_upcoming(
+        rapid_rows,
+        fxcal.merge_upcoming(
+            fxcal.upcoming_from_calendar(now),
+            fxcal.upcoming_from_understat(now),
+        ),
+    )
+    merged.sort(key=lambda r: (r["kickoff"], r["home"]))
+    UPCOMING_LOG.parent.mkdir(parents=True, exist_ok=True)
+    UPCOMING_LOG.write_text(json.dumps(merged, indent=2))
+    try:
+        from . import watchlist as wl
+        wl.write_watchlist(merged)
+    except Exception as e:
+        print(f"  ! watchlist write failed (upcoming list itself is fine): {e}")
 
 
 def _find_25_line(odds_resp: dict) -> tuple[float | None, float | None]:
@@ -223,42 +271,49 @@ class RapidApiWatcher:
         now = pd.Timestamp.now(tz="UTC")
         today = now.strftime("%Y-%m-%d")
 
-        fixtures = _load_fixtures_cache(today)
-        if fixtures is None:
+        dates_cache = _load_fixtures_cache(today)
+        if dates_cache is None:
+            dates_cache = {}
+
+        all_fixtures: list[dict] = []
+        for i in range(FIXTURE_SCAN_DAYS):
+            day = (now + pd.Timedelta(days=i)).strftime("%Y-%m-%d")
+            if day in dates_cache:
+                all_fixtures.extend(dates_cache[day])
+                continue
             if self.budget["calls_used"] >= BUDGET_CAP:
-                print("! monthly budget exhausted, cannot even scan fixtures")
-                return []
+                print(f"! monthly budget exhausted ({self.budget['calls_used']}/{BUDGET_CAP}), "
+                      "cannot scan fixtures")
+                break
             self.budget["calls_used"] += 1
             try:
-                leagues = self.client.matches_by_date(now.strftime("%Y%m%d"))
+                leagues = self.client.matches_by_date(
+                    (now + pd.Timedelta(days=i)).strftime("%Y%m%d"))
             except RapidApiError as e:
-                print(f"! fixtures scan failed: {e}")
+                print(f"! fixtures scan failed for {day}: {e}")
                 _save_budget(self.budget)
-                return []
-            fixtures = []
-            id_to_div = {v: k for k, v in LEAGUE_IDS.items()}
-            for lg in leagues:
-                div = id_to_div.get(lg.get("id"))
-                if div is None:
-                    continue
-                for m in lg.get("matches", []):
-                    fixtures.append({
-                        "id": m["id"], "div": div,
-                        "home": m["home"], "away": m["away"],
-                        "kickoff_iso": m["status"]["utcTime"],
-                        "timeTS": m["timeTS"],
-                    })
-            _save_fixtures_cache(today, fixtures)
-            print(f"  scanned {len(fixtures)} fixtures across our 5 leagues for {today}")
+                break
+            day_fixtures = _fixtures_from_leagues(leagues)
+            dates_cache[day] = day_fixtures
+            all_fixtures.extend(day_fixtures)
+            _save_fixtures_cache(today, dates_cache)
+            print(f"  scanned {len(day_fixtures)} E0 fixture(s) for {day}")
+
+        if dates_cache:
+            _save_fixtures_cache(today, dates_cache)
+            try:
+                sync_upcoming_fixtures(all_fixtures, now)
+            except Exception as e:
+                print(f"  ! upcoming_fixtures sync failed: {e}")
 
         new_rows = []
-        for fx in fixtures:
+        for fx in all_fixtures:
             eid = fx["id"]
             if eid in seen:
                 continue
             kickoff = pd.Timestamp(fx["timeTS"], unit="ms", tz="UTC")
             mins_to_ko = (kickoff - now).total_seconds() / 60
-            if not (0 <= mins_to_ko <= LINEUP_WINDOW_MINUTES):
+            if not (-LINEUP_LOOKBACK_MINUTES <= mins_to_ko <= LINEUP_WINDOW_MINUTES):
                 continue
             if self.budget["calls_used"] >= BUDGET_CAP:
                 break
