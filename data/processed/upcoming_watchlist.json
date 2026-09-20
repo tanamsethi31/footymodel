@@ -1,38 +1,3 @@
 {
-  "fixtures": [
-    {
-      "fixture_id": "us_31229",
-      "home": "Fulham",
-      "away": "Manchester United",
-      "kickoff": "2026-09-20T15:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Rodrigo Muniz",
-          "p_shots_gt0.5": 0.885
-        },
-        {
-          "player": "Kevin",
-          "p_shots_gt0.5": 0.808
-        },
-        {
-          "player": "Joshua King",
-          "p_shots_gt0.5": 0.78
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Matheus Cunha",
-          "p_shots_gt0.5": 0.845
-        },
-        {
-          "player": "Bruno Fernandes",
-          "p_shots_gt0.5": 0.801
-        },
-        {
-          "player": "Bryan Mbeumo",
-          "p_shots_gt0.5": 0.786
-        }
-      ]
-    }
-  ]
+  "fixtures": []
 }
