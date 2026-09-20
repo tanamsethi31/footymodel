@@ -5,7 +5,20 @@
       "home": "Fulham",
       "away": "Manchester United",
       "kickoff": "2026-09-20T15:30:00+00:00",
-      "home_watch": [],
+      "home_watch": [
+        {
+          "player": "Rodrigo Muniz",
+          "p_shots_gt0.5": 0.885
+        },
+        {
+          "player": "Kevin",
+          "p_shots_gt0.5": 0.808
+        },
+        {
+          "player": "Joshua King",
+          "p_shots_gt0.5": 0.78
+        }
+      ],
       "away_watch": [
         {
           "player": "Matheus Cunha",
