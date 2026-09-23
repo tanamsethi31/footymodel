@@ -63,14 +63,20 @@ print("apifootball-sourced closing odds + CLV: OK")
 # --- rapid_-prefixed fixture_id: closing odds via RapidApiClient.odds(),
 # shared monthly budget checked and deducted ---
 mock_rapidapi = MagicMock()
+mock_rapidapi.matches_by_date.return_value = [{"matches": [{
+    "id": 5868013,
+    "home": {"name": "Chelsea", "score": 1},
+    "away": {"name": "Brighton", "score": 2},
+    "status": {"finished": True, "reason": {"short": "FT"}},
+}]}]
 mock_rapidapi.odds.return_value = {"odds": {"odds": {"oddsTabMarkets": [
     {"markets": [{"header": "Over/Under", "selections": [
         {"name": "Over 2.5", "oddsDecimal": 1.75}, {"name": "Under 2.5", "oddsDecimal": 2.10}]}]}]}}}
 budget = {"month": "2026-09", "calls_used": 0}
-clients_rapid = {"apifootball": mock_apifootball, "rapidapi": mock_rapidapi, "rapidapi_budget": budget}
+clients_rapid = {"rapidapi": mock_rapidapi, "rapidapi_budget": budget}
 result2 = grade_results.grade_row(_row("rapid_5868013"), {}, clients_rapid)
 assert mock_rapidapi.odds.call_count == 1
-assert budget["calls_used"] == 1, "closing-odds fetch must deduct the shared budget"
+assert budget["calls_used"] == 2, "score lookup + closing-odds fetch must deduct the shared budget"
 assert result2 is not None
 assert result2["bet_clv"] == round(2.00 / 1.75 - 1, 4), result2["bet_clv"]
 print("rapidapi-sourced closing odds + shared-budget deduction: OK")
@@ -83,6 +89,7 @@ clients_exhausted = {"apifootball": mock_apifootball, "rapidapi": mock_rapidapi2
                      "rapidapi_budget": exhausted_budget}
 result3 = grade_results.grade_row(_row("rapid_5868013"), {}, clients_exhausted)
 assert mock_rapidapi2.odds.call_count == 0, "must not call the client once budget is exhausted"
+assert mock_rapidapi2.matches_by_date.call_count == 0
 assert result3 is not None
 assert result3["bet_clv"] is None
 assert result3["model_correct"] is not None  # outcome grading still worked

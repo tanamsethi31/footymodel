@@ -181,4 +181,25 @@ assert fxcal._fixture_seen("apify_1558002", {1558002}) is True
 assert fxcal._fixture_seen("rapid_99", {99}) is True
 assert fxcal._fixture_seen(1558002, {"apify_1558002"}) is True
 
+# --- rapidapi calendar refresh: budget-aware, E0 only -----------------------
+from unittest.mock import MagicMock as MM
+
+rapid_budget = {"month": "2026-09", "calls_used": 0}
+rapid_client = MM()
+rapid_client.matches_by_date.side_effect = lambda d: [
+    {"id": 47, "matches": [
+        {"id": 1001,
+         "home": {"name": "Arsenal"}, "away": {"name": "Chelsea"},
+         "status": {"utcTime": "2026-09-03T11:30:00+00:00"},
+         "timeTS": 1756906200000},
+    ]},
+    {"id": 140, "matches": []},  # La Liga — not tracked
+] if d == "20260903" else [{"id": 47, "matches": []}]
+
+rapid_refreshed = fxcal.refresh_calendar_rapidapi(
+    rapid_client, rapid_budget, now=NOW, horizon_days=0)
+assert rapid_budget["calls_used"] == 1
+assert rapid_refreshed["source"] == "rapidapi"
+assert [f["fixture_id"] for f in rapid_refreshed["fixtures"]] == ["rapid_1001"]
+
 print("calendar_test: OK")
