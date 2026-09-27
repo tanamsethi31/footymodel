@@ -319,6 +319,94 @@ def _load_combined_seen() -> set:
     return seen
 
 
+# RapidAPI free tier: one call per day in the horizon. Keep this short so
+# calendar refresh does not burn the shared 90/month budget (Understat still
+# fills the 10-day dashboard preview).
+RAPIDAPI_CALENDAR_HORIZON_DAYS = 3
+
+
+def _rapidapi_match_to_calendar_fixture(match: dict, div: str) -> dict | None:
+    try:
+        event_id = int(match["id"])
+        home = match.get("home", {}).get("name")
+        away = match.get("away", {}).get("name")
+        kickoff = match.get("status", {}).get("utcTime") or match.get("timeTS")
+        if kickoff is None:
+            return None
+        if isinstance(kickoff, (int, float)):
+            kickoff = _as_utc(pd.Timestamp(int(kickoff), unit="ms", tz="UTC")).isoformat()
+        else:
+            kickoff = _as_utc(pd.Timestamp(kickoff)).isoformat()
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not home or not away:
+        return None
+    from .engine import LEAGUE_API_IDS
+
+    return {
+        "fixture_id": f"rapid_{event_id}",
+        "league_id": LEAGUE_API_IDS.get(div, LEAGUE_API_IDS["E0"]),
+        "home": str(home),
+        "away": str(away),
+        "kickoff": kickoff,
+    }
+
+
+def refresh_calendar_rapidapi(client,
+                              budget: dict,
+                              now: pd.Timestamp | None = None,
+                              horizon_days: int = RAPIDAPI_CALENDAR_HORIZON_DAYS) -> dict[str, Any]:
+    """Build the saved calendar from RapidAPI matches-by-date (budget-aware)."""
+    from .rapidapi_client import RapidApiError
+    from .rapidapi_engine import BUDGET_CAP, LEAGUE_IDS
+
+    now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
+    horizon_end = now + pd.Timedelta(days=horizon_days)
+    id_to_div = {v: k for k, v in LEAGUE_IDS.items()}
+    slim: list[dict] = []
+    seen_ids: set[str] = set()
+
+    for i in range(horizon_days + 1):
+        if budget["calls_used"] >= BUDGET_CAP:
+            print(f"! rapidapi budget exhausted ({budget['calls_used']}/{BUDGET_CAP}), "
+                  f"stopping calendar refresh after {i} day(s)")
+            break
+        date = (now + pd.Timedelta(days=i)).strftime("%Y%m%d")
+        budget["calls_used"] += 1
+        try:
+            leagues = client.matches_by_date(date)
+        except RapidApiError as e:
+            print(f"! rapidapi calendar fetch failed for {date}: {e}")
+            continue
+        for lg in leagues:
+            div = id_to_div.get(lg.get("id"))
+            if div is None:
+                continue
+            for m in lg.get("matches", []):
+                rec = _rapidapi_match_to_calendar_fixture(m, div)
+                if rec is None:
+                    continue
+                if _as_utc(pd.Timestamp(rec["kickoff"])) > horizon_end:
+                    continue
+                if rec["fixture_id"] in seen_ids:
+                    continue
+                seen_ids.add(rec["fixture_id"])
+                slim.append(rec)
+
+    slim.sort(key=lambda r: r["kickoff"])
+    payload = {
+        "refreshed_at": now.isoformat(),
+        "horizon_days": horizon_days,
+        "source": "rapidapi",
+        "fixtures": slim,
+    }
+    save_calendar(payload)
+    write_upcoming_from_calendar(now, payload)
+    print(f"calendar (rapidapi): {len(slim)} tracked fixture(s) over {horizon_days}d "
+          f"-> {CALENDAR_FILE} (budget {budget['calls_used']}/{BUDGET_CAP})")
+    return payload
+
+
 def _apify_row_to_calendar_fixture(row: dict) -> dict | None:
     try:
         match_id = int(row["matchId"])
@@ -384,8 +472,19 @@ def refresh_calendar_apify(client,
 
 
 def refresh_calendar_if_possible(now: pd.Timestamp | None = None) -> dict[str, Any] | None:
-    """Refresh the saved calendar via Apify, else API-Football if a key exists."""
+    """Refresh the saved calendar via RapidAPI (primary), Apify, or API-Football."""
     now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
+    if os.environ.get("RAPIDAPI_KEY"):
+        try:
+            from .rapidapi_client import RapidApiClient
+            from .rapidapi_engine import _load_budget, _save_budget
+
+            budget = _load_budget()
+            payload = refresh_calendar_rapidapi(RapidApiClient(), budget, now)
+            _save_budget(budget)
+            return payload
+        except Exception as e:
+            print(f"! rapidapi calendar refresh failed ({e})")
     if os.environ.get("APIFY_TOKEN"):
         try:
             from .apify_client import ApifyFootballClient
@@ -525,7 +624,7 @@ def _write_github_output(should_run: bool) -> None:
 
 
 def gate() -> bool:
-    """Entry point for live_poll.yml: refresh calendar via Apify (primary),
+    """Entry point for live_poll.yml: refresh calendar via RapidAPI (primary),
     rewrite upcoming_fixtures.json, then decide whether live engines run."""
     now = pd.Timestamp.now(tz="UTC")
     if not calendar_is_fresh(now):
@@ -547,7 +646,8 @@ if __name__ == "__main__":
         sys.exit(0)
     if "--refresh" in sys.argv:
         if refresh_calendar_if_possible() is None:
-            print("! no calendar source available (set APIFY_TOKEN or API_FOOTBALL_KEY)")
+            print("! no calendar source available "
+                  "(set RAPIDAPI_KEY, APIFY_TOKEN, or API_FOOTBALL_KEY)")
             sys.exit(1)
         sys.exit(0)
     if "--from-understat" in sys.argv:
