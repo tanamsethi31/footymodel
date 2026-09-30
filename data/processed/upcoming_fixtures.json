@@ -28,5 +28,11 @@
     "home": "Sunderland",
     "away": "Brighton",
     "kickoff": "2026-10-10T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31235",
+    "home": "Manchester United",
+    "away": "Tottenham",
+    "kickoff": "2026-10-10T16:30:00+00:00"
   }
 ]
