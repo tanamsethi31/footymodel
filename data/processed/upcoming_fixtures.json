@@ -4,5 +4,29 @@
     "home": "Arsenal",
     "away": "Leeds",
     "kickoff": "2026-10-10T11:30:00+00:00"
+  },
+  {
+    "fixture_id": "us_31231",
+    "home": "Aston Villa",
+    "away": "Brentford",
+    "kickoff": "2026-10-10T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31232",
+    "home": "Chelsea",
+    "away": "Bournemouth",
+    "kickoff": "2026-10-10T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31233",
+    "home": "Ipswich",
+    "away": "Fulham",
+    "kickoff": "2026-10-10T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31234",
+    "home": "Sunderland",
+    "away": "Brighton",
+    "kickoff": "2026-10-10T14:00:00+00:00"
   }
 ]

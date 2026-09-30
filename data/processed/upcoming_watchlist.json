@@ -33,6 +33,48 @@
           "p_shots_gt0.5": 0.662
         }
       ]
+    },
+    {
+      "fixture_id": "us_31233",
+      "home": "Ipswich",
+      "away": "Fulham",
+      "kickoff": "2026-10-10T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Julio Enciso",
+          "p_shots_gt0.5": 0.884
+        },
+        {
+          "player": "Emersonn",
+          "p_shots_gt0.5": 0.851
+        },
+        {
+          "player": "Daizen Maeda",
+          "p_shots_gt0.5": 0.778
+        }
+      ],
+      "away_watch": []
+    },
+    {
+      "fixture_id": "us_31234",
+      "home": "Sunderland",
+      "away": "Brighton",
+      "kickoff": "2026-10-10T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Nilson Angulo",
+          "p_shots_gt0.5": 0.76
+        },
+        {
+          "player": "Brian Brobbey",
+          "p_shots_gt0.5": 0.758
+        },
+        {
+          "player": "Enzo Le F\u00e9e",
+          "p_shots_gt0.5": 0.639
+        }
+      ],
+      "away_watch": []
     }
   ]
 }
