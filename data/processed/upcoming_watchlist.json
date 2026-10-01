@@ -96,6 +96,74 @@
         }
       ],
       "away_watch": []
+    },
+    {
+      "fixture_id": "us_31236",
+      "home": "Crystal Palace",
+      "away": "Nottingham Forest",
+      "kickoff": "2026-10-11T13:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Eddie Nketiah",
+          "p_shots_gt0.5": 0.9
+        },
+        {
+          "player": "Jean-Philippe Mateta",
+          "p_shots_gt0.5": 0.854
+        },
+        {
+          "player": "Dwight McNeil",
+          "p_shots_gt0.5": 0.749
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Igor Jesus",
+          "p_shots_gt0.5": 0.81
+        },
+        {
+          "player": "Morgan Gibbs-White",
+          "p_shots_gt0.5": 0.765
+        },
+        {
+          "player": "Dan Ndoye",
+          "p_shots_gt0.5": 0.664
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31237",
+      "home": "Hull",
+      "away": "Everton",
+      "kickoff": "2026-10-11T13:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Oliver McBurnie",
+          "p_shots_gt0.5": 0.845
+        },
+        {
+          "player": "Mohamed Belloumi",
+          "p_shots_gt0.5": 0.686
+        },
+        {
+          "player": "Elliot Stroud",
+          "p_shots_gt0.5": 0.623
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Tyrique George",
+          "p_shots_gt0.5": 0.906
+        },
+        {
+          "player": "Thierno Barry",
+          "p_shots_gt0.5": 0.867
+        },
+        {
+          "player": "Merlin R\u00f6hl",
+          "p_shots_gt0.5": 0.824
+        }
+      ]
     }
   ]
 }

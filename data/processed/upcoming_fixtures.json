@@ -34,5 +34,17 @@
     "home": "Manchester United",
     "away": "Tottenham",
     "kickoff": "2026-10-10T16:30:00+00:00"
+  },
+  {
+    "fixture_id": "us_31236",
+    "home": "Crystal Palace",
+    "away": "Nottingham Forest",
+    "kickoff": "2026-10-11T13:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31237",
+    "home": "Hull",
+    "away": "Everton",
+    "kickoff": "2026-10-11T13:00:00+00:00"
   }
 ]
