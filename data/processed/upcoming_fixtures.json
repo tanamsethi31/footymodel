@@ -46,5 +46,11 @@
     "home": "Hull",
     "away": "Everton",
     "kickoff": "2026-10-11T13:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31238",
+    "home": "Liverpool",
+    "away": "Manchester City",
+    "kickoff": "2026-10-11T15:30:00+00:00"
   }
 ]
