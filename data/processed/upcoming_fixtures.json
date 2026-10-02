@@ -52,5 +52,11 @@
     "home": "Liverpool",
     "away": "Manchester City",
     "kickoff": "2026-10-11T15:30:00+00:00"
+  },
+  {
+    "fixture_id": "us_31239",
+    "home": "Coventry",
+    "away": "Newcastle United",
+    "kickoff": "2026-10-12T19:00:00+00:00"
   }
 ]
