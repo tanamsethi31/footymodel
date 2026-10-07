@@ -58,5 +58,29 @@
     "home": "Coventry",
     "away": "Newcastle United",
     "kickoff": "2026-10-12T19:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31240",
+    "home": "Everton",
+    "away": "Chelsea",
+    "kickoff": "2026-10-17T11:30:00+00:00"
+  },
+  {
+    "fixture_id": "us_31242",
+    "home": "Brentford",
+    "away": "Liverpool",
+    "kickoff": "2026-10-17T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31241",
+    "home": "Fulham",
+    "away": "Hull",
+    "kickoff": "2026-10-17T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31243",
+    "home": "Manchester City",
+    "away": "Ipswich",
+    "kickoff": "2026-10-17T14:00:00+00:00"
   }
 ]

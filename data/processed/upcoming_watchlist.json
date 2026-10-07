@@ -185,6 +185,69 @@
         }
       ],
       "away_watch": []
+    },
+    {
+      "fixture_id": "us_31240",
+      "home": "Everton",
+      "away": "Chelsea",
+      "kickoff": "2026-10-17T11:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Tyrique George",
+          "p_shots_gt0.5": 0.802
+        },
+        {
+          "player": "Thierno Barry",
+          "p_shots_gt0.5": 0.743
+        },
+        {
+          "player": "Merlin R\u00f6hl",
+          "p_shots_gt0.5": 0.685
+        }
+      ],
+      "away_watch": []
+    },
+    {
+      "fixture_id": "us_31241",
+      "home": "Fulham",
+      "away": "Hull",
+      "kickoff": "2026-10-17T14:00:00+00:00",
+      "home_watch": [],
+      "away_watch": [
+        {
+          "player": "Oliver McBurnie",
+          "p_shots_gt0.5": 0.783
+        },
+        {
+          "player": "Mohamed Belloumi",
+          "p_shots_gt0.5": 0.605
+        },
+        {
+          "player": "Elliot Stroud",
+          "p_shots_gt0.5": 0.541
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31243",
+      "home": "Manchester City",
+      "away": "Ipswich",
+      "kickoff": "2026-10-17T14:00:00+00:00",
+      "home_watch": [],
+      "away_watch": [
+        {
+          "player": "Julio Enciso",
+          "p_shots_gt0.5": 0.741
+        },
+        {
+          "player": "Emersonn",
+          "p_shots_gt0.5": 0.691
+        },
+        {
+          "player": "Daizen Maeda",
+          "p_shots_gt0.5": 0.596
+        }
+      ]
     }
   ]
 }
