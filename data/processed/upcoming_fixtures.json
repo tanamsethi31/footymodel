@@ -82,5 +82,11 @@
     "home": "Manchester City",
     "away": "Ipswich",
     "kickoff": "2026-10-17T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31244",
+    "home": "Newcastle United",
+    "away": "Aston Villa",
+    "kickoff": "2026-10-17T16:30:00+00:00"
   }
 ]
