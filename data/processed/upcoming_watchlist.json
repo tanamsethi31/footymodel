@@ -35,8 +35,50 @@
       ]
     },
     {
+      "fixture_id": "rapid_5795465",
+      "home": "Arsenal",
+      "away": "Leeds United",
+      "kickoff": "2026-10-10T11:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Bukayo Saka",
+          "p_shots_gt0.5": 0.884
+        },
+        {
+          "player": "Kai Havertz",
+          "p_shots_gt0.5": 0.854
+        },
+        {
+          "player": "Christos Tzolis",
+          "p_shots_gt0.5": 0.842
+        }
+      ],
+      "away_watch": []
+    },
+    {
       "fixture_id": "us_31233",
       "home": "Ipswich",
+      "away": "Fulham",
+      "kickoff": "2026-10-10T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Julio Enciso",
+          "p_shots_gt0.5": 0.884
+        },
+        {
+          "player": "Emersonn",
+          "p_shots_gt0.5": 0.851
+        },
+        {
+          "player": "Daizen Maeda",
+          "p_shots_gt0.5": 0.779
+        }
+      ],
+      "away_watch": []
+    },
+    {
+      "fixture_id": "rapid_5795471",
+      "home": "Ipswich Town",
       "away": "Fulham",
       "kickoff": "2026-10-10T14:00:00+00:00",
       "home_watch": [
@@ -80,6 +122,27 @@
       "fixture_id": "us_31235",
       "home": "Manchester United",
       "away": "Tottenham",
+      "kickoff": "2026-10-10T16:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Matheus Cunha",
+          "p_shots_gt0.5": 0.892
+        },
+        {
+          "player": "Bruno Fernandes",
+          "p_shots_gt0.5": 0.857
+        },
+        {
+          "player": "Bryan Mbeumo",
+          "p_shots_gt0.5": 0.845
+        }
+      ],
+      "away_watch": []
+    },
+    {
+      "fixture_id": "rapid_5795473",
+      "home": "Manchester United",
+      "away": "Tottenham Hotspur",
       "kickoff": "2026-10-10T16:30:00+00:00",
       "home_watch": [
         {
@@ -322,6 +385,40 @@
         {
           "player": "Bryan Mbeumo",
           "p_shots_gt0.5": 0.82
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31248",
+      "home": "Nottingham Forest",
+      "away": "Arsenal",
+      "kickoff": "2026-10-18T15:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Igor Jesus",
+          "p_shots_gt0.5": 0.803
+        },
+        {
+          "player": "Morgan Gibbs-White",
+          "p_shots_gt0.5": 0.757
+        },
+        {
+          "player": "Dan Ndoye",
+          "p_shots_gt0.5": 0.655
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Bukayo Saka",
+          "p_shots_gt0.5": 0.858
+        },
+        {
+          "player": "Kai Havertz",
+          "p_shots_gt0.5": 0.824
+        },
+        {
+          "player": "Christos Tzolis",
+          "p_shots_gt0.5": 0.81
         }
       ]
     }
