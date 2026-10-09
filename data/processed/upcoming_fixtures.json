@@ -66,7 +66,7 @@
     "kickoff": "2026-10-10T16:30:00+00:00"
   },
   {
-    "fixture_id": "us_31236",
+    "fixture_id": "rapid_5795469",
     "home": "Crystal Palace",
     "away": "Nottingham Forest",
     "kickoff": "2026-10-11T13:00:00+00:00"
@@ -78,7 +78,13 @@
     "kickoff": "2026-10-11T13:00:00+00:00"
   },
   {
-    "fixture_id": "us_31238",
+    "fixture_id": "rapid_5795470",
+    "home": "Hull City",
+    "away": "Everton",
+    "kickoff": "2026-10-11T13:00:00+00:00"
+  },
+  {
+    "fixture_id": "rapid_5795472",
     "home": "Liverpool",
     "away": "Manchester City",
     "kickoff": "2026-10-11T15:30:00+00:00"
