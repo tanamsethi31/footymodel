@@ -455,6 +455,27 @@
           "p_shots_gt0.5": 0.81
         }
       ]
+    },
+    {
+      "fixture_id": "us_31249",
+      "home": "Tottenham",
+      "away": "Coventry",
+      "kickoff": "2026-10-19T19:00:00+00:00",
+      "home_watch": [],
+      "away_watch": [
+        {
+          "player": "Ellis Simms",
+          "p_shots_gt0.5": 0.789
+        },
+        {
+          "player": "Loum Tchaouna",
+          "p_shots_gt0.5": 0.668
+        },
+        {
+          "player": "Frank Onyeka",
+          "p_shots_gt0.5": 0.583
+        }
+      ]
     }
   ]
 }

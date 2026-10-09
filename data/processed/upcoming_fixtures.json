@@ -148,5 +148,11 @@
     "home": "Nottingham Forest",
     "away": "Arsenal",
     "kickoff": "2026-10-18T15:30:00+00:00"
+  },
+  {
+    "fixture_id": "us_31249",
+    "home": "Tottenham",
+    "away": "Coventry",
+    "kickoff": "2026-10-19T19:00:00+00:00"
   }
 ]
