@@ -1,48 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "us_31235",
-      "home": "Manchester United",
-      "away": "Tottenham",
-      "kickoff": "2026-10-10T16:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Matheus Cunha",
-          "p_shots_gt0.5": 0.892
-        },
-        {
-          "player": "Bruno Fernandes",
-          "p_shots_gt0.5": 0.857
-        },
-        {
-          "player": "Bryan Mbeumo",
-          "p_shots_gt0.5": 0.845
-        }
-      ],
-      "away_watch": []
-    },
-    {
-      "fixture_id": "rapid_5795473",
-      "home": "Manchester United",
-      "away": "Tottenham Hotspur",
-      "kickoff": "2026-10-10T16:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Matheus Cunha",
-          "p_shots_gt0.5": 0.892
-        },
-        {
-          "player": "Bruno Fernandes",
-          "p_shots_gt0.5": 0.857
-        },
-        {
-          "player": "Bryan Mbeumo",
-          "p_shots_gt0.5": 0.845
-        }
-      ],
-      "away_watch": []
-    },
-    {
       "fixture_id": "rapid_5795469",
       "home": "Crystal Palace",
       "away": "Nottingham Forest",

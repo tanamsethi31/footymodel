@@ -1,17 +1,5 @@
 [
   {
-    "fixture_id": "us_31235",
-    "home": "Manchester United",
-    "away": "Tottenham",
-    "kickoff": "2026-10-10T16:30:00+00:00"
-  },
-  {
-    "fixture_id": "rapid_5795473",
-    "home": "Manchester United",
-    "away": "Tottenham Hotspur",
-    "kickoff": "2026-10-10T16:30:00+00:00"
-  },
-  {
     "fixture_id": "rapid_5795469",
     "home": "Crystal Palace",
     "away": "Nottingham Forest",
