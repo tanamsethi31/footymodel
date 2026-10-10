@@ -1,18 +1,6 @@
 [
   {
-    "fixture_id": "us_31230",
-    "home": "Arsenal",
-    "away": "Leeds",
-    "kickoff": "2026-10-10T11:30:00+00:00"
-  },
-  {
-    "fixture_id": "rapid_5795465",
-    "home": "Arsenal",
-    "away": "Leeds United",
-    "kickoff": "2026-10-10T11:30:00+00:00"
-  },
-  {
-    "fixture_id": "rapid_5795466",
+    "fixture_id": "us_31231",
     "home": "Aston Villa",
     "away": "Brentford",
     "kickoff": "2026-10-10T14:00:00+00:00"
@@ -24,20 +12,8 @@
     "kickoff": "2026-10-10T14:00:00+00:00"
   },
   {
-    "fixture_id": "rapid_5795467",
-    "home": "Chelsea",
-    "away": "AFC Bournemouth",
-    "kickoff": "2026-10-10T14:00:00+00:00"
-  },
-  {
     "fixture_id": "us_31233",
     "home": "Ipswich",
-    "away": "Fulham",
-    "kickoff": "2026-10-10T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "rapid_5795471",
-    "home": "Ipswich Town",
     "away": "Fulham",
     "kickoff": "2026-10-10T14:00:00+00:00"
   },
@@ -48,25 +24,13 @@
     "kickoff": "2026-10-10T14:00:00+00:00"
   },
   {
-    "fixture_id": "rapid_5795474",
-    "home": "Sunderland",
-    "away": "Brighton & Hove Albion",
-    "kickoff": "2026-10-10T14:00:00+00:00"
-  },
-  {
     "fixture_id": "us_31235",
     "home": "Manchester United",
     "away": "Tottenham",
     "kickoff": "2026-10-10T16:30:00+00:00"
   },
   {
-    "fixture_id": "rapid_5795473",
-    "home": "Manchester United",
-    "away": "Tottenham Hotspur",
-    "kickoff": "2026-10-10T16:30:00+00:00"
-  },
-  {
-    "fixture_id": "rapid_5795469",
+    "fixture_id": "us_31236",
     "home": "Crystal Palace",
     "away": "Nottingham Forest",
     "kickoff": "2026-10-11T13:00:00+00:00"
@@ -78,13 +42,7 @@
     "kickoff": "2026-10-11T13:00:00+00:00"
   },
   {
-    "fixture_id": "rapid_5795470",
-    "home": "Hull City",
-    "away": "Everton",
-    "kickoff": "2026-10-11T13:00:00+00:00"
-  },
-  {
-    "fixture_id": "rapid_5795472",
+    "fixture_id": "us_31238",
     "home": "Liverpool",
     "away": "Manchester City",
     "kickoff": "2026-10-11T15:30:00+00:00"
