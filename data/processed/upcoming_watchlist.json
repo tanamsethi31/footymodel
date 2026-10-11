@@ -1,7 +1,7 @@
 {
   "fixtures": [
     {
-      "fixture_id": "rapid_5795469",
+      "fixture_id": "us_31236",
       "home": "Crystal Palace",
       "away": "Nottingham Forest",
       "kickoff": "2026-10-11T13:00:00+00:00",
@@ -30,47 +30,13 @@
         },
         {
           "player": "Dan Ndoye",
-          "p_shots_gt0.5": 0.664
+          "p_shots_gt0.5": 0.665
         }
       ]
     },
     {
       "fixture_id": "us_31237",
       "home": "Hull",
-      "away": "Everton",
-      "kickoff": "2026-10-11T13:00:00+00:00",
-      "home_watch": [
-        {
-          "player": "Oliver McBurnie",
-          "p_shots_gt0.5": 0.846
-        },
-        {
-          "player": "Mohamed Belloumi",
-          "p_shots_gt0.5": 0.686
-        },
-        {
-          "player": "Elliot Stroud",
-          "p_shots_gt0.5": 0.624
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Tyrique George",
-          "p_shots_gt0.5": 0.906
-        },
-        {
-          "player": "Thierno Barry",
-          "p_shots_gt0.5": 0.867
-        },
-        {
-          "player": "Merlin R\u00f6hl",
-          "p_shots_gt0.5": 0.825
-        }
-      ]
-    },
-    {
-      "fixture_id": "rapid_5795470",
-      "home": "Hull City",
       "away": "Everton",
       "kickoff": "2026-10-11T13:00:00+00:00",
       "home_watch": [
