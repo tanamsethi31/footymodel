@@ -520,13 +520,8 @@ def refresh_calendar_apify(client,
 
 
 def refresh_calendar_if_possible(now: pd.Timestamp | None = None) -> dict[str, Any] | None:
-    """Refresh via API-Football, then fall back to the quota-limited sources."""
+    """Refresh via Apify, then fall back to RapidAPI or API-Football."""
     now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
-    if os.environ.get("API_FOOTBALL_KEY"):
-        try:
-            return refresh_calendar(ApiFootballClient(), now)
-        except Exception as e:
-            print(f"! API-Football calendar refresh failed ({e})")
     if os.environ.get("APIFY_TOKEN"):
         try:
             from .apify_client import ApifyFootballClient
@@ -548,6 +543,11 @@ def refresh_calendar_if_possible(now: pd.Timestamp | None = None) -> dict[str, A
             return payload
         except Exception as e:
             print(f"! rapidapi calendar refresh failed ({e})")
+    if os.environ.get("API_FOOTBALL_KEY"):
+        try:
+            return refresh_calendar(ApiFootballClient(), now)
+        except Exception as e:
+            print(f"! API-Football calendar refresh failed ({e})")
     return None
 
 
