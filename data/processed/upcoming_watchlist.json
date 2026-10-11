@@ -22,27 +22,6 @@
       "away_watch": []
     },
     {
-      "fixture_id": "rapid_5795468",
-      "home": "Coventry City",
-      "away": "Newcastle United",
-      "kickoff": "2026-10-12T19:00:00+00:00",
-      "home_watch": [
-        {
-          "player": "Ellis Simms",
-          "p_shots_gt0.5": 0.833
-        },
-        {
-          "player": "Loum Tchaouna",
-          "p_shots_gt0.5": 0.722
-        },
-        {
-          "player": "Frank Onyeka",
-          "p_shots_gt0.5": 0.64
-        }
-      ],
-      "away_watch": []
-    },
-    {
       "fixture_id": "us_31240",
       "home": "Everton",
       "away": "Chelsea",
