@@ -19,6 +19,7 @@ from ..data import PROCESSED_DIR
 from ..players import LineupModel, load_players
 from ..strategy import remove_margin
 from . import match_detail, namematch
+from . import fixture_health
 from .rapidapi_client import RapidApiClient, RapidApiError
 
 # Only E0 - the one league with individually significant backtested
@@ -323,12 +324,33 @@ class RapidApiWatcher:
                 row = self.process_fixture(fx["div"], fx)
             except Exception as e:
                 print(f"  ! error processing event {eid}: {e}")
+                fixture_health.record(
+                    f"rapid_{eid}", kickoff=fx["kickoff_iso"],
+                    home=fx["home"]["name"], away=fx["away"]["name"],
+                    source="rapidapi", outcome="lineup_unavailable", detail=str(e),
+                )
                 continue
             if row is not None:
+                has_odds = row.get("odds_over25") and row.get("odds_under25")
+                fixture_health.record(
+                    f"rapid_{eid}", kickoff=fx["kickoff_iso"],
+                    home=fx["home"]["name"], away=fx["away"]["name"],
+                    source="rapidapi",
+                    outcome="processed" if has_odds else "odds_unavailable",
+                    detail="confirmed lineup and O/U odds available" if has_odds
+                    else "lineup available but no usable O/U odds",
+                )
                 new_rows.append(row)
                 seen.add(eid)
                 _save_seen(seen)  # persist progress fixture-by-fixture, not just at the end
                 _save_budget(self.budget)
+            else:
+                fixture_health.record(
+                    f"rapid_{eid}", kickoff=fx["kickoff_iso"],
+                    home=fx["home"]["name"], away=fx["away"]["name"],
+                    source="rapidapi", outcome="lineup_unavailable",
+                    detail="RapidAPI did not return a usable confirmed lineup",
+                )
 
         match_detail.extract_and_log_details(new_rows)
         if new_rows:

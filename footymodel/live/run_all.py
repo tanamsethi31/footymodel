@@ -21,6 +21,7 @@ import pandas as pd
 
 from ..data import PROCESSED_DIR
 from . import calendar as fxcal
+from . import fixture_health
 from . import match_detail
 from .client import ApiFootballClient, ApiFootballError
 from .engine import (LEAGUE_API_IDS, LIVE_LOG, DEFAULT_HOURS_AHEAD, DEFAULT_HOURS_BEHIND,
@@ -174,9 +175,29 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
 
         result = process_one_fixture(fx, client, goals, props, div)
         if result is None:
+            fixture_health.record(
+                fid, kickoff=str(fx["fixture"]["date"]),
+                home=fx["teams"]["home"]["name"], away=fx["teams"]["away"]["name"],
+                source="api-football", outcome="lineup_unavailable",
+                detail="API-Football did not return two confirmed lineups",
+            )
             continue  # lineups not confirmed yet — caller will retry on next poll
 
         goal_row, fixture_prop_rows = result
+        if goal_row is None:
+            outcome = "lineup_unusable"
+            detail = "confirmed lineups could not produce a goals-model row"
+        elif goal_row.get("odds_over25") and goal_row.get("odds_under25"):
+            outcome = "processed"
+            detail = "confirmed lineups and O/U odds available"
+        else:
+            outcome = "odds_unavailable"
+            detail = "confirmed lineups available but no usable O/U odds"
+        fixture_health.record(
+            fid, kickoff=str(fx["fixture"]["date"]),
+            home=fx["teams"]["home"]["name"], away=fx["teams"]["away"]["name"],
+            source="api-football", outcome=outcome, detail=detail,
+        )
         if goal_row is not None:
             goal_rows.append(goal_row)
         prop_rows.extend(fixture_prop_rows)
