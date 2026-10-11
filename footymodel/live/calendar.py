@@ -410,6 +410,51 @@ def refresh_calendar_rapidapi(client,
     return payload
 
 
+def refresh_calendar_from_rapidapi_scan(fixtures: list[dict],
+                                        now: pd.Timestamp | None = None) -> dict[str, Any]:
+    """Persist the fixture scan already paid for by the RapidAPI live poll.
+
+    The fallback engine fetches today plus two following days in order to
+    find lineup windows. Reusing those responses keeps the health calendar
+    current without consuming the separate RapidAPI calendar allowance.
+    """
+    now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
+    slim: list[dict] = []
+    seen_ids: set[str] = set()
+    for fixture in fixtures:
+        try:
+            event_id = int(fixture["id"])
+            div = fixture["div"]
+            home = str(fixture["home"]["name"])
+            away = str(fixture["away"]["name"])
+            kickoff = _as_utc(pd.Timestamp(fixture["kickoff_iso"])).isoformat()
+        except (KeyError, TypeError, ValueError):
+            continue
+        fixture_id = f"rapid_{event_id}"
+        if fixture_id in seen_ids:
+            continue
+        seen_ids.add(fixture_id)
+        slim.append({
+            "fixture_id": fixture_id,
+            "league_id": LEAGUE_API_IDS.get(div, LEAGUE_API_IDS["E0"]),
+            "home": home,
+            "away": away,
+            "kickoff": kickoff,
+        })
+
+    slim.sort(key=lambda r: r["kickoff"])
+    payload = {
+        "refreshed_at": now.isoformat(),
+        "horizon_days": 2,
+        "source": "rapidapi-live-scan",
+        "fixtures": slim,
+    }
+    save_calendar(payload)
+    write_upcoming_from_calendar(now, payload)
+    print(f"calendar (rapidapi live scan): {len(slim)} tracked fixture(s) -> {CALENDAR_FILE}")
+    return payload
+
+
 def _apify_row_to_calendar_fixture(row: dict) -> dict | None:
     try:
         match_id = int(row["matchId"])

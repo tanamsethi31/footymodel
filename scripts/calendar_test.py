@@ -202,6 +202,16 @@ assert rapid_budget["calls_used"] == 1
 assert rapid_refreshed["source"] == "rapidapi"
 assert [f["fixture_id"] for f in rapid_refreshed["fixtures"]] == ["rapid_1001"]
 
+# The live fallback must reuse its already-paid fixture scan to keep the
+# health-check calendar populated; no additional RapidAPI request is needed.
+scan_refreshed = fxcal.refresh_calendar_from_rapidapi_scan([{
+    "id": 1002, "div": "E0", "home": {"name": "Arsenal"},
+    "away": {"name": "Chelsea"}, "kickoff_iso": "2026-09-03T13:30:00+00:00",
+}], now=NOW)
+assert scan_refreshed["source"] == "rapidapi-live-scan"
+assert [f["fixture_id"] for f in scan_refreshed["fixtures"]] == ["rapid_1002"]
+assert fxcal.calendar_is_fresh(NOW, payload=scan_refreshed)
+
 # The calendar must not consume calls reserved for the live lineup/odds poll.
 reserved_budget = {
     "month": "2026-09",

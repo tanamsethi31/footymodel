@@ -303,9 +303,11 @@ class RapidApiWatcher:
         if dates_cache:
             _save_fixtures_cache(today, dates_cache)
             try:
+                from . import calendar as fxcal
+                fxcal.refresh_calendar_from_rapidapi_scan(all_fixtures, now)
                 sync_upcoming_fixtures(all_fixtures, now)
             except Exception as e:
-                print(f"  ! upcoming_fixtures sync failed: {e}")
+                print(f"  ! calendar/upcoming fixtures sync failed: {e}")
 
         new_rows = []
         for fx in all_fixtures:
