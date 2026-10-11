@@ -176,6 +176,19 @@ assert [r["fixture_id"] for r in merged_us] == [1559000, "us_31201"], merged_us
 filled = fxcal.write_dashboard_upcoming(NOW, _payload([]))
 assert filled[0]["fixture_id"] == "us_31200"
 
+# The Apify live engine reuses its paid fixtures scan to maintain calendar
+# state, avoiding a second actor run merely for the health check.
+apify_scan = fxcal.refresh_calendar_from_apify_scan([{
+    "matchId": 2001, "homeTeamName": "Arsenal", "awayTeamName": "Chelsea",
+    "startTimestamp": int(pd.Timestamp("2026-09-04T13:30:00+00:00").timestamp()),
+}, {
+    "matchId": 2002, "homeTeamName": "Far", "awayTeamName": "Away",
+    "startTimestamp": int(pd.Timestamp("2026-09-20T13:30:00+00:00").timestamp()),
+}], now=NOW)
+assert apify_scan["source"] == "apify-live-scan"
+assert [f["fixture_id"] for f in apify_scan["fixtures"]] == ["apify_2001"]
+assert fxcal.calendar_is_fresh(NOW, payload=apify_scan)
+
 # --- combined seen: apify numeric ids match apify_ prefixed calendar ids ---
 assert fxcal._fixture_seen("apify_1558002", {1558002}) is True
 assert fxcal._fixture_seen("rapid_99", {99}) is True

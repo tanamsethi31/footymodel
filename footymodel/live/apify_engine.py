@@ -388,10 +388,14 @@ class ApifyWatcher:
                 })
             _save_fixtures_cache(today, fixtures)
             print(f"  cached {len(fixtures)} upcoming E0 fixtures for {today}")
+
+        if fixtures:
             try:
+                from . import calendar as fxcal
+                fxcal.refresh_calendar_from_apify_scan(fixtures, now)
                 sync_upcoming_fixtures(fixtures, now)
             except Exception as e:
-                print(f"  ! upcoming_fixtures sync failed: {e}")
+                print(f"  ! calendar/upcoming fixtures sync failed: {e}")
 
         new_rows = []
         for fx in fixtures:
