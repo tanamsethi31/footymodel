@@ -52,11 +52,11 @@ assert check(tmp, now, 14 * 24, 48, 80) == []
 }))
 
 issues = check(tmp, now, 14 * 24, 48, 80)
-assert len(issues) == 5, issues
+assert len(issues) == 4, issues
 assert any("recommendation" in issue for issue in issues)
 assert any("calendar" in issue for issue in issues)
 assert any("RapidAPI" in issue for issue in issues)
-assert any("odds_unavailable" in issue for issue in issues)
+assert not any("odds_unavailable" in issue for issue in issues)
 assert not any("Everton v Liverpool" in issue for issue in issues)
 
 (tmp / "live_fixture_health.json").unlink()

@@ -338,9 +338,9 @@ class RapidApiWatcher:
                     f"rapid_{eid}", kickoff=fx["kickoff_iso"],
                     home=fx["home"]["name"], away=fx["away"]["name"],
                     source="rapidapi",
-                    outcome="processed" if has_odds else "odds_unavailable",
+                    outcome="processed" if has_odds else "processed_model_only",
                     detail="confirmed lineup and O/U odds available" if has_odds
-                    else "lineup available but no usable O/U odds",
+                    else "lineup produced a model-only prediction without usable O/U odds",
                 )
                 new_rows.append(row)
                 seen.add(eid)

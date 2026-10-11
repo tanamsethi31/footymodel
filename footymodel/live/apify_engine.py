@@ -426,9 +426,9 @@ class ApifyWatcher:
                     f"apify_{mid}", kickoff=kickoff.isoformat(),
                     home=str(fx["homeTeamName"]), away=str(fx["awayTeamName"]),
                     source="apify",
-                    outcome="processed" if has_odds else "odds_unavailable",
+                    outcome="processed" if has_odds else "processed_model_only",
                     detail="confirmed lineup and O/U odds available" if has_odds
-                    else "lineup available but no usable O/U odds",
+                    else "lineup produced a model-only prediction without usable O/U odds",
                 )
                 new_rows.append(row)
                 seen.add(mid)

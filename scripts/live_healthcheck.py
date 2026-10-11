@@ -17,6 +17,7 @@ DEFAULT_MAX_RECOMMENDATION_AGE_HOURS = 14 * 24
 DEFAULT_MAX_CALENDAR_AGE_HOURS = 48
 DEFAULT_RAPIDAPI_WARNING_AT = 80
 FIXTURE_FAILURE_GRACE_HOURS = 1
+MODEL_OUTPUT_OUTCOMES = {"processed", "processed_model_only", "odds_unavailable"}
 
 
 def _parse_timestamp(value: str) -> datetime:
@@ -55,7 +56,9 @@ def fixture_failures(path: Path, now: datetime,
 
     failures = []
     for record in payload.values():
-        if not isinstance(record, dict) or record.get("outcome") == "processed":
+        # ``odds_unavailable`` is retained for state written before the
+        # model-only outcome existed; those polls did persist a prediction.
+        if not isinstance(record, dict) or record.get("outcome") in MODEL_OUTPUT_OUTCOMES:
             continue
         try:
             kickoff = _parse_timestamp(str(record["kickoff"]))

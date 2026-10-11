@@ -33,26 +33,17 @@ jobs:
 
       - name: Refresh calendar if stale and decide whether live engines are needed
         id: gate
-        env:
-          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
-          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: python -m footymodel.live.calendar --gate
 
-      - name: Run Apify goals pipeline
-        id: apify
+      - name: Install Chromium for SofaScore lineup polling
         if: steps.gate.outputs.should_run == 'true'
-        env:
-          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
-        run: |
-          test -n "$APIFY_TOKEN"
-          python -m footymodel.live.apify_engine
-        continue-on-error: true
+        run: python -m playwright install --with-deps chromium
 
-      - name: Run RapidAPI goals fallback when Apify is unavailable
-        if: steps.gate.outputs.should_run == 'true' && steps.apify.outcome != 'success'
-        env:
-          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
-        run: python -m footymodel.live.rapidapi_engine
+      - name: Run SofaScore goals pipeline
+        id: sofascore
+        if: steps.gate.outputs.should_run == 'true'
+        run: python -m footymodel.live.sofascore_engine
+        continue-on-error: true
 
       - name: Commit + push any new recommendations/state
         env:
@@ -69,6 +60,7 @@ jobs:
                    data/processed/upcoming_watchlist.json \
                    data/processed/fixture_calendar.json \
                    data/processed/live_fixture_health.json \
+                   data/processed/sofascore_seen_fixtures.json \
                    data/processed/rapidapi_seen_fixtures.json \
                    data/processed/rapidapi_budget.json \
                    data/processed/rapidapi_fixtures_cache.json \
@@ -85,3 +77,9 @@ jobs:
 
       - name: Check live pipeline health
         run: python scripts/live_healthcheck.py
+
+      - name: Fail when SofaScore is unavailable during a fixture window
+        if: always() && steps.gate.outputs.should_run == 'true' && steps.sofascore.outcome != 'success'
+        run: |
+          echo "SofaScore did not complete during an expected fixture window."
+          exit 1

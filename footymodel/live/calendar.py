@@ -308,6 +308,47 @@ def _fixture_seen(fid, seen: set) -> bool:
     return False
 
 
+def refresh_calendar_fpl(client, now: pd.Timestamp | None = None,
+                         horizon_days: int = HORIZON_DAYS) -> dict[str, Any]:
+    """Build the Premier League calendar from FPL's public fixture feed."""
+    now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
+    horizon_end = now + pd.Timedelta(days=horizon_days)
+    team_names = {
+        team.get("id"): team.get("name")
+        for team in client.teams()
+        if isinstance(team, dict) and team.get("id") and team.get("name")
+    }
+    slim: list[dict] = []
+    for fixture in client.fixtures():
+        try:
+            kickoff = _as_utc(pd.Timestamp(fixture["kickoff_time"]))
+            fixture_id = int(fixture["id"])
+            home, away = team_names[fixture["team_h"]], team_names[fixture["team_a"]]
+        except (KeyError, TypeError, ValueError):
+            continue
+        if kickoff < now - pd.Timedelta(hours=DEFAULT_HOURS_BEHIND) or kickoff > horizon_end:
+            continue
+        slim.append({
+            "fixture_id": f"fpl_{fixture_id}",
+            "league_id": LEAGUE_API_IDS["E0"],
+            "home": str(home),
+            "away": str(away),
+            "kickoff": kickoff.isoformat(),
+        })
+    slim.sort(key=lambda row: row["kickoff"])
+    payload = {
+        "refreshed_at": now.isoformat(),
+        "horizon_days": horizon_days,
+        "source": "fantasy-premier-league",
+        "fixtures": slim,
+    }
+    save_calendar(payload)
+    write_upcoming_from_calendar(now, payload)
+    print(f"calendar (FPL): {len(slim)} Premier League fixture(s) over {horizon_days}d "
+          f"-> {CALENDAR_FILE}")
+    return payload
+
+
 def _load_combined_seen() -> set:
     """Union seen-fixture sets from every live engine (Apify is primary)."""
     from . import apify_engine, rapidapi_engine
@@ -566,8 +607,13 @@ def refresh_calendar_from_apify_scan(fixtures: list[dict],
 
 
 def refresh_calendar_if_possible(now: pd.Timestamp | None = None) -> dict[str, Any] | None:
-    """Refresh via Apify, then fall back to RapidAPI or API-Football."""
+    """Refresh with FPL first, retaining paid sources as emergency fallbacks."""
     now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
+    try:
+        from .fpl_client import FplClient
+        return refresh_calendar_fpl(FplClient(), now)
+    except Exception as e:
+        print(f"! FPL calendar refresh failed ({e})")
     if os.environ.get("APIFY_TOKEN"):
         try:
             from .apify_client import ApifyFootballClient
@@ -722,7 +768,7 @@ def _write_github_output(should_run: bool) -> None:
 
 
 def gate() -> bool:
-    """Entry point for live_poll.yml: refresh calendar via RapidAPI (primary),
+    """Entry point for live_poll.yml: refresh calendar via FPL (primary),
     rewrite upcoming_fixtures.json, then decide whether live engines run."""
     now = pd.Timestamp.now(tz="UTC")
     if not calendar_is_fresh(now):
@@ -745,7 +791,7 @@ if __name__ == "__main__":
     if "--refresh" in sys.argv:
         if refresh_calendar_if_possible() is None:
             print("! no calendar source available "
-                  "(set RAPIDAPI_KEY, APIFY_TOKEN, or API_FOOTBALL_KEY)")
+                  "(FPL and all configured fallback sources failed)")
             sys.exit(1)
         sys.exit(0)
     if "--from-understat" in sys.argv:
