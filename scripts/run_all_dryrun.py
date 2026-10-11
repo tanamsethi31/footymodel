@@ -104,5 +104,15 @@ assert len(upcoming) == 1 and upcoming[0]["fixture_id"] == fixture["fixture"]["i
 )
 print(f"upcoming_fixtures.json: {len(upcoming)} row(s), fixture_id={upcoming[0]['fixture_id']}")
 
+# A provider failure must not masquerade as a quiet no-fixture poll. The
+# workflow uses this non-zero outcome to switch to the RapidAPI fallback.
+mock_client.fixtures_by_date.side_effect = run_all.ApiFootballError("invalid API key")
+try:
+    run_all.run_once()
+except RuntimeError as e:
+    assert "every date bucket" in str(e)
+else:
+    raise AssertionError("expected all API-Football fixture fetch failures to raise")
+
 print("\nALL CHECKS PASSED — shared fetch confirmed, no duplicate API-Football calls, "
       "past-kickoff fixture recovered.")

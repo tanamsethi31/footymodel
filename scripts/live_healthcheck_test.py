@@ -59,6 +59,9 @@ assert any("RapidAPI" in issue for issue in issues)
 assert any("odds_unavailable" in issue for issue in issues)
 assert not any("Everton v Liverpool" in issue for issue in issues)
 
+(tmp / "live_fixture_health.json").unlink()
+assert fixture_failures(tmp / "live_fixture_health.json", now) == []
+
 (tmp / "live_fixture_health.json").write_text("not json")
 assert fixture_failures(tmp / "live_fixture_health.json", now)[0].startswith(
     "fixture processing state is unreadable"
