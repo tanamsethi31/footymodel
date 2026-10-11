@@ -1,0 +1,22 @@
+{
+  "rapid_5795469": {
+    "away": "Nottingham Forest",
+    "checked_at": "2026-10-11T13:04:17.526256+00:00",
+    "detail": "lineup available but no usable O/U odds",
+    "fixture_id": "rapid_5795469",
+    "home": "Crystal Palace",
+    "kickoff": "2026-10-11T13:00:00.000Z",
+    "outcome": "odds_unavailable",
+    "source": "rapidapi"
+  },
+  "rapid_5795470": {
+    "away": "Everton",
+    "checked_at": "2026-10-11T13:04:18.734937+00:00",
+    "detail": "lineup available but no usable O/U odds",
+    "fixture_id": "rapid_5795470",
+    "home": "Hull City",
+    "kickoff": "2026-10-11T13:00:00.000Z",
+    "outcome": "odds_unavailable",
+    "source": "rapidapi"
+  }
+}
