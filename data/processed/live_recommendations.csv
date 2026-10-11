@@ -17,3 +17,4 @@ logged_at,fixture_id,league,kickoff,home,away,n_home_starters_matched,n_away_sta
 2026-09-06T12:45:02.538689,rapid_5795438,E0,2026-09-06T13:00:00.000Z,Everton,Man United,11,11,0.557,2.91,1.55,2.4,rapidapi,0.608,-0.136,0.063
 2026-10-11T13:04:17.525911,rapid_5795469,E0,2026-10-11T13:00:00.000Z,Crystal Palace,Nottingham Forest,10,8,0.391,2.25,,,rapidapi
 2026-10-11T13:04:18.734456,rapid_5795470,E0,2026-10-11T13:00:00.000Z,Hull City,Everton,9,10,0.523,2.77,,,rapidapi
+2026-10-11T15:29:15.046973,apify_16363878,E0,2026-10-11T15:30:00+00:00,Liverpool FC,Manchester City,10,9,0.621,3.2,1.6153846153846154,2.3,apify,0.587,0.003,-0.128

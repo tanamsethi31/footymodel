@@ -1,12 +1,12 @@
 {
   "apify_16363878": {
     "away": "Manchester City",
-    "checked_at": "2026-10-11T14:13:58.874630+00:00",
-    "detail": "Apify did not return a usable confirmed lineup",
+    "checked_at": "2026-10-11T15:29:15.047313+00:00",
+    "detail": "confirmed lineup and O/U odds available",
     "fixture_id": "apify_16363878",
     "home": "Liverpool FC",
     "kickoff": "2026-10-11T15:30:00+00:00",
-    "outcome": "lineup_unavailable",
+    "outcome": "processed",
     "source": "apify"
   },
   "rapid_5795469": {
