@@ -68,6 +68,7 @@ jobs:
                    data/processed/upcoming_fixtures.json \
                    data/processed/upcoming_watchlist.json \
                    data/processed/fixture_calendar.json \
+                   data/processed/live_fixture_health.json \
                    data/processed/rapidapi_seen_fixtures.json \
                    data/processed/rapidapi_budget.json \
                    data/processed/rapidapi_fixtures_cache.json \
