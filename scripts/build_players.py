@@ -12,10 +12,12 @@ redundant Understat requests a day for seasons that already finished.
 Usage:
     python scripts/build_players.py E0,SP1,D1,I1,F1          # full default seasons
     python scripts/build_players.py E0,SP1,D1,I1,F1 2025      # just 2025/26
+    python scripts/build_players.py E0,SP1,D1,I1,F1 current   # active season
 """
 from __future__ import annotations
 
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -24,6 +26,12 @@ import pandas as pd
 
 from footymodel import config
 from footymodel.understat import build_player_dataset, PLAYER_OUTPUT
+
+
+def current_season_start_year(now: datetime | None = None) -> int:
+    """Understat uses the first calendar year in an Aug-Jul season label."""
+    now = now or datetime.now(timezone.utc)
+    return now.year if now.month >= 7 else now.year - 1
 
 
 def merge_player_dataset(existing: pd.DataFrame | None, new_rows: pd.DataFrame,
@@ -40,7 +48,12 @@ def merge_player_dataset(existing: pd.DataFrame | None, new_rows: pd.DataFrame,
 
 if __name__ == "__main__":
     DIVS = sys.argv[1].split(",") if len(sys.argv) > 1 else ["E0"]
-    YEARS = [int(y) for y in sys.argv[2].split(",")] if len(sys.argv) > 2 else config.DEFAULT_START_YEARS
+    if len(sys.argv) <= 2:
+        YEARS = config.DEFAULT_START_YEARS
+    elif sys.argv[2] == "current":
+        YEARS = [current_season_start_year()]
+    else:
+        YEARS = [int(y) for y in sys.argv[2].split(",")]
 
     print(f"Scraping player rosters for {DIVS}, seasons {YEARS}")
     new_rows = build_player_dataset(DIVS, YEARS)

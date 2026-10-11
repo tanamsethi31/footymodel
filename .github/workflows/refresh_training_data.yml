@@ -39,9 +39,8 @@ jobs:
       # requests for seasons that already finished. Only the current season
       # changes week to week, so only that gets refreshed here (merged into
       # the existing file, see build_players.py's merge_player_dataset()).
-      # Bump the year below once the 2027/28 season starts.
       - name: Refresh player rosters (Understat, current season only)
-        run: python scripts/build_players.py E0,SP1,D1,I1,F1 2026
+        run: python scripts/build_players.py E0,SP1,D1,I1,F1 current
 
       # Next ~10 days of PL kickoffs, used by live_poll.yml to skip idle
       # ticks and by the dashboard as the upcoming-match preview. Date-only

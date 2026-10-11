@@ -319,10 +319,12 @@ def _load_combined_seen() -> set:
     return seen
 
 
-# RapidAPI free tier: one call per day in the horizon. Keep this short so
-# calendar refresh does not burn the shared 90/month budget (Understat still
-# fills the 10-day dashboard preview).
+# RapidAPI is the only live source currently able to supply confirmed lineups
+# and O/U odds. Preserve most of its 90-call monthly allowance for that work;
+# Understat still fills the dashboard's 10-day preview when the calendar skips
+# a refresh because this smaller calendar allowance has been reached.
 RAPIDAPI_CALENDAR_HORIZON_DAYS = 3
+RAPIDAPI_CALENDAR_BUDGET_CAP = 30
 
 
 def _rapidapi_match_to_calendar_fixture(match: dict, div: str) -> dict | None:
@@ -367,9 +369,10 @@ def refresh_calendar_rapidapi(client,
     seen_ids: set[str] = set()
 
     for i in range(horizon_days + 1):
-        if budget["calls_used"] >= BUDGET_CAP:
-            print(f"! rapidapi budget exhausted ({budget['calls_used']}/{BUDGET_CAP}), "
-                  f"stopping calendar refresh after {i} day(s)")
+        if budget["calls_used"] >= RAPIDAPI_CALENDAR_BUDGET_CAP:
+            print("! RapidAPI calendar allowance exhausted "
+                  f"({budget['calls_used']}/{RAPIDAPI_CALENDAR_BUDGET_CAP}); "
+                  "preserving the remaining live-poll quota")
             break
         date = (now + pd.Timedelta(days=i)).strftime("%Y%m%d")
         budget["calls_used"] += 1
@@ -472,30 +475,34 @@ def refresh_calendar_apify(client,
 
 
 def refresh_calendar_if_possible(now: pd.Timestamp | None = None) -> dict[str, Any] | None:
-    """Refresh the saved calendar via RapidAPI (primary), Apify, or API-Football."""
+    """Refresh via API-Football, then fall back to the quota-limited sources."""
     now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
-    if os.environ.get("RAPIDAPI_KEY"):
+    if os.environ.get("API_FOOTBALL_KEY"):
         try:
-            from .rapidapi_client import RapidApiClient
-            from .rapidapi_engine import _load_budget, _save_budget
-
-            budget = _load_budget()
-            payload = refresh_calendar_rapidapi(RapidApiClient(), budget, now)
-            _save_budget(budget)
-            return payload
+            return refresh_calendar(ApiFootballClient(), now)
         except Exception as e:
-            print(f"! rapidapi calendar refresh failed ({e})")
+            print(f"! API-Football calendar refresh failed ({e})")
     if os.environ.get("APIFY_TOKEN"):
         try:
             from .apify_client import ApifyFootballClient
             return refresh_calendar_apify(ApifyFootballClient(), now)
         except Exception as e:
             print(f"! apify calendar refresh failed ({e})")
-    if os.environ.get("API_FOOTBALL_KEY"):
+    if os.environ.get("RAPIDAPI_KEY"):
         try:
-            return refresh_calendar(ApiFootballClient(), now)
+            from .rapidapi_client import RapidApiClient
+            from .rapidapi_engine import _load_budget, _save_budget
+
+            budget = _load_budget()
+            if budget["calls_used"] >= RAPIDAPI_CALENDAR_BUDGET_CAP:
+                print("! RapidAPI calendar allowance exhausted; using another source or "
+                      "the Understat dashboard fallback")
+                return None
+            payload = refresh_calendar_rapidapi(RapidApiClient(), budget, now)
+            _save_budget(budget)
+            return payload
         except Exception as e:
-            print(f"! API-Football calendar refresh failed ({e})")
+            print(f"! rapidapi calendar refresh failed ({e})")
     return None
 
 
