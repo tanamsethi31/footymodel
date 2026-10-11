@@ -44,9 +44,13 @@ def latest_recommendation_at(path: Path) -> datetime | None:
 def fixture_failures(path: Path, now: datetime,
                      grace_hours: int = FIXTURE_FAILURE_GRACE_HOURS) -> list[str]:
     """Return post-kickoff fixtures whose last attempted live processing failed."""
+    if not path.exists():
+        # There is no fixture-level failure to report until a source has seen
+        # a fixture. Calendar and recommendation checks cover an idle poll.
+        return []
     try:
         payload = _load_json(path)
-    except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
+    except (ValueError, json.JSONDecodeError) as e:
         return [f"fixture processing state is unreadable: {e}"]
 
     failures = []

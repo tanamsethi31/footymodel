@@ -132,11 +132,26 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
     # fixture inside DEFAULT_HOURS_BEHIND — without that, the 24h backward
     # window never sees fixtures whose UTC date has already rolled off.
     all_fixtures = []
-    for date_str in sorted(fxcal.date_buckets_to_fetch(now)):
+    date_buckets = sorted(fxcal.date_buckets_to_fetch(now))
+    fixture_fetch_errors = []
+    successful_fixture_fetches = 0
+    for date_str in date_buckets:
         try:
             all_fixtures.extend(client.fixtures_by_date(date_str))
+            successful_fixture_fetches += 1
         except ApiFootballError as e:
             print(f"! fixtures fetch failed for {date_str}: {e}")
+            fixture_fetch_errors.append(f"{date_str}: {e}")
+
+    # An empty response is a normal quiet-poll result. In contrast, an error
+    # from every date bucket means this provider is unavailable (for example,
+    # an expired key). Raise so the workflow can run its RapidAPI fallback
+    # instead of reporting a false-successful no-op.
+    if date_buckets and not successful_fixture_fetches:
+        raise RuntimeError(
+            "API-Football fixture fetch failed for every date bucket: "
+            + "; ".join(fixture_fetch_errors)
+        )
 
     try:
         live_upcoming = build_upcoming_list(all_fixtures, api_id_to_div, now)
