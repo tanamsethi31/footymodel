@@ -16,6 +16,7 @@ from pathlib import Path
 DEFAULT_MAX_RECOMMENDATION_AGE_HOURS = 14 * 24
 DEFAULT_MAX_CALENDAR_AGE_HOURS = 48
 DEFAULT_RAPIDAPI_WARNING_AT = 80
+FIXTURE_FAILURE_GRACE_HOURS = 1
 
 
 def _parse_timestamp(value: str) -> datetime:
@@ -40,6 +41,32 @@ def latest_recommendation_at(path: Path) -> datetime | None:
     return max(timestamps, default=None)
 
 
+def fixture_failures(path: Path, now: datetime,
+                     grace_hours: int = FIXTURE_FAILURE_GRACE_HOURS) -> list[str]:
+    """Return post-kickoff fixtures whose last attempted live processing failed."""
+    try:
+        payload = _load_json(path)
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
+        return [f"fixture processing state is unreadable: {e}"]
+
+    failures = []
+    for record in payload.values():
+        if not isinstance(record, dict) or record.get("outcome") == "processed":
+            continue
+        try:
+            kickoff = _parse_timestamp(str(record["kickoff"]))
+        except (KeyError, TypeError, ValueError):
+            failures.append(f"fixture processing state has an invalid kickoff: {record}")
+            continue
+        if (now - kickoff).total_seconds() < grace_hours * 3600:
+            continue
+        fixture = f"{record.get('home', '?')} v {record.get('away', '?')}"
+        outcome = record.get("outcome", "unknown failure")
+        detail = record.get("detail") or "no detail recorded"
+        failures.append(f"{fixture} ({record.get('fixture_id', '?')}) {outcome}: {detail}")
+    return failures
+
+
 def check(processed_dir: Path, now: datetime, max_recommendation_age_hours: int,
           max_calendar_age_hours: int, rapidapi_warning_at: int) -> list[str]:
     now = now.astimezone(timezone.utc)
@@ -54,12 +81,17 @@ def check(processed_dir: Path, now: datetime, max_recommendation_age_hours: int,
 
     calendar_path = processed_dir / "fixture_calendar.json"
     try:
-        refreshed_at = _parse_timestamp(_load_json(calendar_path)["refreshed_at"])
+        calendar = _load_json(calendar_path)
+        refreshed_at = _parse_timestamp(calendar["refreshed_at"])
         if (now - refreshed_at).total_seconds() > max_calendar_age_hours * 3600:
             age_hours = (now - refreshed_at).total_seconds() / 3600
             issues.append(f"fixture calendar is {age_hours:.1f} hours old ({refreshed_at.isoformat()})")
+        if not calendar.get("fixtures"):
+            issues.append("fixture calendar is empty")
     except (FileNotFoundError, KeyError, TypeError, ValueError, json.JSONDecodeError) as e:
         issues.append(f"fixture calendar is unreadable: {e}")
+
+    issues.extend(fixture_failures(processed_dir / "live_fixture_health.json", now))
 
     budget_path = processed_dir / "rapidapi_budget.json"
     try:

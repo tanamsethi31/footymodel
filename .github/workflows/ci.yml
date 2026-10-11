@@ -47,6 +47,8 @@ jobs:
         run: python scripts/calendar_test.py
       - name: Live pipeline persisted-state health checks (pure, data-free)
         run: python scripts/live_healthcheck_test.py
+      - name: Latest live fixture outcome persistence (pure, data-free)
+        run: python scripts/fixture_health_test.py
       - name: Apify season label resolution (pure, data-free)
         run: python scripts/apify_season_test.py
       - name: Grade-results Apify score parsing (pure, data-free)

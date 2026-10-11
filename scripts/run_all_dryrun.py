@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pandas as pd
 
 from footymodel.live import calendar as fxcal
-from footymodel.live import engine, match_detail, run_all, shots_engine, watchlist
+from footymodel.live import engine, fixture_health, match_detail, run_all, shots_engine, watchlist
 from footymodel.live import namematch
 from footymodel.players import load_players
 
@@ -28,6 +28,7 @@ run_all.LIVE_LOG = engine.LIVE_LOG
 shots_engine.PROPS_LOG = tmp / "props.csv"
 run_all.PROPS_LOG = shots_engine.PROPS_LOG
 match_detail.MATCH_DETAIL_LOG = tmp / "match_detail.jsonl"
+fixture_health.STATE_FILE = tmp / "live_fixture_health.json"
 run_all.UPCOMING_LOG = tmp / "upcoming_fixtures.json"
 fxcal.CALENDAR_FILE = tmp / "fixture_calendar.json"
 fxcal.UPCOMING_LOG = run_all.UPCOMING_LOG
@@ -90,6 +91,9 @@ assert any(r["fixture_id"] == fixture_past["fixture"]["id"] for r in goal_rows),
     "expected the already-kicked-off fixture to still be logged thanks to the widened backward window"
 )
 assert len(prop_rows) == 44
+health = json.loads(fixture_health.STATE_FILE.read_text())
+assert set(health) == {"999003", "999004"}
+assert {row["outcome"] for row in health.values()} == {"processed"}
 sample_row = [r for r in prop_rows if r["player"] == home_names[0]][0]
 assert sample_row["odds_shots_gt0.5"] == 1.75, "expected mocked player-shots odds to reach the props row"
 
