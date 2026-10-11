@@ -519,6 +519,52 @@ def refresh_calendar_apify(client,
     return payload
 
 
+def refresh_calendar_from_apify_scan(fixtures: list[dict],
+                                     now: pd.Timestamp | None = None,
+                                     horizon_days: int = HORIZON_DAYS) -> dict[str, Any]:
+    """Persist the fixture scan already paid for by the Apify live poll."""
+    now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
+    horizon_end = now + pd.Timedelta(days=horizon_days)
+    slim: list[dict] = []
+    seen_ids: set[str] = set()
+    for fixture in fixtures:
+        try:
+            match_id = int(fixture["matchId"])
+            home = str(fixture["homeTeamName"])
+            away = str(fixture["awayTeamName"])
+            kickoff_ts = _as_utc(
+                pd.Timestamp(int(fixture["startTimestamp"]), unit="s", tz="UTC")
+            )
+        except (KeyError, TypeError, ValueError):
+            continue
+        if kickoff_ts > horizon_end:
+            continue
+        fixture_id = f"apify_{match_id}"
+        if fixture_id in seen_ids:
+            continue
+        seen_ids.add(fixture_id)
+        slim.append({
+            "fixture_id": fixture_id,
+            "league_id": LEAGUE_API_IDS["E0"],
+            "home": home,
+            "away": away,
+            "kickoff": kickoff_ts.isoformat(),
+        })
+
+    slim.sort(key=lambda r: r["kickoff"])
+    payload = {
+        "refreshed_at": now.isoformat(),
+        "horizon_days": horizon_days,
+        "source": "apify-live-scan",
+        "fixtures": slim,
+    }
+    save_calendar(payload)
+    write_upcoming_from_calendar(now, payload)
+    print(f"calendar (apify live scan): {len(slim)} tracked fixture(s) "
+          f"over {horizon_days}d -> {CALENDAR_FILE}")
+    return payload
+
+
 def refresh_calendar_if_possible(now: pd.Timestamp | None = None) -> dict[str, Any] | None:
     """Refresh via Apify, then fall back to RapidAPI or API-Football."""
     now = _as_utc(now if now is not None else pd.Timestamp.now(tz="UTC"))
