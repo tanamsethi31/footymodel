@@ -1,4 +1,14 @@
 {
+  "apify_16363878": {
+    "away": "Manchester City",
+    "checked_at": "2026-10-11T14:07:58.176219+00:00",
+    "detail": "Apify did not return a usable confirmed lineup",
+    "fixture_id": "apify_16363878",
+    "home": "Liverpool FC",
+    "kickoff": "2026-10-11T15:30:00+00:00",
+    "outcome": "lineup_unavailable",
+    "source": "apify"
+  },
   "rapid_5795469": {
     "away": "Nottingham Forest",
     "checked_at": "2026-10-11T13:04:17.526256+00:00",

@@ -6,13 +6,25 @@
     "kickoff": "2026-10-11T15:30:00+00:00"
   },
   {
+    "fixture_id": "apify_16363878",
+    "home": "Liverpool FC",
+    "away": "Manchester City",
+    "kickoff": "2026-10-11T15:30:00+00:00"
+  },
+  {
     "fixture_id": "us_31239",
     "home": "Coventry",
     "away": "Newcastle United",
     "kickoff": "2026-10-12T19:00:00+00:00"
   },
   {
-    "fixture_id": "us_31240",
+    "fixture_id": "apify_16363874",
+    "home": "Coventry City",
+    "away": "Newcastle United",
+    "kickoff": "2026-10-12T19:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363884",
     "home": "Everton",
     "away": "Chelsea",
     "kickoff": "2026-10-17T11:30:00+00:00"
@@ -24,9 +36,21 @@
     "kickoff": "2026-10-17T14:00:00+00:00"
   },
   {
+    "fixture_id": "apify_16363882",
+    "home": "Brentford",
+    "away": "Liverpool FC",
+    "kickoff": "2026-10-17T14:00:00+00:00"
+  },
+  {
     "fixture_id": "us_31241",
     "home": "Fulham",
     "away": "Hull",
+    "kickoff": "2026-10-17T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363885",
+    "home": "Fulham",
+    "away": "Hull City",
     "kickoff": "2026-10-17T14:00:00+00:00"
   },
   {
@@ -36,13 +60,19 @@
     "kickoff": "2026-10-17T14:00:00+00:00"
   },
   {
-    "fixture_id": "us_31244",
+    "fixture_id": "apify_16363887",
+    "home": "Manchester City",
+    "away": "Ipswich Town",
+    "kickoff": "2026-10-17T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363888",
     "home": "Newcastle United",
     "away": "Aston Villa",
     "kickoff": "2026-10-17T16:30:00+00:00"
   },
   {
-    "fixture_id": "us_31246",
+    "fixture_id": "apify_16363881",
     "home": "Bournemouth",
     "away": "Sunderland",
     "kickoff": "2026-10-18T13:00:00+00:00"
@@ -54,13 +84,25 @@
     "kickoff": "2026-10-18T13:00:00+00:00"
   },
   {
+    "fixture_id": "apify_16363883",
+    "home": "Brighton & Hove Albion",
+    "away": "Crystal Palace",
+    "kickoff": "2026-10-18T13:00:00+00:00"
+  },
+  {
     "fixture_id": "us_31247",
     "home": "Leeds",
     "away": "Manchester United",
     "kickoff": "2026-10-18T13:00:00+00:00"
   },
   {
-    "fixture_id": "us_31248",
+    "fixture_id": "apify_16363886",
+    "home": "Leeds United",
+    "away": "Manchester United",
+    "kickoff": "2026-10-18T13:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363889",
     "home": "Nottingham Forest",
     "away": "Arsenal",
     "kickoff": "2026-10-18T15:30:00+00:00"
@@ -70,5 +112,119 @@
     "home": "Tottenham",
     "away": "Coventry",
     "kickoff": "2026-10-19T19:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363890",
+    "home": "Tottenham Hotspur",
+    "away": "Coventry City",
+    "kickoff": "2026-10-19T19:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363897",
+    "home": "Ipswich Town",
+    "away": "Nottingham Forest",
+    "kickoff": "2026-10-23T19:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363892",
+    "home": "Aston Villa",
+    "away": "Manchester City",
+    "kickoff": "2026-10-24T11:30:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363891",
+    "home": "Arsenal",
+    "away": "Everton",
+    "kickoff": "2026-10-24T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363894",
+    "home": "Coventry City",
+    "away": "Fulham",
+    "kickoff": "2026-10-24T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363893",
+    "home": "Chelsea",
+    "away": "Tottenham Hotspur",
+    "kickoff": "2026-10-24T16:30:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363895",
+    "home": "Crystal Palace",
+    "away": "Newcastle United",
+    "kickoff": "2026-10-25T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363896",
+    "home": "Hull City",
+    "away": "Brentford",
+    "kickoff": "2026-10-25T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363898",
+    "home": "Liverpool FC",
+    "away": "Brighton & Hove Albion",
+    "kickoff": "2026-10-25T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363899",
+    "home": "Manchester United",
+    "away": "Bournemouth",
+    "kickoff": "2026-10-25T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363900",
+    "home": "Sunderland",
+    "away": "Leeds United",
+    "kickoff": "2026-10-25T16:30:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363904",
+    "home": "Chelsea",
+    "away": "Manchester United",
+    "kickoff": "2026-10-31T12:30:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363902",
+    "home": "Bournemouth",
+    "away": "Leeds United",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363903",
+    "home": "Brentford",
+    "away": "Nottingham Forest",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363905",
+    "home": "Coventry City",
+    "away": "Sunderland",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363906",
+    "home": "Hull City",
+    "away": "Ipswich Town",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363908",
+    "home": "Manchester City",
+    "away": "Brighton & Hove Albion",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363909",
+    "home": "Newcastle United",
+    "away": "Everton",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "apify_16363910",
+    "home": "Tottenham Hotspur",
+    "away": "Crystal Palace",
+    "kickoff": "2026-10-31T17:30:00+00:00"
   }
 ]
