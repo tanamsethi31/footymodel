@@ -145,6 +145,22 @@ assert [f["fixture_id"] for f in refreshed["fixtures"]] == [1558001]
 assert json.loads(fxcal.CALENDAR_FILE.read_text())["fixtures"][0]["home"] == "Arsenal"
 assert json.loads(fxcal.UPCOMING_LOG.read_text())[0]["fixture_id"] == 1558001
 
+# --- FPL calendar refresh: free EPL fixture feed, no provider key ----------
+fpl_client = MagicMock()
+fpl_client.teams.return_value = [
+    {"id": 1, "name": "Arsenal"}, {"id": 2, "name": "Chelsea"},
+]
+fpl_client.fixtures.return_value = [
+    {"id": 7001, "team_h": 1, "team_a": 2,
+     "kickoff_time": "2026-09-04T14:00:00Z"},
+    {"id": 7002, "team_h": 1, "team_a": 2,
+     "kickoff_time": "2026-10-10T14:00:00Z"},  # beyond horizon
+]
+fpl_refreshed = fxcal.refresh_calendar_fpl(fpl_client, now=NOW)
+assert fpl_refreshed["source"] == "fantasy-premier-league"
+assert [f["fixture_id"] for f in fpl_refreshed["fixtures"]] == ["fpl_7001"]
+assert fpl_refreshed["fixtures"][0]["home"] == "Arsenal"
+
 # --- Understat fills the dashboard list when the API calendar is empty ------
 us_payload = {
     "dates": [

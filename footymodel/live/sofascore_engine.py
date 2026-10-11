@@ -30,6 +30,7 @@ from ..players import LineupModel, load_players
 from ..strategy import remove_margin
 from . import namematch
 from . import match_detail
+from . import fixture_health
 from .sofascore_client import SofaScoreClient, SofaScoreError
 
 # Only E0 - the one league with individually significant backtested
@@ -172,14 +173,17 @@ class SofaScoreWatcher:
         seen = _load_seen()
         now = pd.Timestamp.now(tz="UTC")
         new_rows = []
+        successful_fixture_queries = 0
 
-        for date_str in {now.strftime("%Y-%m-%d"), (now + pd.Timedelta(days=1)).strftime("%Y-%m-%d")}:
+        for date_str in sorted({now.strftime("%Y-%m-%d"),
+                                (now + pd.Timedelta(days=1)).strftime("%Y-%m-%d")}):
             for div, tid in TOURNAMENT_IDS.items():
                 try:
                     events = self.client.scheduled_events(tid, date_str)
                 except SofaScoreError as e:
                     print(f"! fixtures fetch failed for {div} {date_str}: {e}")
                     continue
+                successful_fixture_queries += 1
                 for ev in events:
                     if ev.get("status", {}).get("type") != "notstarted":
                         continue
@@ -196,10 +200,34 @@ class SofaScoreWatcher:
                         row = self.process_fixture(div, ev)
                     except Exception as e:
                         print(f"  ! error processing event {eid}: {e}")
+                        fixture_health.record(
+                            f"sofa_{eid}", kickoff=kickoff.isoformat(),
+                            home=ev["homeTeam"]["name"], away=ev["awayTeam"]["name"],
+                            source="sofascore", outcome="lineup_unavailable", detail=str(e),
+                        )
                         continue
                     if row is not None:
+                        has_odds = row.get("odds_over25") and row.get("odds_under25")
+                        fixture_health.record(
+                            f"sofa_{eid}", kickoff=kickoff.isoformat(),
+                            home=ev["homeTeam"]["name"], away=ev["awayTeam"]["name"],
+                            source="sofascore",
+                            outcome="processed" if has_odds else "processed_model_only",
+                            detail="confirmed lineup and O/U odds available" if has_odds
+                            else "lineup produced a model-only prediction without usable O/U odds",
+                        )
                         new_rows.append(row)
                         seen.add(eid)
+                    else:
+                        fixture_health.record(
+                            f"sofa_{eid}", kickoff=kickoff.isoformat(),
+                            home=ev["homeTeam"]["name"], away=ev["awayTeam"]["name"],
+                            source="sofascore", outcome="lineup_unavailable",
+                            detail="SofaScore did not return a usable confirmed lineup",
+                        )
+
+        if not successful_fixture_queries:
+            raise RuntimeError("SofaScore fixture fetch failed for every scheduled date")
 
         match_detail.extract_and_log_details(new_rows)
         if new_rows:

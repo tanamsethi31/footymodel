@@ -206,8 +206,8 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
             outcome = "processed"
             detail = "confirmed lineups and O/U odds available"
         else:
-            outcome = "odds_unavailable"
-            detail = "confirmed lineups available but no usable O/U odds"
+            outcome = "processed_model_only"
+            detail = "confirmed lineups produced a model-only prediction without usable O/U odds"
         fixture_health.record(
             fid, kickoff=str(fx["fixture"]["date"]),
             home=fx["teams"]["home"]["name"], away=fx["teams"]["away"]["name"],

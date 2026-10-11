@@ -76,8 +76,9 @@ flowchart LR
         US[Understat<br/>xG + rosters]
         FB[FBref<br/>player SOT]
         WS[WhoScored<br/>player shots/SOT,<br/>real minutes]
-        AP[Apify football-api-scraper<br/>primary, SofaScore via Apify]
-        RA2[RapidAPI<br/>fallback, 90 req/mo budget]
+        FPL[Fantasy Premier League<br/>free fixture calendar]
+        AP[Apify football-api-scraper<br/>local/legacy fallback]
+        RA2[RapidAPI<br/>local/legacy fallback]
         AF[API-Football<br/>optional fallback]
         SS[SofaScore<br/>fallback, browser-scraped]
     end
@@ -91,6 +92,7 @@ flowchart LR
     FB --> SM[SOTModel]
     WS --> SM
 
+    FPL --> CAL
     AP --> APE[live/apify_engine.py]
     AF --> RUN[live/run_all.py<br/>optional goals + props poll]
     RA2 --> RAE[live/rapidapi_engine.py]
@@ -121,9 +123,9 @@ flowchart LR
 ```
 
 All four live engines write to the SAME `live_recommendations.csv`, tagged
-by source — Apify is primary; RapidAPI, SofaScore, and API-Football are
-fallbacks so a single provider outage does not stop predictions from being
-logged. The whole
+by source. Production uses FPL for the free Premier League calendar and
+SofaScore for best-effort confirmed lineups; Apify, RapidAPI, and API-Football
+remain available for local recovery work. The whole
 thing runs unattended on a GitHub Actions cron, not a local machine — the
 dashboard reads straight from the repo, so there's no separate database or
 backend server.
@@ -137,10 +139,11 @@ footymodel/
   players.py   # Phase A — LineupModel (confirmed-lineup goals prediction)
   live/        # Phase B — live detection/paper-trade pipeline
     engine.py            # API-Football goals/O-U engine (optional fallback)
-    rapidapi_engine.py    # RapidAPI fallback (100 req/month, budget-capped)
-    sofascore_engine.py   # SofaScore fallback (browser-scraped, no API key)
-    apify_engine.py       # Apify primary (SofaScore-shaped, pay-per-run cap)
-    calendar.py            # saved PL fixture calendar + idle-poll gate
+    fpl_client.py          # free Fantasy Premier League fixture feed
+    rapidapi_engine.py     # legacy RapidAPI source (budget-capped)
+    sofascore_engine.py   # production lineup source (browser-scraped, no API key)
+    apify_engine.py       # legacy Apify source (pay-per-run cap)
+    calendar.py            # FPL-backed PL calendar + idle-poll gate
     match_detail.py        # shared JSONL side-log: lineups + model breakdown
     run_all.py             # shares one fetch across goals + props engines
     grade_results.py       # grades logged predictions against real results
@@ -227,23 +230,20 @@ lineups, runs the exact same `LineupModel` used in the confirmed backtest,
 fetches best-price O/U odds, and logs a timestamped recommendation.
 **No staking, no order placement — detection/paper-trade only.**
 
-### Three data sources, one goal
+### Production data sources
 
-- **`engine.py` (API-Football, primary)** — the main source. Free tier is
-  100 req/day; has been suspended once before without warning, which is why
-  the other two exist.
-- **`rapidapi_engine.py` (fallback)** — heuristic-confirmed lineups (no
-  documented confirmed/predicted flag on this API), hard-capped at 90 of its
-  100 requests/month to leave headroom.
-- **`sofascore_engine.py` (fallback)** — no API key, no documented quota;
-  scrapes SofaScore's internal API via a real headless-browser session
-  (plain HTTP requests get bot-detected). **Currently blocked from GitHub
-  Actions specifically** — SofaScore's bot-detection flags GitHub's shared
-  runner IPs (confirmed: works fine from a residential IP, 403s only from
-  the cron) — a known, tracked gap, non-blocking since it's a third-string
-  fallback and the other two sources are healthy.
+- **Fantasy Premier League (FPL)** — public, keyless Premier League fixture
+  feed. It owns the calendar and dashboard preview, but does not claim to
+  provide lineups or odds.
+- **`sofascore_engine.py`** — production, best-effort lineup source. It uses
+  a real headless browser because direct requests are bot-blocked. The poll
+  fails visibly when SofaScore is unavailable during an expected fixture
+  window; it does not silently fall back to a paid API.
+- **Odds are optional enrichment** — a confirmed lineup still writes a
+  model-only prediction when no O/U price is available. EV and fair-price
+  fields are simply absent; a missing lineup remains a health failure.
 
-All three log to the same `data/processed/live_recommendations.csv`, tagged
+The goals engines log to the same `data/processed/live_recommendations.csv`, tagged
 by `source`, plus `data/processed/match_detail.jsonl` (starting XI names and
 a team-model vs. lineup-model breakdown, consumed by the dashboard's
 expandable match cards).
@@ -260,9 +260,9 @@ lineup/odds fetches and Playwright. That keeps midweek ticks cheap without
 slowing the cron to 30 minutes — confirmed lineups only exist ~20–40 min
 pre-kickoff, and GitHub's scheduled triggers already slip by hours under
 load, so a slower cadence would miss more of that window. On a real match
-poll, `apify_engine.py` drives the goals pipeline and RapidAPI takes over
-when Apify is unavailable. The API-Football goals + player-props engine
-remains available for local use. The calendar also adds yesterday's date
+poll, `sofascore_engine.py` drives the goals pipeline with no provider token.
+The API-Football, RapidAPI, and Apify engines remain available for local
+recovery work. The calendar also adds yesterday's date
 bucket when a delayed poll still has an unseen fixture in the 24h backward
 window, so that window is not limited to "same UTC calendar day".
 
