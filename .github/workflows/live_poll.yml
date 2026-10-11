@@ -34,11 +34,22 @@ jobs:
       - name: Refresh calendar if stale and decide whether live engines are needed
         id: gate
         env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: python -m footymodel.live.calendar --gate
 
-      - name: Run RapidAPI goals engine (primary — goals O/U, paper-trade only)
+      - name: Run API-Football goals and player-props pipeline
+        id: api_football
         if: steps.gate.outputs.should_run == 'true'
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          test -n "$API_FOOTBALL_KEY"
+          python -m footymodel.live.run_all
+        continue-on-error: true
+
+      - name: Run RapidAPI goals fallback when API-Football is unavailable
+        if: steps.gate.outputs.should_run == 'true' && steps.api_football.outcome != 'success'
         env:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: python -m footymodel.live.rapidapi_engine
@@ -70,3 +81,6 @@ jobs:
           python scripts/notify_dashboard.py || true  # never block the commit on a notify failure
           git commit -m "live poll: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git push
+
+      - name: Check live pipeline health
+        run: python scripts/live_healthcheck.py

@@ -12,8 +12,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
+from datetime import datetime, timezone
 
-from scripts.build_players import merge_player_dataset
+from scripts.build_players import current_season_start_year, merge_player_dataset
+
+assert current_season_start_year(datetime(2026, 6, 30, tzinfo=timezone.utc)) == 2025
+assert current_season_start_year(datetime(2026, 7, 1, tzinfo=timezone.utc)) == 2026
 
 existing = pd.DataFrame([
     {"match_id": 1, "league": "E0", "season": "2024/25", "player_id": "p1"},

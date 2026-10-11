@@ -1,7 +1,7 @@
 # ⚽ footymodel
 
 [![Live dashboard](https://img.shields.io/badge/live%20dashboard-footymodel.vercel.app-blue?logo=vercel)](https://footymodel.vercel.app/)
-![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![Python](https://img.shields.io/badge/python-3.11-blue)
 ![CI](https://github.com/tanamsethi31/footymodel/actions/workflows/ci.yml/badge.svg)
 ![Live poll](https://github.com/tanamsethi31/footymodel/actions/workflows/live_poll.yml/badge.svg)
 ![Status](https://img.shields.io/badge/status-live%20paper--trading-brightgreen)
@@ -157,10 +157,14 @@ data/
 
 ```bash
 cd ~/footymodel
-python3 -m venv .venv
+python3.11 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+`requirements.txt` is the production lock file. Update dependency ranges in
+`requirements.in`, then regenerate it with
+`uv pip compile requirements.in --output-file requirements.txt --python-version 3.11`.
 
 ## Phase 1 usage
 

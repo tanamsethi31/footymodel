@@ -202,4 +202,16 @@ assert rapid_budget["calls_used"] == 1
 assert rapid_refreshed["source"] == "rapidapi"
 assert [f["fixture_id"] for f in rapid_refreshed["fixtures"]] == ["rapid_1001"]
 
+# The calendar must not consume calls reserved for the live lineup/odds poll.
+reserved_budget = {
+    "month": "2026-09",
+    "calls_used": fxcal.RAPIDAPI_CALENDAR_BUDGET_CAP,
+}
+reserved_client = MM()
+reserved = fxcal.refresh_calendar_rapidapi(
+    reserved_client, reserved_budget, now=NOW, horizon_days=0)
+assert reserved_client.matches_by_date.call_count == 0
+assert reserved_budget["calls_used"] == fxcal.RAPIDAPI_CALENDAR_BUDGET_CAP
+assert reserved["fixtures"] == []
+
 print("calendar_test: OK")
