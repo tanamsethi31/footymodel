@@ -76,10 +76,10 @@ flowchart LR
         US[Understat<br/>xG + rosters]
         FB[FBref<br/>player SOT]
         WS[WhoScored<br/>player shots/SOT,<br/>real minutes]
-        AF[API-Football<br/>primary live source]
+        AP[Apify football-api-scraper<br/>primary, SofaScore via Apify]
         RA2[RapidAPI<br/>fallback, 90 req/mo budget]
+        AF[API-Football<br/>optional fallback]
         SS[SofaScore<br/>fallback, browser-scraped]
-        AP[Apify football-api-scraper<br/>fallback, SofaScore via Apify]
     end
 
     FD --> DC[Dixon-Coles goals engine]
@@ -91,10 +91,10 @@ flowchart LR
     FB --> SM[SOTModel]
     WS --> SM
 
-    AF --> RUN[live/run_all.py<br/>goals + props, one shared poll]
+    AP --> APE[live/apify_engine.py]
+    AF --> RUN[live/run_all.py<br/>optional goals + props poll]
     RA2 --> RAE[live/rapidapi_engine.py]
     SS --> SSE[live/sofascore_engine.py]
-    AP --> APE[live/apify_engine.py]
     LM --> RUN
     LM --> RAE
     LM --> SSE
@@ -121,9 +121,9 @@ flowchart LR
 ```
 
 All four live engines write to the SAME `live_recommendations.csv`, tagged
-by source — API-Football is primary; RapidAPI, SofaScore, and Apify exist as
-fallbacks so a single provider's outage (API-Football's free tier has been
-suspended before) doesn't stop predictions from being logged. The whole
+by source — Apify is primary; RapidAPI, SofaScore, and API-Football are
+fallbacks so a single provider outage does not stop predictions from being
+logged. The whole
 thing runs unattended on a GitHub Actions cron, not a local machine — the
 dashboard reads straight from the repo, so there's no separate database or
 backend server.
@@ -136,10 +136,10 @@ footymodel/
   data.py      # Phase 1 — download + normalize football-data.co.uk CSVs
   players.py   # Phase A — LineupModel (confirmed-lineup goals prediction)
   live/        # Phase B — live detection/paper-trade pipeline
-    engine.py            # API-Football goals/O-U engine (primary)
+    engine.py            # API-Football goals/O-U engine (optional fallback)
     rapidapi_engine.py    # RapidAPI fallback (100 req/month, budget-capped)
     sofascore_engine.py   # SofaScore fallback (browser-scraped, no API key)
-    apify_engine.py       # Apify fallback (SofaScore-shaped, pay-per-run cap)
+    apify_engine.py       # Apify primary (SofaScore-shaped, pay-per-run cap)
     calendar.py            # saved PL fixture calendar + idle-poll gate
     match_detail.py        # shared JSONL side-log: lineups + model breakdown
     run_all.py             # shares one fetch across goals + props engines
@@ -260,19 +260,18 @@ lineup/odds fetches and Playwright. That keeps midweek ticks cheap without
 slowing the cron to 30 minutes — confirmed lineups only exist ~20–40 min
 pre-kickoff, and GitHub's scheduled triggers already slip by hours under
 load, so a slower cadence would miss more of that window. On a real match
-poll, `run_all.py` drives the API-Football goals + player-props engines
-off ONE shared fixtures+lineups fetch (see Phase H in the Roadmap for why
-that matters on a 100-req/day free tier); the other two engines run as
-separate steps in the same workflow. The calendar also adds yesterday's
-date bucket when a delayed poll still has an unseen fixture in the 24h
-backward window, so that window is not limited to "same UTC calendar day".
+poll, `apify_engine.py` drives the goals pipeline and RapidAPI takes over
+when Apify is unavailable. The API-Football goals + player-props engine
+remains available for local use. The calendar also adds yesterday's date
+bucket when a delayed poll still has an unseen fixture in the 24h backward
+window, so that window is not limited to "same UTC calendar day".
 
 To run any engine manually (e.g. local debugging):
 ```bash
 python -m footymodel.live.run_all          # API-Football: goals + props
 python -m footymodel.live.sofascore_engine  # SofaScore fallback (goals only)
 python -m footymodel.live.rapidapi_engine   # RapidAPI fallback (goals only)
-python -m footymodel.live.apify_engine      # Apify fallback (goals only)
+python -m footymodel.live.apify_engine      # Apify primary (goals only)
 ```
 Each needs its own key/setup, in a local `.env` file at the repo root
 (gitignored, never committed):

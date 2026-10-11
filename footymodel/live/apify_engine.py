@@ -1,12 +1,11 @@
-"""Apify-based engine for the goals O/U live pipeline (optional fallback).
+"""Apify-based primary engine for the goals O/U live pipeline.
 
 Uses sian.agency/football-api-scraper on Apify — SofaScore-shaped data via
 Apify's infrastructure. Shares the same LineupModel / EV math as engine.py;
 logs to live_recommendations.csv with source="apify" and fixture ids prefixed
 apify_{matchId}.
 
-Demoted from production now that Apify credits are exhausted; RapidAPI is
-the primary path in live_poll.yml.
+RapidAPI remains the quota-limited fallback when Apify is unavailable.
 """
 from __future__ import annotations
 
@@ -19,7 +18,7 @@ import pandas as pd
 from ..data import PROCESSED_DIR
 from ..players import LineupModel, load_players
 from ..strategy import remove_margin
-from . import match_detail, namematch
+from . import fixture_health, match_detail, namematch
 from .apify_client import ApifyFootballClient, ApifyError
 
 # E0 only — same rationale as sofascore_engine / rapidapi_engine.
@@ -376,7 +375,7 @@ class ApifyWatcher:
             except ApifyError as e:
                 print(f"! fixtures scan failed: {e}")
                 _save_budget(self.budget)
-                return []
+                raise RuntimeError(f"Apify fixture scan failed: {e}") from e
             fixtures = []
             for r in rows:
                 if not _is_upcoming(r, now):
@@ -411,12 +410,33 @@ class ApifyWatcher:
                 row = self.process_fixture("E0", fx)
             except Exception as e:
                 print(f"  ! error processing match {mid}: {e}")
+                fixture_health.record(
+                    f"apify_{mid}", kickoff=kickoff.isoformat(),
+                    home=str(fx["homeTeamName"]), away=str(fx["awayTeamName"]),
+                    source="apify", outcome="lineup_unavailable", detail=str(e),
+                )
                 continue
             if row is not None:
+                has_odds = row.get("odds_over25") and row.get("odds_under25")
+                fixture_health.record(
+                    f"apify_{mid}", kickoff=kickoff.isoformat(),
+                    home=str(fx["homeTeamName"]), away=str(fx["awayTeamName"]),
+                    source="apify",
+                    outcome="processed" if has_odds else "odds_unavailable",
+                    detail="confirmed lineup and O/U odds available" if has_odds
+                    else "lineup available but no usable O/U odds",
+                )
                 new_rows.append(row)
                 seen.add(mid)
                 _save_seen(seen)
                 _save_budget(self.budget)
+            else:
+                fixture_health.record(
+                    f"apify_{mid}", kickoff=kickoff.isoformat(),
+                    home=str(fx["homeTeamName"]), away=str(fx["awayTeamName"]),
+                    source="apify", outcome="lineup_unavailable",
+                    detail="Apify did not return a usable confirmed lineup",
+                )
 
         match_detail.extract_and_log_details(new_rows)
         if new_rows:
