@@ -22,9 +22,9 @@
       "away_watch": []
     },
     {
-      "fixture_id": "apify_16363874",
+      "fixture_id": "fpl_54",
       "home": "Coventry City",
-      "away": "Newcastle United",
+      "away": "Newcastle",
       "kickoff": "2026-10-12T19:00:00+00:00",
       "home_watch": [
         {
@@ -43,7 +43,7 @@
       "away_watch": []
     },
     {
-      "fixture_id": "apify_16363884",
+      "fixture_id": "fpl_64",
       "home": "Everton",
       "away": "Chelsea",
       "kickoff": "2026-10-17T11:30:00+00:00",
@@ -76,7 +76,7 @@
         },
         {
           "player": "Mohamed Belloumi",
-          "p_shots_gt0.5": 0.605
+          "p_shots_gt0.5": 0.604
         },
         {
           "player": "Elliot Stroud",
@@ -85,7 +85,7 @@
       ]
     },
     {
-      "fixture_id": "apify_16363885",
+      "fixture_id": "fpl_65",
       "home": "Fulham",
       "away": "Hull City",
       "kickoff": "2026-10-17T14:00:00+00:00",
@@ -97,11 +97,32 @@
         },
         {
           "player": "Mohamed Belloumi",
-          "p_shots_gt0.5": 0.605
+          "p_shots_gt0.5": 0.604
         },
         {
           "player": "Elliot Stroud",
           "p_shots_gt0.5": 0.541
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_67",
+      "home": "Man City",
+      "away": "Ipswich Town",
+      "kickoff": "2026-10-17T14:00:00+00:00",
+      "home_watch": [],
+      "away_watch": [
+        {
+          "player": "Julio Enciso",
+          "p_shots_gt0.5": 0.74
+        },
+        {
+          "player": "Emersonn",
+          "p_shots_gt0.5": 0.691
+        },
+        {
+          "player": "Daizen Maeda",
+          "p_shots_gt0.5": 0.597
         }
       ]
     },
@@ -122,33 +143,12 @@
         },
         {
           "player": "Daizen Maeda",
-          "p_shots_gt0.5": 0.596
+          "p_shots_gt0.5": 0.597
         }
       ]
     },
     {
-      "fixture_id": "apify_16363887",
-      "home": "Manchester City",
-      "away": "Ipswich Town",
-      "kickoff": "2026-10-17T14:00:00+00:00",
-      "home_watch": [],
-      "away_watch": [
-        {
-          "player": "Julio Enciso",
-          "p_shots_gt0.5": 0.74
-        },
-        {
-          "player": "Emersonn",
-          "p_shots_gt0.5": 0.691
-        },
-        {
-          "player": "Daizen Maeda",
-          "p_shots_gt0.5": 0.596
-        }
-      ]
-    },
-    {
-      "fixture_id": "apify_16363881",
+      "fixture_id": "fpl_61",
       "home": "Bournemouth",
       "away": "Sunderland",
       "kickoff": "2026-10-18T13:00:00+00:00",
@@ -169,7 +169,7 @@
       ]
     },
     {
-      "fixture_id": "us_31245",
+      "fixture_id": "fpl_63",
       "home": "Brighton",
       "away": "Crystal Palace",
       "kickoff": "2026-10-18T13:00:00+00:00",
@@ -224,28 +224,75 @@
       ]
     },
     {
-      "fixture_id": "apify_16363886",
-      "home": "Leeds United",
-      "away": "Manchester United",
+      "fixture_id": "fpl_66",
+      "home": "Leeds",
+      "away": "Man Utd",
       "kickoff": "2026-10-18T13:00:00+00:00",
-      "home_watch": [],
+      "home_watch": [
+        {
+          "player": "Dominic Calvert-Lewin",
+          "p_shots_gt0.5": 0.844
+        },
+        {
+          "player": "Harry Wilson",
+          "p_shots_gt0.5": 0.838
+        },
+        {
+          "player": "Anton Stach",
+          "p_shots_gt0.5": 0.77
+        }
+      ],
       "away_watch": [
         {
           "player": "Matheus Cunha",
-          "p_shots_gt0.5": 0.861
+          "p_shots_gt0.5": 0.873
         },
         {
           "player": "Bruno Fernandes",
-          "p_shots_gt0.5": 0.819
+          "p_shots_gt0.5": 0.833
         },
         {
           "player": "Bryan Mbeumo",
-          "p_shots_gt0.5": 0.805
+          "p_shots_gt0.5": 0.82
         }
       ]
     },
     {
-      "fixture_id": "apify_16363889",
+      "fixture_id": "fpl_69",
+      "home": "Nott'm Forest",
+      "away": "Arsenal",
+      "kickoff": "2026-10-18T15:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Igor Jesus",
+          "p_shots_gt0.5": 0.803
+        },
+        {
+          "player": "Morgan Gibbs-White",
+          "p_shots_gt0.5": 0.757
+        },
+        {
+          "player": "Dan Ndoye",
+          "p_shots_gt0.5": 0.656
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Bukayo Saka",
+          "p_shots_gt0.5": 0.858
+        },
+        {
+          "player": "Kai Havertz",
+          "p_shots_gt0.5": 0.824
+        },
+        {
+          "player": "Christos Tzolis",
+          "p_shots_gt0.5": 0.81
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31248",
       "home": "Nottingham Forest",
       "away": "Arsenal",
       "kickoff": "2026-10-18T15:30:00+00:00",
@@ -282,27 +329,6 @@
       "fixture_id": "us_31249",
       "home": "Tottenham",
       "away": "Coventry",
-      "kickoff": "2026-10-19T19:00:00+00:00",
-      "home_watch": [],
-      "away_watch": [
-        {
-          "player": "Ellis Simms",
-          "p_shots_gt0.5": 0.789
-        },
-        {
-          "player": "Loum Tchaouna",
-          "p_shots_gt0.5": 0.668
-        },
-        {
-          "player": "Frank Onyeka",
-          "p_shots_gt0.5": 0.583
-        }
-      ]
-    },
-    {
-      "fixture_id": "apify_16363890",
-      "home": "Tottenham Hotspur",
-      "away": "Coventry City",
       "kickoff": "2026-10-19T19:00:00+00:00",
       "home_watch": [],
       "away_watch": [
