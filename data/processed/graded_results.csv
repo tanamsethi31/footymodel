@@ -5,3 +5,6 @@ fixture_id,home,away,kickoff,actual_home_goals,actual_away_goals,actual_total_go
 1557382,Leeds,Brentford,2026-08-30T13:00:00+00:00,1,1,2,False,0.552,False,over,2.25,False,-1.0,2026-09-01T07:45:35.640352,,,
 1557385,Sunderland,Fulham,2026-08-30T13:00:00+00:00,1,0,1,False,0.36,True,under,1.84,True,0.84,2026-09-01T07:45:36.834446,,,
 1557384,Manchester United,Ipswich,2026-08-30T15:30:00+00:00,5,2,7,True,0.591,True,under,2.65,False,-1.0,2026-09-01T07:45:38.028726,,,
+rapid_5795469,Crystal Palace,Nottingham Forest,2026-10-11T13:00:00.000Z,3,1,4,True,0.391,False,,,,,,,,2026-10-12T15:56:17.589485
+rapid_5795470,Hull City,Everton,2026-10-11T13:00:00.000Z,2,2,4,True,0.523,True,,,,,,,,2026-10-12T15:56:18.632452
+apify_16363878,Liverpool FC,Manchester City,2026-10-11T15:30:00+00:00,0,3,3,True,0.621,True,over,1.6153846153846154,True,0.615,,,,2026-10-12T15:56:19.919625
