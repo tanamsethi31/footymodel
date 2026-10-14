@@ -371,6 +371,61 @@
           "p_shots_gt0.5": 0.734
         }
       ]
+    },
+    {
+      "fixture_id": "us_31254",
+      "home": "Arsenal",
+      "away": "Everton",
+      "kickoff": "2026-10-24T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Bukayo Saka",
+          "p_shots_gt0.5": 0.886
+        },
+        {
+          "player": "Kai Havertz",
+          "p_shots_gt0.5": 0.856
+        },
+        {
+          "player": "Christos Tzolis",
+          "p_shots_gt0.5": 0.844
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Tyrique George",
+          "p_shots_gt0.5": 0.748
+        },
+        {
+          "player": "Thierno Barry",
+          "p_shots_gt0.5": 0.684
+        },
+        {
+          "player": "Merlin R\u00f6hl",
+          "p_shots_gt0.5": 0.623
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31253",
+      "home": "Coventry",
+      "away": "Fulham",
+      "kickoff": "2026-10-24T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Ellis Simms",
+          "p_shots_gt0.5": 0.816
+        },
+        {
+          "player": "Loum Tchaouna",
+          "p_shots_gt0.5": 0.7
+        },
+        {
+          "player": "Frank Onyeka",
+          "p_shots_gt0.5": 0.617
+        }
+      ],
+      "away_watch": []
     }
   ]
 }
