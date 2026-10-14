@@ -100,5 +100,23 @@
     "home": "Ipswich",
     "away": "Nottingham Forest",
     "kickoff": "2026-10-23T19:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_77",
+    "home": "Ipswich Town",
+    "away": "Nott'm Forest",
+    "kickoff": "2026-10-23T19:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31251",
+    "home": "Aston Villa",
+    "away": "Manchester City",
+    "kickoff": "2026-10-24T11:30:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_72",
+    "home": "Aston Villa",
+    "away": "Man City",
+    "kickoff": "2026-10-24T11:30:00+00:00"
   }
 ]

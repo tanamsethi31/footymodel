@@ -337,6 +337,40 @@
           "p_shots_gt0.5": 0.734
         }
       ]
+    },
+    {
+      "fixture_id": "fpl_77",
+      "home": "Ipswich Town",
+      "away": "Nott'm Forest",
+      "kickoff": "2026-10-23T19:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Julio Enciso",
+          "p_shots_gt0.5": 0.903
+        },
+        {
+          "player": "Emersonn",
+          "p_shots_gt0.5": 0.874
+        },
+        {
+          "player": "Daizen Maeda",
+          "p_shots_gt0.5": 0.808
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Igor Jesus",
+          "p_shots_gt0.5": 0.862
+        },
+        {
+          "player": "Morgan Gibbs-White",
+          "p_shots_gt0.5": 0.824
+        },
+        {
+          "player": "Dan Ndoye",
+          "p_shots_gt0.5": 0.734
+        }
+      ]
     }
   ]
 }
