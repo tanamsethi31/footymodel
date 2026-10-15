@@ -172,5 +172,11 @@
     "home": "Manchester United",
     "away": "Bournemouth",
     "kickoff": "2026-10-25T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31259",
+    "home": "Sunderland",
+    "away": "Leeds",
+    "kickoff": "2026-10-25T16:30:00+00:00"
   }
 ]
