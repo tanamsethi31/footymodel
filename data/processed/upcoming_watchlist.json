@@ -373,7 +373,7 @@
       ]
     },
     {
-      "fixture_id": "us_31254",
+      "fixture_id": "fpl_71",
       "home": "Arsenal",
       "away": "Everton",
       "kickoff": "2026-10-24T14:00:00+00:00",
@@ -409,6 +409,27 @@
     {
       "fixture_id": "us_31253",
       "home": "Coventry",
+      "away": "Fulham",
+      "kickoff": "2026-10-24T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Ellis Simms",
+          "p_shots_gt0.5": 0.816
+        },
+        {
+          "player": "Loum Tchaouna",
+          "p_shots_gt0.5": 0.7
+        },
+        {
+          "player": "Frank Onyeka",
+          "p_shots_gt0.5": 0.617
+        }
+      ],
+      "away_watch": []
+    },
+    {
+      "fixture_id": "fpl_74",
+      "home": "Coventry City",
       "away": "Fulham",
       "kickoff": "2026-10-24T14:00:00+00:00",
       "home_watch": [

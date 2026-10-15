@@ -120,7 +120,7 @@
     "kickoff": "2026-10-24T11:30:00+00:00"
   },
   {
-    "fixture_id": "us_31254",
+    "fixture_id": "fpl_71",
     "home": "Arsenal",
     "away": "Everton",
     "kickoff": "2026-10-24T14:00:00+00:00"
@@ -128,6 +128,12 @@
   {
     "fixture_id": "us_31253",
     "home": "Coventry",
+    "away": "Fulham",
+    "kickoff": "2026-10-24T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_74",
+    "home": "Coventry City",
     "away": "Fulham",
     "kickoff": "2026-10-24T14:00:00+00:00"
   },
@@ -141,6 +147,12 @@
     "fixture_id": "us_31255",
     "home": "Chelsea",
     "away": "Tottenham",
+    "kickoff": "2026-10-24T16:30:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_73",
+    "home": "Chelsea",
+    "away": "Spurs",
     "kickoff": "2026-10-24T16:30:00+00:00"
   }
 ]
