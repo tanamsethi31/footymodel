@@ -470,6 +470,27 @@
       "away_watch": []
     },
     {
+      "fixture_id": "fpl_75",
+      "home": "Crystal Palace",
+      "away": "Newcastle",
+      "kickoff": "2026-10-25T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Eddie Nketiah",
+          "p_shots_gt0.5": 0.893
+        },
+        {
+          "player": "Jean-Philippe Mateta",
+          "p_shots_gt0.5": 0.845
+        },
+        {
+          "player": "Dwight McNeil",
+          "p_shots_gt0.5": 0.738
+        }
+      ],
+      "away_watch": []
+    },
+    {
       "fixture_id": "us_31258",
       "home": "Hull",
       "away": "Brentford",
@@ -485,7 +506,49 @@
         },
         {
           "player": "Elliot Stroud",
-          "p_shots_gt0.5": 0.648
+          "p_shots_gt0.5": 0.649
+        }
+      ],
+      "away_watch": []
+    },
+    {
+      "fixture_id": "fpl_76",
+      "home": "Hull City",
+      "away": "Brentford",
+      "kickoff": "2026-10-25T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Oliver McBurnie",
+          "p_shots_gt0.5": 0.862
+        },
+        {
+          "player": "Mohamed Belloumi",
+          "p_shots_gt0.5": 0.709
+        },
+        {
+          "player": "Elliot Stroud",
+          "p_shots_gt0.5": 0.649
+        }
+      ],
+      "away_watch": []
+    },
+    {
+      "fixture_id": "fpl_79",
+      "home": "Man Utd",
+      "away": "Bournemouth",
+      "kickoff": "2026-10-25T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Matheus Cunha",
+          "p_shots_gt0.5": 0.903
+        },
+        {
+          "player": "Bruno Fernandes",
+          "p_shots_gt0.5": 0.87
+        },
+        {
+          "player": "Bryan Mbeumo",
+          "p_shots_gt0.5": 0.859
         }
       ],
       "away_watch": []
@@ -512,7 +575,7 @@
       "away_watch": []
     },
     {
-      "fixture_id": "us_31259",
+      "fixture_id": "fpl_80",
       "home": "Sunderland",
       "away": "Leeds",
       "kickoff": "2026-10-25T16:30:00+00:00",
