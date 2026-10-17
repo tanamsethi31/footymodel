@@ -1,35 +1,5 @@
 [
   {
-    "fixture_id": "fpl_62",
-    "home": "Brentford",
-    "away": "Liverpool",
-    "kickoff": "2026-10-17T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "us_31241",
-    "home": "Fulham",
-    "away": "Hull",
-    "kickoff": "2026-10-17T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_65",
-    "home": "Fulham",
-    "away": "Hull City",
-    "kickoff": "2026-10-17T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_67",
-    "home": "Man City",
-    "away": "Ipswich Town",
-    "kickoff": "2026-10-17T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "us_31243",
-    "home": "Manchester City",
-    "away": "Ipswich",
-    "kickoff": "2026-10-17T14:00:00+00:00"
-  },
-  {
     "fixture_id": "fpl_68",
     "home": "Newcastle",
     "away": "Aston Villa",
