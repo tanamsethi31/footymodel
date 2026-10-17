@@ -1,27 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "fpl_64",
-      "home": "Everton",
-      "away": "Chelsea",
-      "kickoff": "2026-10-17T11:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Tyrique George",
-          "p_shots_gt0.5": 0.802
-        },
-        {
-          "player": "Thierno Barry",
-          "p_shots_gt0.5": 0.744
-        },
-        {
-          "player": "Merlin R\u00f6hl",
-          "p_shots_gt0.5": 0.686
-        }
-      ],
-      "away_watch": []
-    },
-    {
       "fixture_id": "us_31241",
       "home": "Fulham",
       "away": "Hull",
