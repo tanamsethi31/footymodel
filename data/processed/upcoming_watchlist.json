@@ -64,7 +64,7 @@
       "away_watch": [
         {
           "player": "Matheus Cunha",
-          "p_shots_gt0.5": 0.873
+          "p_shots_gt0.5": 0.872
         },
         {
           "player": "Bruno Fernandes",
@@ -98,7 +98,7 @@
       "away_watch": [
         {
           "player": "Matheus Cunha",
-          "p_shots_gt0.5": 0.873
+          "p_shots_gt0.5": 0.872
         },
         {
           "player": "Bruno Fernandes",
@@ -187,7 +187,7 @@
       "away_watch": [
         {
           "player": "Ellis Simms",
-          "p_shots_gt0.5": 0.789
+          "p_shots_gt0.5": 0.79
         },
         {
           "player": "Loum Tchaouna",
@@ -229,7 +229,7 @@
         },
         {
           "player": "Dan Ndoye",
-          "p_shots_gt0.5": 0.734
+          "p_shots_gt0.5": 0.735
         }
       ]
     },
@@ -263,7 +263,7 @@
         },
         {
           "player": "Dan Ndoye",
-          "p_shots_gt0.5": 0.734
+          "p_shots_gt0.5": 0.735
         }
       ]
     },
