@@ -1,29 +1,5 @@
 [
   {
-    "fixture_id": "fpl_61",
-    "home": "Bournemouth",
-    "away": "Sunderland",
-    "kickoff": "2026-10-18T13:00:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_63",
-    "home": "Brighton",
-    "away": "Crystal Palace",
-    "kickoff": "2026-10-18T13:00:00+00:00"
-  },
-  {
-    "fixture_id": "us_31247",
-    "home": "Leeds",
-    "away": "Manchester United",
-    "kickoff": "2026-10-18T13:00:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_66",
-    "home": "Leeds",
-    "away": "Man Utd",
-    "kickoff": "2026-10-18T13:00:00+00:00"
-  },
-  {
     "fixture_id": "fpl_69",
     "home": "Nott'm Forest",
     "away": "Arsenal",
