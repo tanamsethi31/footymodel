@@ -40,6 +40,45 @@ SHOTS_LINES = [0.5, 1.5, 2.5]
 SOT_LINES = [0.5, 1.5]
 MINUTES_ASSUMED = 85  # measured league-avg starter minutes — see RESULTS.md
 PROPS_LOG = PROCESSED_DIR / "live_player_props.csv"
+PROPS_LOG_COLUMNS = [
+    "fixture_id",
+    "kickoff",
+    "home",
+    "away",
+    "team",
+    "player",
+    *[f"p_shots_gt{line}" for line in SHOTS_LINES],
+    *[f"odds_shots_gt{line}" for line in SHOTS_LINES],
+    *[f"ev_shots_gt{line}" for line in SHOTS_LINES],
+    *[f"p_sot_gt{line}" for line in SOT_LINES],
+    *[f"odds_sot_gt{line}" for line in SOT_LINES],
+    *[f"ev_sot_gt{line}" for line in SOT_LINES],
+]
+
+
+def append_props_rows(rows: list[dict], *, skip_fixture_ids: set[str] | None = None) -> int:
+    """Append player-prop rows with a stable CSV schema (includes home/away)."""
+    if not rows:
+        return 0
+    skip = skip_fixture_ids or set()
+    rows = [r for r in rows if r.get("fixture_id") not in skip]
+    if not rows:
+        return 0
+    df = pd.DataFrame(rows).reindex(columns=PROPS_LOG_COLUMNS)
+    PROPS_LOG.parent.mkdir(parents=True, exist_ok=True)
+    if PROPS_LOG.exists():
+        try:
+            existing = pd.read_csv(PROPS_LOG)
+            if "home" not in existing.columns:
+                existing["home"] = ""
+                existing["away"] = ""
+            existing = existing.reindex(columns=PROPS_LOG_COLUMNS)
+            df = pd.concat([existing, df], ignore_index=True)
+        except pd.errors.ParserError:
+            pass
+    df = df.drop_duplicates(subset=["fixture_id", "player"], keep="last")
+    df.to_csv(PROPS_LOG, index=False)
+    return len(rows)
 # Standalone-run dedup only (run_all.py shares engine.py's seen-fixtures file
 # instead, since it drives both watchers off one fetch per fixture).
 PROPS_SEEN_FILE = PROCESSED_DIR / "live_props_seen_fixtures.json"
@@ -248,10 +287,8 @@ class PropsWatcher:
                     seen.add(fid)
 
         if all_rows:
-            df = pd.DataFrame(all_rows)
-            PROPS_LOG.parent.mkdir(parents=True, exist_ok=True)
-            df.to_csv(PROPS_LOG, mode="a", header=not PROPS_LOG.exists(), index=False)
-            print(f"Logged {len(all_rows)} player-prop rows -> {PROPS_LOG}")
+            n = append_props_rows(all_rows)
+            print(f"Logged {n} player-prop rows -> {PROPS_LOG}")
         else:
             print("No new confirmed-lineup fixtures this poll.")
         _save_seen(seen)

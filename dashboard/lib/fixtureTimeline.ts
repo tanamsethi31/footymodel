@@ -1,5 +1,6 @@
 import type { GoalsPick, UpcomingFixture } from "./data";
 import { matchKey, UPCOMING_DISPLAY_LIMIT } from "./upcoming";
+import { irishDateKey, kickoffMs, todayIrishDateKey } from "./timezone";
 
 export type FixtureBucket = "past" | "today" | "preview";
 
@@ -16,20 +17,7 @@ type LoggedFixture = Pick<GoalsPick, "fixtureId" | "home" | "away" | "kickoff">;
 /** Typical PL match length + half-time + stoppage before treating as finished. */
 export const MATCH_FINISH_BUFFER_MS = 2.5 * 60 * 60 * 1000;
 
-export function kickoffMs(kickoff: string): number {
-  const t = new Date(kickoff).getTime();
-  return Number.isFinite(t) ? t : 0;
-}
-
-export function utcDateKey(kickoff: string): string {
-  const t = new Date(kickoff);
-  if (Number.isNaN(t.getTime())) return kickoff.slice(0, 10);
-  return t.toISOString().slice(0, 10);
-}
-
-export function todayDateKey(nowMs = Date.now()): string {
-  return new Date(nowMs).toISOString().slice(0, 10);
-}
+export { kickoffMs, irishDateKey, todayIrishDateKey };
 
 export function isFixtureGraded(
   fixture: FixtureRef,
@@ -48,7 +36,7 @@ export function isFixtureFinished(
   fixture?: FixtureRef
 ): boolean {
   if (fixture && isFixtureGraded(fixture, gradedKeys)) return true;
-  if (utcDateKey(kickoff) < todayDateKey(nowMs)) return true;
+  if (irishDateKey(kickoff) < todayIrishDateKey(nowMs)) return true;
   return kickoffMs(kickoff) + MATCH_FINISH_BUFFER_MS <= nowMs;
 }
 
@@ -69,7 +57,7 @@ export function classifyFixture(
   fixture?: FixtureRef
 ): FixtureBucket {
   if (isFixtureFinished(kickoff, nowMs, gradedKeys, fixture)) return "past";
-  if (utcDateKey(kickoff) === todayDateKey(nowMs)) return "today";
+  if (irishDateKey(kickoff) === todayIrishDateKey(nowMs)) return "today";
   return "preview";
 }
 

@@ -93,6 +93,35 @@ export type KellySimResult = {
   generatedAt: string | null;
 };
 
+export type GradedPropsFixture = {
+  fixtureId: string;
+  kickoff: string;
+  home: string;
+  away: string;
+  homeGoals: number;
+  awayGoals: number;
+  homeShots: number | null;
+  awayShots: number | null;
+  understatMatchId: string | null;
+  proxyXi: boolean;
+  nPlayersGraded: number;
+  source: string;
+};
+
+export type GradedPropsPlayer = {
+  fixtureId: string;
+  player: string;
+  team: string;
+  actualShots: number | null;
+  actualSot: number | null;
+  actualXg: number | null;
+  pShotsGt05: number | null;
+  pSotGt05: number | null;
+  shots1PlusHit: boolean | null;
+  sot1PlusHit: boolean | null;
+  proxyXi: boolean;
+};
+
 export type PropsPick = {
   fixtureId: string;
   kickoff: string;
@@ -533,6 +562,46 @@ export async function getGradedResults(): Promise<GradedResult[]> {
       }))
       .filter((r) => r.fixtureId)
   );
+}
+
+export async function getGradedPropsFixtures(): Promise<GradedPropsFixture[]> {
+  const rows = await fetchCsv("graded_props_fixtures.csv");
+  return rows
+    .map((r) => ({
+      fixtureId: r.fixture_id,
+      kickoff: r.kickoff,
+      home: r.home,
+      away: r.away,
+      homeGoals: num(r.home_goals) ?? 0,
+      awayGoals: num(r.away_goals) ?? 0,
+      homeShots: num(r.home_shots),
+      awayShots: num(r.away_shots),
+      understatMatchId: r.understat_match_id ? String(r.understat_match_id) : null,
+      proxyXi: bool(r.proxy_xi) ?? false,
+      nPlayersGraded: num(r.n_players_graded) ?? 0,
+      source: r.source ?? "",
+    }))
+    .filter((r) => r.fixtureId)
+    .sort((a, b) => (a.kickoff < b.kickoff ? 1 : -1));
+}
+
+export async function getGradedPropsPlayers(): Promise<GradedPropsPlayer[]> {
+  const rows = await fetchCsv("graded_props_players.csv");
+  return rows
+    .map((r) => ({
+      fixtureId: r.fixture_id,
+      player: r.player,
+      team: r.team,
+      actualShots: num(r.actual_shots),
+      actualSot: num(r.actual_sot),
+      actualXg: num(r.actual_xg),
+      pShotsGt05: num(r["p_shots_gt0.5"]),
+      pSotGt05: num(r["p_sot_gt0.5"]),
+      shots1PlusHit: bool(r.shots_1plus_hit),
+      sot1PlusHit: bool(r.sot_1plus_hit),
+      proxyXi: bool(r.proxy_xi) ?? false,
+    }))
+    .filter((r) => r.fixtureId && r.player);
 }
 
 export async function getKellySimResults(): Promise<KellySimResult[]> {

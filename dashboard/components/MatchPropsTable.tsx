@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { MatchDetail, PropsPick } from "@/lib/data";
+import type { GradedPropsPlayer, MatchDetail, PropsPick } from "@/lib/data";
 import { formatKickoff, odds, probClass } from "@/lib/format";
 import {
   cardEmphasisClass,
@@ -123,6 +123,7 @@ export default function MatchPropsTable({
   away,
   rows,
   lineup = null,
+  playerGrades = null,
   emphasis = "preview",
   live = false,
 }: {
@@ -131,9 +132,11 @@ export default function MatchPropsTable({
   away: string;
   rows: PropsPick[];
   lineup?: MatchDetail | null;
+  playerGrades?: Map<string, GradedPropsPlayer> | null;
   emphasis?: TimelineEmphasis;
   live?: boolean;
 }) {
+  const showActuals = playerGrades && playerGrades.size > 0;
   const teams = home && away ? [home, away] : [...new Set(rows.map((r) => r.team))];
   const [activeTeam, setActiveTeam] = useState(0);
   const [thresh, setThresh] = useState(0);
@@ -246,12 +249,14 @@ export default function MatchPropsTable({
                     <th className="py-1.5 pr-3 font-normal">Player</th>
                     <th className="py-1.5 pr-3 font-normal">Shots on Target</th>
                     <th className="py-1.5 pr-3 font-normal">Total Shots</th>
+                    {showActuals && <th className="py-1.5 pr-3 font-normal">Actual</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {teamRows.map((r) => {
                     const sot = valueAt(r, "sot", thresh);
                     const shots = valueAt(r, "shots", thresh);
+                    const grade = playerGrades?.get(r.player);
                     return (
                       <tr
                         key={`${fixtureId}-${r.player}`}
@@ -272,6 +277,13 @@ export default function MatchPropsTable({
                         >
                           {shots === null ? "-" : `${(shots * 100).toFixed(0)}%`}
                         </td>
+                        {showActuals && (
+                          <td className="py-1.5 pr-3 font-mono text-xs text-neutral-500">
+                            {grade?.actualShots != null
+                              ? `${grade.actualShots} sh${grade.actualSot != null ? ` · ${grade.actualSot} sot` : ""}`
+                              : "—"}
+                          </td>
+                        )}
                       </tr>
                     );
                   })}

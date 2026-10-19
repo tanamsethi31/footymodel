@@ -39,6 +39,8 @@ data/logs/
 !data/processed/apify_squad_budget.json
 !data/processed/apify_team_ids.json
 !data/processed/graded_results.csv
+!data/processed/graded_props_fixtures.csv
+!data/processed/graded_props_players.csv
 !data/processed/kelly_simulation.csv
 !data/raw_fbref/player_match.jsonl
 .superpowers/

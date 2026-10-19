@@ -1,0 +1,6 @@
+fixture_id,kickoff,home,away,home_goals,away_goals,home_shots,away_shots,understat_match_id,proxy_xi,n_players_graded,source
+us_31239,2026-10-12T15:00:00+00:00,Coventry,Newcastle,4,1,9,19,31239,False,22,backfill_understat
+us_31238,2026-10-11T15:00:00+00:00,Liverpool,Man City,0,3,13,15,31238,False,22,backfill_understat
+us_31237,2026-10-11T15:00:00+00:00,Hull,Everton,2,2,9,15,31237,False,22,backfill_understat
+us_31236,2026-10-11T15:00:00+00:00,Crystal Palace,Nott'm Forest,3,1,13,24,31236,False,22,backfill_understat
+us_31235,2026-10-10T15:00:00+00:00,Man United,Tottenham,1,1,12,12,31235,False,22,backfill_understat
