@@ -27,6 +27,7 @@ data/logs/
 !data/processed/live_fixture_health.json
 !data/processed/live_seen_fixtures.json
 !data/processed/sofascore_seen_fixtures.json
+!data/processed/sofascore_props_seen_fixtures.json
 !data/processed/rapidapi_seen_fixtures.json
 !data/processed/rapidapi_budget.json
 !data/processed/rapidapi_fixtures_cache.json

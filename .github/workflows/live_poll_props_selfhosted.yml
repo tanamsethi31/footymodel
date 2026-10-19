@@ -1,0 +1,69 @@
+name: Live poll (props — self-hosted)
+
+on:
+  schedule:
+    - cron: "*/20 9-21 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: live-poll-props
+  cancel-in-progress: false
+
+jobs:
+  props:
+    # Register a self-hosted runner on a home PC / Mac (non-datacenter IP).
+    # Repo → Settings → Actions → Runners → New self-hosted runner.
+    # Use labels: self-hosted, footymodel-props (or change the list below).
+    runs-on: [self-hosted, footymodel-props]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - name: Install Chromium for SofaScore
+        run: python -m playwright install --with-deps chromium
+
+      - name: Refresh calendar gate (skip props fetch when idle)
+        id: gate
+        run: python -m footymodel.live.calendar --gate
+
+      - name: Run SofaScore player props (model-only)
+        id: props
+        if: steps.gate.outputs.should_run == 'true'
+        run: python -m footymodel.live.sofascore_props_engine
+
+      - name: Commit + push props state
+        env:
+          NOTIFY_URL: https://footymodel.vercel.app/api/notify
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for f in data/processed/live_player_props.csv \
+                   data/processed/match_detail.jsonl \
+                   data/processed/sofascore_props_seen_fixtures.json \
+                   data/processed/live_fixture_health.json \
+                   data/processed/upcoming_fixtures.json \
+                   data/processed/upcoming_watchlist.json; do
+            [ -f "$f" ] && git add "$f"
+          done
+          git diff --cached --quiet && exit 0
+          python scripts/notify_dashboard.py || true
+          git commit -m "live poll (props): $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git push
+
+      - name: Props pipeline health
+        run: python scripts/live_healthcheck.py --props-only
+
+      - name: Fail when SofaScore props did not complete in a fixture window
+        if: always() && steps.gate.outputs.should_run == 'true' && steps.props.outcome != 'success'
+        run: |
+          echo "SofaScore props engine did not complete during an expected fixture window."
+          exit 1

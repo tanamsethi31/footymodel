@@ -79,19 +79,20 @@ def fixture_failures(path: Path, now: datetime,
 
 def check(processed_dir: Path, now: datetime, max_recommendation_age_hours: int,
           max_calendar_age_hours: int, rapidapi_warning_at: int,
-          props_only: bool = False) -> list[str]:
+          props_only: bool = False, calendar_only: bool = False) -> list[str]:
     now = now.astimezone(timezone.utc)
     issues: list[str] = []
 
-    rec_path = (processed_dir / "live_player_props.csv" if props_only
-                else processed_dir / "live_recommendations.csv")
-    latest = latest_recommendation_at(rec_path)
-    label = "player-prop" if props_only else "live recommendation"
-    if latest is None:
-        issues.append(f"no {label} has been logged")
-    elif (now - latest).total_seconds() > max_recommendation_age_hours * 3600:
-        age_days = (now - latest).total_seconds() / 86400
-        issues.append(f"latest {label} is {age_days:.1f} days old ({latest.isoformat()})")
+    if not calendar_only:
+        rec_path = (processed_dir / "live_player_props.csv" if props_only
+                    else processed_dir / "live_recommendations.csv")
+        latest = latest_recommendation_at(rec_path)
+        label = "player-prop" if props_only else "live recommendation"
+        if latest is None:
+            issues.append(f"no {label} has been logged")
+        elif (now - latest).total_seconds() > max_recommendation_age_hours * 3600:
+            age_days = (now - latest).total_seconds() / 86400
+            issues.append(f"latest {label} is {age_days:.1f} days old ({latest.isoformat()})")
 
     calendar_path = processed_dir / "fixture_calendar.json"
     try:
@@ -107,7 +108,7 @@ def check(processed_dir: Path, now: datetime, max_recommendation_age_hours: int,
 
     issues.extend(fixture_failures(processed_dir / "live_fixture_health.json", now))
 
-    if not props_only:
+    if not props_only and not calendar_only:
         budget_path = processed_dir / "rapidapi_budget.json"
         try:
             calls_used = int(_load_json(budget_path)["calls_used"])
@@ -129,11 +130,14 @@ def main() -> int:
     parser.add_argument("--rapidapi-warning-at", type=int, default=DEFAULT_RAPIDAPI_WARNING_AT)
     parser.add_argument("--props-only", action="store_true",
                         help="Check live_player_props.csv instead of goals recommendations.")
+    parser.add_argument("--calendar-only", action="store_true",
+                        help="Only check fixture_calendar.json freshness (cloud calendar job).")
     args = parser.parse_args()
 
     issues = check(args.processed_dir, datetime.now(timezone.utc),
                    args.max_recommendation_age_hours, args.max_calendar_age_hours,
-                   args.rapidapi_warning_at, props_only=args.props_only)
+                   args.rapidapi_warning_at, props_only=args.props_only,
+                   calendar_only=args.calendar_only)
     if not issues:
         print("live health check: OK")
         return 0

@@ -30,6 +30,7 @@ now = datetime(2026, 10, 11, 12, tzinfo=timezone.utc)
 }))
 
 assert check(tmp, now, 14 * 24, 48, 80) == []
+assert check(tmp, now, 14 * 24, 48, 80, calendar_only=True) == []
 
 (tmp / "live_recommendations.csv").write_text(
     "logged_at,fixture_id\n2026-09-01T13:00:00+00:00,123\n"

@@ -104,8 +104,11 @@ def _save_seen(seen: set) -> None:
 
 
 class PropsWatcher:
-    def __init__(self, client: ApiFootballClient | None = None):
-        self.client = client or ApiFootballClient()
+    def __init__(self, client: ApiFootballClient | None = None, *, allow_no_client: bool = False):
+        if allow_no_client:
+            self.client = client
+        else:
+            self.client = client or ApiFootballClient()
         self.understat = load_understat_players()
         self.fbref = load_fbref_players()
         self.fbref_names = team_display_names(self.fbref)
@@ -127,6 +130,59 @@ class PropsWatcher:
         f_id = self.fbref_name_to_id.get(f_match) if f_match else None
         return u_match, f_id
 
+    def build_rows_for_starters(
+        self,
+        *,
+        fixture_id: str,
+        kickoff: str,
+        home_name: str,
+        away_name: str,
+        home_starter_names: list[str],
+        away_starter_names: list[str],
+        shots_odds: dict | None = None,
+        sot_odds: dict | None = None,
+    ) -> list[dict]:
+        """Model-only or with pre-parsed odds dicts from _parse_player_line_odds."""
+        shots_odds = shots_odds or {}
+        sot_odds = sot_odds or {}
+        home_u, home_f = self._match_team(home_name)
+        away_u, away_f = self._match_team(away_name)
+        shots_model, sot_model = self._models()
+        rows = []
+        for names, team_name, team_u, team_f, opp_u, opp_f, side in [
+            (home_starter_names, home_name, home_u, home_f, away_u, away_f, "h"),
+            (away_starter_names, away_name, away_u, away_f, home_u, home_f, "a"),
+        ]:
+            u_roster = namematch.team_roster_index(self.understat, LEAGUE, team_u) if team_u else {}
+            f_roster = namematch.team_roster_index(self.fbref, LEAGUE, team_f) if team_f else {}
+            for name in names:
+                u_pid = namematch.match_player(name, u_roster) if u_roster else None
+                f_pid = namematch.match_player(name, f_roster) if f_roster else None
+                row = {
+                    "fixture_id": fixture_id,
+                    "kickoff": kickoff,
+                    "home": home_name,
+                    "away": away_name,
+                    "team": team_name,
+                    "player": name,
+                }
+                for line in SHOTS_LINES:
+                    p = (round(shots_model.predict_player_shots(u_pid, opp_u, MINUTES_ASSUMED, line, side), 3)
+                         if u_pid and opp_u else None)
+                    odd = _lookup_player_odd(shots_odds, name, line)
+                    row[f"p_shots_gt{line}"] = p
+                    row[f"odds_shots_gt{line}"] = odd
+                    row[f"ev_shots_gt{line}"] = round(p * odd - 1.0, 3) if (p is not None and odd) else None
+                for line in SOT_LINES:
+                    p = (round(sot_model.predict_player_sot(f_pid, opp_f, MINUTES_ASSUMED, line, side), 3)
+                         if f_pid and opp_f else None)
+                    odd = _lookup_player_odd(sot_odds, name, line)
+                    row[f"p_sot_gt{line}"] = p
+                    row[f"odds_sot_gt{line}"] = odd
+                    row[f"ev_sot_gt{line}"] = round(p * odd - 1.0, 3) if (p is not None and odd) else None
+                rows.append(row)
+        return rows
+
     def player_rows_for_fixture(self, fixture: dict, lineups: list[dict],
                                 odds_resp: list[dict] | None = None) -> list[dict]:
         """`lineups` (and, if given, `odds_resp`) are fetched by the caller
@@ -147,44 +203,21 @@ class PropsWatcher:
         shots_odds = _parse_player_line_odds(odds_resp, _SHOTS_BET_NAMES)
         sot_odds = _parse_player_line_odds(odds_resp, _SOT_BET_NAMES)
 
-        home_u, home_f = self._match_team(teams["home"]["name"])
-        away_u, away_f = self._match_team(teams["away"]["name"])
         by_team_id = {l["team"]["id"]: l for l in lineups}
         home_l, away_l = by_team_id.get(teams["home"]["id"]), by_team_id.get(teams["away"]["id"])
         if home_l is None or away_l is None:
             return []
 
-        shots_model, sot_model = self._models()
-        rows = []
-        for side_l, team_name, team_u, team_f, opp_u, opp_f, side in [
-            (home_l, teams["home"]["name"], home_u, home_f, away_u, away_f, "h"),
-            (away_l, teams["away"]["name"], away_u, away_f, home_u, home_f, "a"),
-        ]:
-            names = [p["player"]["name"] for p in side_l.get("startXI", [])]
-            u_roster = namematch.team_roster_index(self.understat, LEAGUE, team_u) if team_u else {}
-            f_roster = namematch.team_roster_index(self.fbref, LEAGUE, team_f) if team_f else {}
-            for name in names:
-                u_pid = namematch.match_player(name, u_roster) if u_roster else None
-                f_pid = namematch.match_player(name, f_roster) if f_roster else None
-                row = {"fixture_id": fx["id"], "kickoff": fx["date"],
-                       "home": teams["home"]["name"], "away": teams["away"]["name"],
-                       "team": team_name, "player": name}
-                for line in SHOTS_LINES:
-                    p = (round(shots_model.predict_player_shots(u_pid, opp_u, MINUTES_ASSUMED, line, side), 3)
-                        if u_pid and opp_u else None)
-                    odd = _lookup_player_odd(shots_odds, name, line)
-                    row[f"p_shots_gt{line}"] = p
-                    row[f"odds_shots_gt{line}"] = odd
-                    row[f"ev_shots_gt{line}"] = round(p * odd - 1.0, 3) if (p is not None and odd) else None
-                for line in SOT_LINES:
-                    p = (round(sot_model.predict_player_sot(f_pid, opp_f, MINUTES_ASSUMED, line, side), 3)
-                        if f_pid and opp_f else None)
-                    odd = _lookup_player_odd(sot_odds, name, line)
-                    row[f"p_sot_gt{line}"] = p
-                    row[f"odds_sot_gt{line}"] = odd
-                    row[f"ev_sot_gt{line}"] = round(p * odd - 1.0, 3) if (p is not None and odd) else None
-                rows.append(row)
-        return rows
+        return self.build_rows_for_starters(
+            fixture_id=fx["id"],
+            kickoff=fx["date"],
+            home_name=teams["home"]["name"],
+            away_name=teams["away"]["name"],
+            home_starter_names=[p["player"]["name"] for p in home_l.get("startXI", [])],
+            away_starter_names=[p["player"]["name"] for p in away_l.get("startXI", [])],
+            shots_odds=shots_odds,
+            sot_odds=sot_odds,
+        )
 
     def run_once(self, hours_ahead: int = 2) -> list[dict]:
         seen = _load_seen()
