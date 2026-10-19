@@ -34,10 +34,26 @@ The **gate** (`python -m footymodel.live.calendar --gate`) sets `should_run=true
 PYTHONPATH=. python scripts/matchday_schedule.py
 ```
 
-## Local match-day (no self-hosted runner)
+## Laptop-only match-day (recommended if you have one machine)
+
+On **home Wi‑Fi**, plug in, disable sleep, then:
 
 ```bash
-./scripts/poll_props_local.sh   # run ~60–90 minutes before kickoff
+./scripts/matchday_laptop.sh show              # Irish kickoffs + T−90 window
+./scripts/matchday_laptop.sh loop              # poll every 20 min while gate is open
+./scripts/matchday_laptop.sh loop 900 --push   # same, commit+push to update Vercel
+```
+
+Single poll without a loop:
+
+```bash
+./scripts/matchday_laptop.sh once
+```
+
+Legacy one-shot (always runs props, ignores gate):
+
+```bash
+./scripts/poll_props_local.sh
 ```
 
 ## Manual grading after a matchweek
