@@ -167,7 +167,8 @@ class PropsWatcher:
                 u_pid = namematch.match_player(name, u_roster) if u_roster else None
                 f_pid = namematch.match_player(name, f_roster) if f_roster else None
                 row = {"fixture_id": fx["id"], "kickoff": fx["date"],
-                      "team": team_name, "player": name}
+                       "home": teams["home"]["name"], "away": teams["away"]["name"],
+                       "team": team_name, "player": name}
                 for line in SHOTS_LINES:
                     p = (round(shots_model.predict_player_shots(u_pid, opp_u, MINUTES_ASSUMED, line, side), 3)
                         if u_pid and opp_u else None)

@@ -2,13 +2,9 @@ name: Live poll
 
 on:
   schedule:
-    # Keep 20-minute ticks (not 30): confirmed lineups only exist in a
-    # ~20-40min pre-kickoff window, and GitHub Actions already delays
-    # scheduled triggers by hours under load. A slower cron would miss more
-    # of that window. Idle ticks are cheap now — the gate step below skips
-    # lineup/odds fetches when the saved calendar says nothing is inside
-    # the live window (see footymodel/live/calendar.py).
-    # 09:00-21:59 UTC covers PL kickoffs with margin on both ends.
+    # Keep 20-minute ticks: confirmed lineups only exist in a ~20-40min
+    # pre-kickoff window. Idle ticks skip API work when the calendar gate
+    # says nothing is in the live window (see footymodel/live/calendar.py).
     - cron: "*/20 9-21 * * *"
   workflow_dispatch: {}
 
@@ -35,14 +31,12 @@ jobs:
         id: gate
         run: python -m footymodel.live.calendar --gate
 
-      - name: Install Chromium for SofaScore lineup polling
+      - name: Run player props pipeline (E0 shots/SOT)
+        id: props
         if: steps.gate.outputs.should_run == 'true'
-        run: python -m playwright install --with-deps chromium
-
-      - name: Run SofaScore goals pipeline
-        id: sofascore
-        if: steps.gate.outputs.should_run == 'true'
-        run: python -m footymodel.live.sofascore_engine
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python -m footymodel.live.run_all --props-only
         continue-on-error: true
 
       - name: Commit + push any new recommendations/state
@@ -53,33 +47,24 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for f in data/processed/live_seen_fixtures.json \
-                   data/processed/live_recommendations.csv \
                    data/processed/live_player_props.csv \
                    data/processed/match_detail.jsonl \
                    data/processed/upcoming_fixtures.json \
                    data/processed/upcoming_watchlist.json \
                    data/processed/fixture_calendar.json \
-                   data/processed/live_fixture_health.json \
-                   data/processed/sofascore_seen_fixtures.json \
-                   data/processed/rapidapi_seen_fixtures.json \
-                   data/processed/rapidapi_budget.json \
-                   data/processed/rapidapi_fixtures_cache.json \
-                   data/processed/apify_seen_fixtures.json \
-                   data/processed/apify_budget.json \
-                   data/processed/apify_fixtures_cache.json \
-                   data/processed/apify_season_cache.json; do
+                   data/processed/live_fixture_health.json; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --cached --quiet && exit 0
-          python scripts/notify_dashboard.py || true  # never block the commit on a notify failure
+          python scripts/notify_dashboard.py || true
           git commit -m "live poll: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git push
 
       - name: Check live pipeline health
-        run: python scripts/live_healthcheck.py
+        run: python scripts/live_healthcheck.py --props-only
 
-      - name: Fail when SofaScore is unavailable during a fixture window
-        if: always() && steps.gate.outputs.should_run == 'true' && steps.sofascore.outcome != 'success'
+      - name: Fail when props engine did not complete during a fixture window
+        if: always() && steps.gate.outputs.should_run == 'true' && steps.props.outcome != 'success'
         run: |
-          echo "SofaScore did not complete during an expected fixture window."
+          echo "Player props pipeline did not complete during an expected fixture window."
           exit 1

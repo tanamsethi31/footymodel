@@ -2,23 +2,21 @@
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
-const TABS = ["Track record", "Goals O/U", "Player props", "Staking", "Glossary"];
+const TABS = ["Predictions", "Track record", "Features", "Glossary"];
 
 export default function DashboardTabs({
+  predictions,
   trackRecord,
-  goals,
-  props,
-  staking,
+  features,
   glossary,
 }: {
+  predictions: ReactNode;
   trackRecord: ReactNode;
-  goals: ReactNode;
-  props: ReactNode;
-  staking: ReactNode;
+  features: ReactNode;
   glossary: ReactNode;
 }) {
   const [active, setActive] = useState(0);
-  const panels = [trackRecord, goals, props, staking, glossary];
+  const panels = [predictions, trackRecord, features, glossary];
 
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -30,25 +28,12 @@ export default function DashboardTabs({
     const wrapper = wrapperRef.current;
     const btn = buttonRefs.current[active];
     if (!wrapper || !btn) return;
-    // Measure against the buttons wrapper, not the (fixed-frame) scroll
-    // container - the wrapper and the clip-path overlay are both scrolled
-    // content, so their coordinate origins shift together when the tab bar
-    // is scrolled. Measuring against the container instead was off by
-    // exactly scrollLeft whenever the bar was scrolled off zero.
     const wrapperRect = wrapper.getBoundingClientRect();
     const btnRect = btn.getBoundingClientRect();
     setClip({
       left: btnRect.left - wrapperRect.left,
       right: wrapperRect.right - btnRect.right,
     });
-    // The tab bar itself scrolls horizontally when there isn't room for all
-    // 5 tabs (see the container's overflow-x-auto below) - without this,
-    // clicking a tab outside the currently-visible scroll window left the
-    // container's scroll position unchanged, so the highlight (and the
-    // clicked tab's label) could end up entirely off-screen. Only do this
-    // after mount, though - this effect also runs once on initial render
-    // (active=0), and scrolling then would risk an unwanted page-level
-    // vertical scroll on load if the first tab isn't fully in view yet.
     if (didMountRef.current) {
       btn.scrollIntoView({ block: "nearest", inline: "nearest" });
     }
@@ -69,7 +54,7 @@ export default function DashboardTabs({
                 buttonRefs.current[i] = el;
               }}
               onClick={() => setActive(i)}
-              className="relative z-10 w-32 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-neutral-500 dark:text-neutral-400 whitespace-nowrap text-center active:scale-[0.97] transition-transform duration-150"
+              className="relative z-10 w-28 sm:w-32 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-neutral-500 dark:text-neutral-400 whitespace-nowrap text-center active:scale-[0.97] transition-transform duration-150"
             >
               {t}
             </button>
@@ -84,7 +69,7 @@ export default function DashboardTabs({
               {TABS.map((t) => (
                 <span
                   key={t}
-                  className="w-32 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-white whitespace-nowrap text-center"
+                  className="w-28 sm:w-32 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-white whitespace-nowrap text-center"
                 >
                   {t}
                 </span>

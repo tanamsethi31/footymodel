@@ -33,14 +33,21 @@ def make_detail(fixture_id, home_starters: list[str], away_starters: list[str],
     }
 
 
-def extract_and_log_details(rows: list[dict]) -> None:
-    """Pops the private "_detail" key from each row IN PLACE - so it never
-    ends up in the live_recommendations.csv DataFrame - and appends the
-    collected details to MATCH_DETAIL_LOG as JSONL. Call this AFTER building
-    `rows` but BEFORE writing them to the CSV. Never raises: a failure here
-    must never look like a lost prediction to the caller, since the actual
-    prediction lives entirely in `rows`, independent of this file."""
-    details = [r.pop("_detail") for r in rows if "_detail" in r]
+def log_props_lineups(fixture_id, home: str, away: str,
+                      home_starters: list[str], away_starters: list[str]) -> dict:
+    """Lineup-only detail for the player-props dashboard (no goals breakdown)."""
+    return {
+        "fixture_id": fixture_id,
+        "kind": "props",
+        "home": home,
+        "away": away,
+        "home_starters": home_starters,
+        "away_starters": away_starters,
+    }
+
+
+def append_details(details: list[dict]) -> None:
+    """Append JSONL detail rows; never raises (predictions already persisted)."""
     if not details:
         return
     try:
@@ -50,3 +57,14 @@ def extract_and_log_details(rows: list[dict]) -> None:
                 f.write(json.dumps(d) + "\n")
     except Exception as e:
         print(f"  ! failed to write match_detail.jsonl (predictions themselves were still logged fine): {e}")
+
+
+def extract_and_log_details(rows: list[dict]) -> None:
+    """Pops the private "_detail" key from each row IN PLACE - so it never
+    ends up in the live_recommendations.csv DataFrame - and appends the
+    collected details to MATCH_DETAIL_LOG as JSONL. Call this AFTER building
+    `rows` but BEFORE writing them to the CSV. Never raises: a failure here
+    must never look like a lost prediction to the caller, since the actual
+    prediction lives entirely in `rows`, independent of this file."""
+    details = [r.pop("_detail") for r in rows if "_detail" in r]
+    append_details(details)

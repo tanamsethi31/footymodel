@@ -15,6 +15,9 @@ import {
 const CONFIDENCE_THRESHOLD = 0.05;
 
 function confidenceLine(detail: MatchDetail): string {
+  if (detail.pOver25Team === null || detail.pOver25Full === null) {
+    return "Lineup detail only.";
+  }
   const gap = Math.abs(detail.pOver25Team - detail.pOver25Full);
   return gap < CONFIDENCE_THRESHOLD
     ? "Team and lineup models agree closely."
@@ -147,13 +150,13 @@ export default function MatchCard({
                   <div>
                     <div className="text-neutral-400">Team model</div>
                     <div>
-                      {detail.expTeam.toFixed(2)} xG · {pct(detail.pOver25Team)}
+                      {detail.expTeam?.toFixed(2) ?? "—"} xG · {pct(detail.pOver25Team)}
                     </div>
                   </div>
                   <div>
                     <div className="text-neutral-400">Lineup model</div>
                     <div>
-                      {detail.expFull.toFixed(2)} xG · {pct(detail.pOver25Full)}
+                      {detail.expFull?.toFixed(2) ?? "—"} xG · {pct(detail.pOver25Full)}
                     </div>
                   </div>
                   <div>

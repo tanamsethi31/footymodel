@@ -37,8 +37,11 @@ def latest_recommendation_at(path: Path) -> datetime | None:
         return None
     with path.open(newline="") as f:
         rows = csv.DictReader(f)
-        timestamps = [_parse_timestamp(row["logged_at"])
-                      for row in rows if row.get("logged_at")]
+        timestamps = []
+        for row in rows:
+            raw = row.get("logged_at") or row.get("kickoff")
+            if raw:
+                timestamps.append(_parse_timestamp(raw))
     return max(timestamps, default=None)
 
 
@@ -75,16 +78,20 @@ def fixture_failures(path: Path, now: datetime,
 
 
 def check(processed_dir: Path, now: datetime, max_recommendation_age_hours: int,
-          max_calendar_age_hours: int, rapidapi_warning_at: int) -> list[str]:
+          max_calendar_age_hours: int, rapidapi_warning_at: int,
+          props_only: bool = False) -> list[str]:
     now = now.astimezone(timezone.utc)
     issues: list[str] = []
 
-    latest = latest_recommendation_at(processed_dir / "live_recommendations.csv")
+    rec_path = (processed_dir / "live_player_props.csv" if props_only
+                else processed_dir / "live_recommendations.csv")
+    latest = latest_recommendation_at(rec_path)
+    label = "player-prop" if props_only else "live recommendation"
     if latest is None:
-        issues.append("no live recommendation has been logged")
+        issues.append(f"no {label} has been logged")
     elif (now - latest).total_seconds() > max_recommendation_age_hours * 3600:
         age_days = (now - latest).total_seconds() / 86400
-        issues.append(f"latest live recommendation is {age_days:.1f} days old ({latest.isoformat()})")
+        issues.append(f"latest {label} is {age_days:.1f} days old ({latest.isoformat()})")
 
     calendar_path = processed_dir / "fixture_calendar.json"
     try:
@@ -100,13 +107,14 @@ def check(processed_dir: Path, now: datetime, max_recommendation_age_hours: int,
 
     issues.extend(fixture_failures(processed_dir / "live_fixture_health.json", now))
 
-    budget_path = processed_dir / "rapidapi_budget.json"
-    try:
-        calls_used = int(_load_json(budget_path)["calls_used"])
-        if calls_used >= rapidapi_warning_at:
-            issues.append(f"RapidAPI budget is nearly exhausted ({calls_used}/90 calls used)")
-    except (FileNotFoundError, KeyError, TypeError, ValueError, json.JSONDecodeError) as e:
-        issues.append(f"RapidAPI budget state is unreadable: {e}")
+    if not props_only:
+        budget_path = processed_dir / "rapidapi_budget.json"
+        try:
+            calls_used = int(_load_json(budget_path)["calls_used"])
+            if calls_used >= rapidapi_warning_at:
+                issues.append(f"RapidAPI budget is nearly exhausted ({calls_used}/90 calls used)")
+        except (FileNotFoundError, KeyError, TypeError, ValueError, json.JSONDecodeError) as e:
+            issues.append(f"RapidAPI budget state is unreadable: {e}")
 
     return issues
 
@@ -119,11 +127,13 @@ def main() -> int:
     parser.add_argument("--max-calendar-age-hours", type=int,
                         default=DEFAULT_MAX_CALENDAR_AGE_HOURS)
     parser.add_argument("--rapidapi-warning-at", type=int, default=DEFAULT_RAPIDAPI_WARNING_AT)
+    parser.add_argument("--props-only", action="store_true",
+                        help="Check live_player_props.csv instead of goals recommendations.")
     args = parser.parse_args()
 
     issues = check(args.processed_dir, datetime.now(timezone.utc),
                    args.max_recommendation_age_hours, args.max_calendar_age_hours,
-                   args.rapidapi_warning_at)
+                   args.rapidapi_warning_at, props_only=args.props_only)
     if not issues:
         print("live health check: OK")
         return 0
