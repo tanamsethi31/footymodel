@@ -1,0 +1,57 @@
+name: Grade player props
+
+on:
+  schedule:
+    # Post-match grading (UTC). ~08:00 catches late US-style slots; ~23:30 UTC
+    # catches evening PL kickoffs (20:00–21:30 Irish time) after full-time.
+    - cron: "0 8 * * *"
+    - cron: "30 23 * * *"
+  workflow_dispatch:
+    inputs:
+      n_fixtures:
+        description: "Number of recent PL fixtures to backfill"
+        required: false
+        default: "10"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: grade-props
+  cancel-in-progress: false
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - name: Refresh Understat + football-data xG (PL season)
+        run: python -m footymodel.understat --seasons 2026 --leagues E0
+
+      - name: Backfill props + grade vs Understat actuals
+        run: |
+          N="${{ github.event.inputs.n_fixtures || '10' }}"
+          PYTHONPATH=. python scripts/backfill_recent_props.py -n "$N"
+
+      - name: Commit + push graded props
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for f in data/processed/graded_props_fixtures.csv \
+                   data/processed/graded_props_players.csv \
+                   data/processed/live_player_props.csv \
+                   data/processed/match_detail.jsonl \
+                   data/processed/matches_xg.parquet \
+                   data/raw_understat/EPL_2026.json; do
+            [ -f "$f" ] && git add "$f"
+          done
+          git diff --cached --quiet && exit 0
+          git commit -m "grade props: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git push

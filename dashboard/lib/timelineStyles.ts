@@ -1,4 +1,4 @@
-export type TimelineEmphasis = "today" | "preview";
+export type TimelineEmphasis = "today" | "preview" | "past";
 
 export function sectionTodayClass(): string {
   return "rounded-2xl border border-neutral-300 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950/80 p-4 sm:p-5 shadow-sm";
@@ -24,6 +24,9 @@ export function cardEmphasisClass(emphasis: TimelineEmphasis = "preview"): strin
   if (emphasis === "today") {
     return "border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-sm ring-1 ring-neutral-200 dark:ring-neutral-800";
   }
+  if (emphasis === "past") {
+    return "border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/40";
+  }
   return "border-neutral-200 dark:border-neutral-800";
 }
 
@@ -43,6 +46,13 @@ export function emphasisBadge(emphasis: TimelineEmphasis): {
       label: "Today",
       className:
         "text-[10px] uppercase tracking-wide font-semibold text-neutral-800 dark:text-neutral-200 bg-neutral-200 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-full px-2 py-0.5",
+    };
+  }
+  if (emphasis === "past") {
+    return {
+      label: "Graded",
+      className:
+        "text-[10px] uppercase tracking-wide font-medium text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-900 rounded-full px-2 py-0.5",
     };
   }
   return {

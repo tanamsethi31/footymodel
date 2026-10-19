@@ -9,9 +9,11 @@ export default function PropsPastSummary({
   grades: GradedPropsPlayer[];
 }) {
   const withShots = grades.filter((g) => g.actualShots !== null);
+  const withSot = grades.filter((g) => g.actualSot !== null);
   const shotsHits = withShots.filter((g) => g.shots1PlusHit === true).length;
-  const sotHits = withShots.filter((g) => g.sot1PlusHit === true).length;
+  const sotHits = withSot.filter((g) => g.sot1PlusHit === true).length;
   const shotsRate = withShots.length ? shotsHits / withShots.length : null;
+  const sotRate = withSot.length ? sotHits / withSot.length : null;
 
   return (
     <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50/80 dark:bg-neutral-900/40 px-4 py-3 text-sm">
@@ -37,8 +39,13 @@ export default function PropsPastSummary({
         )}
         {withShots.length > 0 && (
           <span>
-            Shots 1+ calibration: {shotsHits}/{withShots.length} ({pct(shotsRate)}) · SOT 1+:{" "}
-            {sotHits}/{withShots.length}
+            Shots 1+ hit rate: {shotsHits}/{withShots.length} ({pct(shotsRate)})
+            {withSot.length > 0 && (
+              <>
+                {" "}
+                · SOT 1+: {sotHits}/{withSot.length} ({pct(sotRate)})
+              </>
+            )}
           </span>
         )}
       </div>

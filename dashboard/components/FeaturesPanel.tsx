@@ -93,7 +93,12 @@ const FEATURES: {
       {
         name: "Self-hosted SofaScore props poll",
         status: "live",
-        note: "Option A: model-only props from home runner — see docs/SELF_HOSTED_PROPS.md.",
+        note: "Cron every 20m (08–23 UTC) + calendar gate ~T−24h→T+2h — docs/MATCHDAY_AUTOMATION.md.",
+      },
+      {
+        name: "Post-match props grading (Understat)",
+        status: "live",
+        note: "grade_props.yml twice daily + backfill_recent_props.py.",
       },
       {
         name: "Cloud calendar / watchlist poll",
