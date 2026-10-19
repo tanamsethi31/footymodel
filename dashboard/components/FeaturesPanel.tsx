@@ -43,7 +43,7 @@ const FEATURES: {
       {
         name: "Full market grid (odds when fetched)",
         status: "partial",
-        note: "EV shown when API-Football returns player line markets.",
+        note: "Option A is model-only (no EV). Paid/API paths can add odds later.",
       },
       {
         name: "Most probable strip",
@@ -83,12 +83,22 @@ const FEATURES: {
       {
         name: "Web Push (VAPID)",
         status: "live",
-        note: "Subscribe on this device; fires when live_poll commits new rows.",
+        note: "Fires when the self-hosted props workflow commits new rows.",
       },
       {
         name: "Props-focused notify body",
         status: "live",
         note: "Highlights fixture + top player line when new props land.",
+      },
+      {
+        name: "Self-hosted SofaScore props poll",
+        status: "live",
+        note: "Option A: model-only props from home runner — see docs/SELF_HOSTED_PROPS.md.",
+      },
+      {
+        name: "Cloud calendar / watchlist poll",
+        status: "live",
+        note: "GitHub-hosted job updates preview without Playwright.",
       },
       {
         name: "PWA manifest / install",

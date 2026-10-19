@@ -2,9 +2,11 @@
 
 Use the **Features** tab on [footymodel.vercel.app](https://footymodel.vercel.app/) for the live checklist (same content, kept in sync with `components/FeaturesPanel.tsx`).
 
-## Live today
+## Live today (Option A — free data)
 
-- Premier League player shots & SOT predictions (confirmed-lineup window)
+- **Cloud:** fixture calendar + pre-match watchlists (`live_poll.yml`)
+- **Self-hosted / home:** SofaScore Playwright props (`live_poll_props_selfhosted.yml` or `scripts/poll_props_local.sh`) — see [docs/SELF_HOSTED_PROPS.md](../docs/SELF_HOSTED_PROPS.md)
+- Premier League player shots & SOT predictions (confirmed-lineup window, model-only)
 - Today / Upcoming / Past fixture timeline
 - Pre-match “players to watch” watchlists
 - Confirmed starting XI on logged fixtures

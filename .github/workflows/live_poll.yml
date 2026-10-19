@@ -1,10 +1,9 @@
-name: Live poll
+name: Live poll (calendar)
 
 on:
   schedule:
-    # Keep 20-minute ticks: confirmed lineups only exist in a ~20-40min
-    # pre-kickoff window. Idle ticks skip API work when the calendar gate
-    # says nothing is in the live window (see footymodel/live/calendar.py).
+    # Cloud job: free data only (FPL/Understat calendar + watchlists).
+    # Player props run on the self-hosted workflow — see live_poll_props_selfhosted.yml.
     - cron: "*/20 9-21 * * *"
   workflow_dispatch: {}
 
@@ -12,11 +11,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: live-poll
+  group: live-poll-calendar
   cancel-in-progress: false
 
 jobs:
-  poll:
+  calendar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -27,44 +26,23 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Refresh calendar if stale and decide whether live engines are needed
-        id: gate
-        run: python -m footymodel.live.calendar --gate
+      - name: Refresh calendar if stale and refresh upcoming preview
+        run: |
+          python -m footymodel.live.calendar --gate || true
+          python -m footymodel.live.calendar --from-understat
 
-      - name: Run player props pipeline (E0 shots/SOT)
-        id: props
-        if: steps.gate.outputs.should_run == 'true'
-        env:
-          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-        run: python -m footymodel.live.run_all --props-only
-        continue-on-error: true
-
-      - name: Commit + push any new recommendations/state
-        env:
-          NOTIFY_URL: https://footymodel.vercel.app/api/notify
-          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+      - name: Commit + push calendar / preview state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for f in data/processed/live_seen_fixtures.json \
-                   data/processed/live_player_props.csv \
-                   data/processed/match_detail.jsonl \
-                   data/processed/upcoming_fixtures.json \
+          for f in data/processed/upcoming_fixtures.json \
                    data/processed/upcoming_watchlist.json \
-                   data/processed/fixture_calendar.json \
-                   data/processed/live_fixture_health.json; do
+                   data/processed/fixture_calendar.json; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --cached --quiet && exit 0
-          python scripts/notify_dashboard.py || true
-          git commit -m "live poll: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git commit -m "live poll (calendar): $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git push
 
-      - name: Check live pipeline health
-        run: python scripts/live_healthcheck.py --props-only
-
-      - name: Fail when props engine did not complete during a fixture window
-        if: always() && steps.gate.outputs.should_run == 'true' && steps.props.outcome != 'success'
-        run: |
-          echo "Player props pipeline did not complete during an expected fixture window."
-          exit 1
+      - name: Calendar health (no props age check on cloud)
+        run: python scripts/live_healthcheck.py --calendar-only
