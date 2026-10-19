@@ -17,6 +17,7 @@ import type {
 import PropsPastSummary from "./PropsPastSummary";
 import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
 import { buildGradedKeys, sortPastPredictions } from "@/lib/graded";
+import { propsRowsFromGrades } from "@/lib/propsGrading";
 import type { LoggedFixture } from "@/lib/propsFixtures";
 import FixtureTimelineSection from "./FixtureTimelineSection";
 import MostProbableStrip from "./MostProbableStrip";
@@ -111,7 +112,14 @@ export default function PropsPanel({
   gradedPlayers: GradedPropsPlayer[];
 }) {
   const now = Date.now();
-  const gradedKeys = buildGradedKeys([]);
+  const gradedKeys = buildGradedKeys(
+    gradedFixtures.map((g) => ({
+      fixtureId: g.fixtureId,
+      home: g.home,
+      away: g.away,
+      kickoff: g.kickoff,
+    }))
+  );
   const byFixtureId = buildPropsIndex(props);
 
   const plLogged = loggedFixtures.filter(
@@ -218,6 +226,8 @@ export default function PropsPanel({
         {pastFromGraded.map(({ gf, logged, rows }) => {
           const grades = gradesByFixture.get(gf.fixtureId) ?? [];
           const gradeMap = new Map(grades.map((g) => [g.player, g]));
+          const displayRows =
+            rows.length > 0 ? rows : propsRowsFromGrades(gf, grades);
           return (
             <div key={gf.fixtureId} className="space-y-2">
               <PropsPastSummary fixture={gf} grades={grades} />
@@ -225,9 +235,10 @@ export default function PropsPanel({
                 fixtureId={gf.fixtureId}
                 home={logged.home}
                 away={logged.away}
-                rows={rows}
+                rows={displayRows}
                 lineup={matchDetails[gf.fixtureId] ?? null}
                 playerGrades={gradeMap}
+                emphasis="past"
               />
             </div>
           );

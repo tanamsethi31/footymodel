@@ -4,7 +4,8 @@ on:
   schedule:
     # Cloud job: free data only (FPL/Understat calendar + watchlists).
     # Player props run on the self-hosted workflow — see live_poll_props_selfhosted.yml.
-    - cron: "*/20 9-21 * * *"
+    # 08:00–23:59 UTC covers typical PL matchdays (incl. evening Irish kickoffs).
+    - cron: "*/20 8-23 * * *"
   workflow_dispatch: {}
 
 permissions:

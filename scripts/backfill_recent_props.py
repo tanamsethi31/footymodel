@@ -188,8 +188,8 @@ def main() -> None:
         for row in prop_rows:
             name = row["player"]
             act_sh = actual_shots.get(name)
-            act_sot = actual_sot.get(name)
-            player_grade_rows.append({
+            act_sot = actual_sot.get(name, 0) if act_sh is not None else None
+            grade = {
                 "fixture_id": fixture_id,
                 "kickoff": kickoff_iso,
                 "home": home_fd,
@@ -200,11 +200,16 @@ def main() -> None:
                 "actual_shots": act_sh,
                 "actual_sot": act_sot,
                 "actual_xg": xg_map.get(name),
-                "p_shots_gt0.5": row.get("p_shots_gt0.5"),
-                "p_sot_gt0.5": row.get("p_sot_gt0.5"),
-                "shots_1plus_hit": _hit_over(row.get("p_shots_gt0.5"), act_sh, 0.5) if act_sh is not None else None,
-                "sot_1plus_hit": _hit_over(row.get("p_sot_gt0.5"), act_sot, 0.5) if act_sot is not None else None,
-            })
+            }
+            for line in (0.5, 1.5, 2.5):
+                grade[f"p_shots_gt{line}"] = row.get(f"p_shots_gt{line}")
+                if act_sh is not None:
+                    grade[f"shots_gt{line}_hit"] = _hit_over(row.get(f"p_shots_gt{line}"), act_sh, line)
+            for line in (0.5, 1.5):
+                grade[f"p_sot_gt{line}"] = row.get(f"p_sot_gt{line}")
+                if act_sot is not None:
+                    grade[f"sot_gt{line}_hit"] = _hit_over(row.get(f"p_sot_gt{line}"), act_sot, line)
+            player_grade_rows.append(grade)
 
         n_graded = sum(1 for r in player_grade_rows if r["fixture_id"] == fixture_id and r["actual_shots"] is not None)
         fixture_rows.append({

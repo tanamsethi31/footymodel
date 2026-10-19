@@ -116,7 +116,10 @@ export type GradedPropsPlayer = {
   actualSot: number | null;
   actualXg: number | null;
   pShotsGt05: number | null;
+  pShotsGt15: number | null;
+  pShotsGt25: number | null;
   pSotGt05: number | null;
+  pSotGt15: number | null;
   shots1PlusHit: boolean | null;
   sot1PlusHit: boolean | null;
   proxyXi: boolean;
@@ -596,9 +599,12 @@ export async function getGradedPropsPlayers(): Promise<GradedPropsPlayer[]> {
       actualSot: num(r.actual_sot),
       actualXg: num(r.actual_xg),
       pShotsGt05: num(r["p_shots_gt0.5"]),
+      pShotsGt15: num(r["p_shots_gt1.5"]),
+      pShotsGt25: num(r["p_shots_gt2.5"]),
       pSotGt05: num(r["p_sot_gt0.5"]),
-      shots1PlusHit: bool(r.shots_1plus_hit),
-      sot1PlusHit: bool(r.sot_1plus_hit),
+      pSotGt15: num(r["p_sot_gt1.5"]),
+      shots1PlusHit: bool(r["shots_gt0.5_hit"] ?? r.shots_1plus_hit),
+      sot1PlusHit: bool(r["sot_gt0.5_hit"] ?? r.sot_1plus_hit),
       proxyXi: bool(r.proxy_xi) ?? false,
     }))
     .filter((r) => r.fixtureId && r.player);

@@ -4,6 +4,13 @@ import { useState } from "react";
 import type { GradedPropsPlayer, MatchDetail, PropsPick } from "@/lib/data";
 import { formatKickoff, odds, probClass } from "@/lib/format";
 import {
+  hitOver,
+  SHOTS_LINES,
+  SOT_LINES,
+  shotsProbAt,
+  sotProbAt,
+} from "@/lib/propsGrading";
+import {
   cardEmphasisClass,
   emphasisBadge,
   kickoffEmphasisClass,
@@ -22,8 +29,24 @@ const MARKETS = [
 ];
 
 function valueAt(row: PropsPick, stat: "shots" | "sot", idx: number): number | null {
-  if (stat === "shots") return [row.pShotsGt05, row.pShotsGt15, row.pShotsGt25][idx];
-  return [row.pSotGt05, row.pSotGt15, null][idx];
+  if (stat === "shots") return shotsProbAt(row, idx);
+  return sotProbAt(row, idx);
+}
+
+function HitMark({ hit }: { hit: boolean | null }) {
+  if (hit === null) return null;
+  return (
+    <span
+      className={`ml-1.5 text-[10px] font-semibold ${
+        hit
+          ? "text-emerald-600 dark:text-emerald-400"
+          : "text-red-500 dark:text-red-400"
+      }`}
+      title={hit ? "Model line hit" : "Model line missed"}
+    >
+      {hit ? "✓" : "✗"}
+    </span>
+  );
 }
 
 function topPlayer(rows: PropsPick[]): PropsPick | null {
@@ -141,8 +164,8 @@ export default function MatchPropsTable({
   const [activeTeam, setActiveTeam] = useState(0);
   const [thresh, setThresh] = useState(0);
   const [swapping, setSwapping] = useState(false);
-  const [open, setOpen] = useState(emphasis === "today");
-  const expandable = emphasis === "today";
+  const [open, setOpen] = useState(emphasis === "today" || emphasis === "past");
+  const expandable = emphasis === "today" || emphasis === "past";
 
   function pick(i: number) {
     if (i === thresh) return;
@@ -257,6 +280,16 @@ export default function MatchPropsTable({
                     const sot = valueAt(r, "sot", thresh);
                     const shots = valueAt(r, "shots", thresh);
                     const grade = playerGrades?.get(r.player);
+                    const sotLine = SOT_LINES[thresh] ?? SOT_LINES[0];
+                    const shotsLine = SHOTS_LINES[thresh] ?? SHOTS_LINES[0];
+                    const sotHit =
+                      showActuals && grade
+                        ? hitOver(grade.actualSot, sotLine)
+                        : null;
+                    const shotsHit =
+                      showActuals && grade
+                        ? hitOver(grade.actualShots, shotsLine)
+                        : null;
                     return (
                       <tr
                         key={`${fixtureId}-${r.player}`}
@@ -269,6 +302,7 @@ export default function MatchPropsTable({
                           )} ${swapping ? "blur-[3px] opacity-50" : ""}`}
                         >
                           {sot === null ? "-" : `${(sot * 100).toFixed(0)}%`}
+                          <HitMark hit={thresh < 2 ? sotHit : null} />
                         </td>
                         <td
                           className={`py-1.5 pr-3 font-mono transition-[filter,opacity] duration-150 ${probClass(
@@ -276,6 +310,7 @@ export default function MatchPropsTable({
                           )} ${swapping ? "blur-[3px] opacity-50" : ""}`}
                         >
                           {shots === null ? "-" : `${(shots * 100).toFixed(0)}%`}
+                          <HitMark hit={shotsHit} />
                         </td>
                         {showActuals && (
                           <td className="py-1.5 pr-3 font-mono text-xs text-neutral-500">
