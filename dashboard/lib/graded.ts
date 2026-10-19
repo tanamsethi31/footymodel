@@ -12,7 +12,9 @@ export function findGradedResult(
   return graded.find((g) => matchKey(g.home, g.away, g.kickoff) === key) ?? null;
 }
 
-export function buildGradedKeys(graded: GradedResult[]): Set<string> {
+export function buildGradedKeys(
+  graded: Pick<GradedResult, "fixtureId" | "home" | "away" | "kickoff">[]
+): Set<string> {
   const keys = new Set<string>();
   for (const g of graded) {
     keys.add(g.fixtureId);

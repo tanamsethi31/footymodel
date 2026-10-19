@@ -17,7 +17,7 @@ import pandas as pd
 from ..data import PROCESSED_DIR
 from . import fixture_health
 from . import match_detail
-from .shots_engine import PROPS_LOG, PropsWatcher
+from .shots_engine import append_props_rows, PropsWatcher
 from .sofascore_client import SofaScoreClient, SofaScoreError
 
 # Premier League — same tournament id as sofascore_engine.py
@@ -167,10 +167,8 @@ class SofaScorePropsWatcher:
             raise RuntimeError("SofaScore fixture fetch failed for every scheduled date")
 
         if all_rows:
-            df = pd.DataFrame(all_rows)
-            PROPS_LOG.parent.mkdir(parents=True, exist_ok=True)
-            df.to_csv(PROPS_LOG, mode="a", header=not PROPS_LOG.exists(), index=False)
-            print(f"Logged {len(all_rows)} player-prop rows -> {PROPS_LOG}")
+            n = append_props_rows(all_rows)
+            print(f"Logged {n} player-prop rows")
         else:
             print("No new confirmed-lineup fixtures this poll (SofaScore props).")
 

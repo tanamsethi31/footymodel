@@ -13,7 +13,7 @@ const FEATURES: {
       {
         name: "Today / Upcoming / Past buckets",
         status: "live",
-        note: "UTC kickoff windows with live-state badge.",
+        note: "Irish-time kickoff windows with live-state badge.",
       },
       {
         name: "Players to watch (pre-lineup)",
@@ -67,8 +67,8 @@ const FEATURES: {
       },
       {
         name: "Result vs actual shots/SOT grading",
-        status: "planned",
-        note: "Needs post-match WhoScored/FBref ingest + graded_props.csv.",
+        status: "live",
+        note: "Understat rosters + shot logs via scripts/backfill_recent_props.py; proxy XI when rosters lag.",
       },
       {
         name: "CLV / yield on prop bets",

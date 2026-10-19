@@ -44,7 +44,7 @@ export default function GlossaryPanel() {
           <div className="border-l-2 border-blue-600 dark:border-blue-400 pl-3">
             <dt className="font-medium">Preview vs Today</dt>
             <dd className="text-neutral-500 mt-0.5">
-              Fixtures bucket by UTC kickoff date. &quot;Today&quot; includes live
+              Fixtures bucket by Irish (Europe/Dublin) kickoff date. &quot;Today&quot; includes live
               matches until full-time; &quot;Upcoming&quot; is the next scheduled
               matchdays in the saved calendar.
             </dd>

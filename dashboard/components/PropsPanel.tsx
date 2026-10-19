@@ -7,11 +7,14 @@ import {
 } from "@/lib/fixtureTimeline";
 import type {
   FixtureWatchlist,
+  GradedPropsFixture,
+  GradedPropsPlayer,
   MatchDetail,
   PropsPick,
   MostProbablePick,
   UpcomingFixture,
 } from "@/lib/data";
+import PropsPastSummary from "./PropsPastSummary";
 import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
 import { buildGradedKeys, sortPastPredictions } from "@/lib/graded";
 import type { LoggedFixture } from "@/lib/propsFixtures";
@@ -95,6 +98,8 @@ export default function PropsPanel({
   watchlists,
   matchDetails,
   loggedFixtures,
+  gradedFixtures,
+  gradedPlayers,
 }: {
   props: PropsPick[];
   mostProbable: MostProbablePick[];
@@ -102,6 +107,8 @@ export default function PropsPanel({
   watchlists: FixtureWatchlist[];
   matchDetails: Record<string, MatchDetail>;
   loggedFixtures: LoggedFixture[];
+  gradedFixtures: GradedPropsFixture[];
+  gradedPlayers: GradedPropsPlayer[];
 }) {
   const now = Date.now();
   const gradedKeys = buildGradedKeys([]);
@@ -111,11 +118,30 @@ export default function PropsPanel({
     (f) => f.home && f.away // PL-only pipeline; all logged props are E0
   );
 
+  const gradesByFixture = new Map<string, GradedPropsPlayer[]>();
+  for (const g of gradedPlayers) {
+    const arr = gradesByFixture.get(g.fixtureId) ?? [];
+    arr.push(g);
+    gradesByFixture.set(g.fixtureId, arr);
+  }
+
+  const pastFromGraded = gradedFixtures.map((gf) => {
+    const rows = byFixtureId.get(gf.fixtureId) ?? [];
+    const logged: LoggedFixture = {
+      fixtureId: gf.fixtureId,
+      home: gf.home,
+      away: gf.away,
+      kickoff: gf.kickoff,
+    };
+    return { gf, logged, rows };
+  });
+
   const pastFixtures = sortPastPredictions(
     plLogged.filter((f) => isFixtureFinished(f.kickoff, now, gradedKeys, f))
   );
 
-  const pastGroups = pastFixtures
+  const pastGroupsLegacy = pastFixtures
+    .filter((f) => !gradedFixtures.some((g) => g.fixtureId === f.fixtureId))
     .map((f) => {
       const rows = byFixtureId.get(f.fixtureId);
       return rows ? ([f, rows] as [LoggedFixture, PropsPick[]]) : null;
@@ -170,7 +196,7 @@ export default function PropsPanel({
 
       <FixtureTimelineSection
         title="Today"
-        description="Matches kicking off today (UTC). Live until full-time. Confirmed lineups and shots/SOT model output when the poll catches the XI window."
+        description="Matches kicking off today (Irish time). Live until full-time. Confirmed lineups and shots/SOT model output when the poll catches the XI window."
         emptyMessage="No Premier League matches scheduled for today."
         count={timeline.today.length}
         variant="today"
@@ -188,13 +214,26 @@ export default function PropsPanel({
         {timeline.preview.map((f, i) => renderFixture(f, i, "preview"))}
       </FixtureTimelineSection>
 
-      <PastDisclosure count={pastGroups.length}>
-        {pastGroups.map(([fixture, rows]) => (
-          <div key={fixture.fixtureId} className="space-y-2">
-            <div className="text-xs text-neutral-500 px-1">
-              Final score grading for player shots/SOT props is not automated yet —
-              lines below are what the model logged pre-kickoff.
+      <PastDisclosure count={pastFromGraded.length + pastGroupsLegacy.length}>
+        {pastFromGraded.map(({ gf, logged, rows }) => {
+          const grades = gradesByFixture.get(gf.fixtureId) ?? [];
+          const gradeMap = new Map(grades.map((g) => [g.player, g]));
+          return (
+            <div key={gf.fixtureId} className="space-y-2">
+              <PropsPastSummary fixture={gf} grades={grades} />
+              <MatchPropsTable
+                fixtureId={gf.fixtureId}
+                home={logged.home}
+                away={logged.away}
+                rows={rows}
+                lineup={matchDetails[gf.fixtureId] ?? null}
+                playerGrades={gradeMap}
+              />
             </div>
+          );
+        })}
+        {pastGroupsLegacy.map(([fixture, rows]) => (
+          <div key={fixture.fixtureId} className="space-y-2">
             <MatchPropsTable
               fixtureId={fixture.fixtureId}
               home={fixture.home}
