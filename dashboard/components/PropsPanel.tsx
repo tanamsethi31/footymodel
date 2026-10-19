@@ -5,11 +5,16 @@ import {
   isFixtureLive,
   type FixtureTimeline,
 } from "@/lib/fixtureTimeline";
-import type { FixtureWatchlist, GoalsPick, PropsPick, MostProbablePick, UpcomingFixture, GradedResult } from "@/lib/data";
+import type {
+  FixtureWatchlist,
+  MatchDetail,
+  PropsPick,
+  MostProbablePick,
+  UpcomingFixture,
+} from "@/lib/data";
 import { UPCOMING_DISPLAY_LIMIT, watchlistForFixture } from "@/lib/upcoming";
-import { buildGradedKeys, findGradedResult, sortPastPredictions } from "@/lib/graded";
-import { PREMIER_LEAGUE } from "@/lib/league";
-import PredictionResultBanner from "./PredictionResultBanner";
+import { buildGradedKeys, sortPastPredictions } from "@/lib/graded";
+import type { LoggedFixture } from "@/lib/propsFixtures";
 import FixtureTimelineSection from "./FixtureTimelineSection";
 import MostProbableStrip from "./MostProbableStrip";
 import MatchPropsTable from "./MatchPropsTable";
@@ -29,14 +34,14 @@ function buildPropsIndex(props: PropsPick[]) {
 function findPropsRows(
   fixture: UpcomingFixture,
   byFixtureId: Map<string, PropsPick[]>,
-  loggedGoals: GoalsPick[]
+  logged: LoggedFixture[]
 ): PropsPick[] | undefined {
   const direct = byFixtureId.get(fixture.fixtureId);
   if (direct?.length) return direct;
-  const goal = findLoggedFixture(fixture, loggedGoals);
-  if (goal) {
-    const viaGoal = byFixtureId.get(goal.fixtureId);
-    if (viaGoal?.length) return viaGoal;
+  const match = findLoggedFixture(fixture, logged);
+  if (match) {
+    const via = byFixtureId.get(match.fixtureId);
+    if (via?.length) return via;
   }
   return undefined;
 }
@@ -45,29 +50,29 @@ export function isActivePropsFixture(
   fixtureId: string,
   kickoff: string,
   timeline: FixtureTimeline,
-  loggedGoals: GoalsPick[],
+  logged: LoggedFixture[],
   gradedKeys: Set<string>
 ): boolean {
-  const goal = loggedGoals.find((g) => g.fixtureId === fixtureId);
+  const ref = logged.find((g) => g.fixtureId === fixtureId);
   const timelineFixture =
     [...timeline.today, ...timeline.preview].find((f) => f.fixtureId === fixtureId) ??
-    (goal
+    (ref
       ? [...timeline.today, ...timeline.preview].find(
-          (f) => findLoggedFixture(f, [goal]) !== undefined
+          (f) => findLoggedFixture(f, [ref]) !== undefined
         )
       : undefined);
-  const ref = goal ?? timelineFixture;
+  const fixtureRef = ref ?? timelineFixture;
   if (
     isFixtureFinished(
       kickoff,
       Date.now(),
       gradedKeys,
-      ref
+      fixtureRef
         ? {
-            fixtureId: ref.fixtureId,
-            home: ref.home,
-            away: ref.away,
-            kickoff: ref.kickoff,
+            fixtureId: fixtureRef.fixtureId,
+            home: fixtureRef.home,
+            away: fixtureRef.away,
+            kickoff: fixtureRef.kickoff,
           }
         : { fixtureId, home: "", away: "", kickoff }
     )
@@ -77,8 +82,8 @@ export function isActivePropsFixture(
   const inBucket = (list: UpcomingFixture[]) =>
     list.some((f) => {
       if (f.fixtureId === fixtureId) return true;
-      const goal = findLoggedFixture(f, loggedGoals);
-      return goal?.fixtureId === fixtureId;
+      const m = findLoggedFixture(f, logged);
+      return m?.fixtureId === fixtureId;
     });
   return inBucket(timeline.today) || inBucket(timeline.preview);
 }
@@ -88,54 +93,52 @@ export default function PropsPanel({
   mostProbable,
   timeline,
   watchlists,
-  loggedGoals,
-  graded,
+  matchDetails,
+  loggedFixtures,
 }: {
   props: PropsPick[];
   mostProbable: MostProbablePick[];
   timeline: FixtureTimeline;
   watchlists: FixtureWatchlist[];
-  loggedGoals: GoalsPick[];
-  graded: GradedResult[];
+  matchDetails: Record<string, MatchDetail>;
+  loggedFixtures: LoggedFixture[];
 }) {
   const now = Date.now();
-  const gradedKeys = buildGradedKeys(graded);
+  const gradedKeys = buildGradedKeys([]);
   const byFixtureId = buildPropsIndex(props);
 
-  const plGoals = loggedGoals.filter((g) => g.league === PREMIER_LEAGUE);
-  const plFixtureIds = new Set(plGoals.map((g) => g.fixtureId));
-
-  const pastEntries = [...byFixtureId.entries()].filter(([fixtureId, rows]) => {
-    if (!plFixtureIds.has(fixtureId)) return false;
-    const goal = plGoals.find((g) => g.fixtureId === fixtureId);
-    if (!goal) return false;
-    return isFixtureFinished(rows[0].kickoff, now, gradedKeys, goal);
-  });
-
-  const pastGoals = sortPastPredictions(
-    pastEntries.map(([fixtureId]) => plGoals.find((g) => g.fixtureId === fixtureId)!)
+  const plLogged = loggedFixtures.filter(
+    (f) => f.home && f.away // PL-only pipeline; all logged props are E0
   );
 
-  const pastGroups = pastGoals
-    .map((goal) => {
-      const rows = byFixtureId.get(goal.fixtureId);
-      return rows ? ([goal.fixtureId, rows] as [string, PropsPick[]]) : null;
+  const pastFixtures = sortPastPredictions(
+    plLogged.filter((f) => isFixtureFinished(f.kickoff, now, gradedKeys, f))
+  );
+
+  const pastGroups = pastFixtures
+    .map((f) => {
+      const rows = byFixtureId.get(f.fixtureId);
+      return rows ? ([f, rows] as [LoggedFixture, PropsPick[]]) : null;
     })
-    .filter((entry): entry is [string, PropsPick[]] => entry !== null);
+    .filter((entry): entry is [LoggedFixture, PropsPick[]] => entry !== null);
 
   function renderFixture(
     fixture: UpcomingFixture,
     index: number,
     emphasis: "today" | "preview"
   ) {
-    const rows = findPropsRows(fixture, byFixtureId, loggedGoals);
+    const rows = findPropsRows(fixture, byFixtureId, plLogged);
     const live = isFixtureLive(fixture.kickoff, now, gradedKeys, fixture);
+    const detail = matchDetails[fixture.fixtureId] ?? null;
     if (rows && rows.length > 0) {
       return (
         <MatchPropsTable
           key={fixture.fixtureId}
           fixtureId={fixture.fixtureId}
+          home={fixture.home}
+          away={fixture.away}
           rows={rows}
+          lineup={detail}
           emphasis={emphasis}
           live={live}
         />
@@ -157,16 +160,17 @@ export default function PropsPanel({
     <section>
       <h2 className="text-lg font-semibold mb-1">Player shots &amp; shots-on-target</h2>
       <p className="text-sm text-neutral-500 mb-5">
-        Fixtures move Preview → Today → Past as kickoff approaches. Player lines
-        fill in once lineups are confirmed (~20–40 min pre-kickoff). SOT 3+ has
-        no underlying data yet, shown as -.
+        Premier League only. Fixtures move Preview → Today → Past as kickoff
+        approaches. Pre-match cards show players to watch; confirmed starting
+        XIs and full prop lines land ~20–40 minutes before kickoff. Paper-trade
+        research only — not betting advice.
       </p>
 
       <MostProbableStrip picks={mostProbable} />
 
       <FixtureTimelineSection
         title="Today"
-        description="Matches kicking off today (UTC), including live games until full-time. Full XI and shots/SOT analysis once lineups are confirmed."
+        description="Matches kicking off today (UTC). Live until full-time. Confirmed lineups and shots/SOT model output when the poll catches the XI window."
         emptyMessage="No Premier League matches scheduled for today."
         count={timeline.today.length}
         variant="today"
@@ -175,8 +179,8 @@ export default function PropsPanel({
       </FixtureTimelineSection>
 
       <FixtureTimelineSection
-        title="Preview"
-        description={`Next ${UPCOMING_DISPLAY_LIMIT} scheduled fixtures on future matchdays.`}
+        title="Upcoming"
+        description={`Next ${UPCOMING_DISPLAY_LIMIT} scheduled fixtures on future matchdays — pre-match watchlists and kickoff times.`}
         emptyMessage="No further fixtures in the preview window."
         count={timeline.preview.length}
         variant="preview"
@@ -185,17 +189,21 @@ export default function PropsPanel({
       </FixtureTimelineSection>
 
       <PastDisclosure count={pastGroups.length}>
-        {pastGroups.map(([fixtureId, rows]) => {
-          const goal = loggedGoals.find((g) => g.fixtureId === fixtureId);
-          const gradedResult = goal ? findGradedResult(goal, graded) : null;
-
-          return (
-            <div key={fixtureId} className="space-y-2">
-              {gradedResult && <PredictionResultBanner graded={gradedResult} />}
-              <MatchPropsTable fixtureId={fixtureId} rows={rows} />
+        {pastGroups.map(([fixture, rows]) => (
+          <div key={fixture.fixtureId} className="space-y-2">
+            <div className="text-xs text-neutral-500 px-1">
+              Final score grading for player shots/SOT props is not automated yet —
+              lines below are what the model logged pre-kickoff.
             </div>
-          );
-        })}
+            <MatchPropsTable
+              fixtureId={fixture.fixtureId}
+              home={fixture.home}
+              away={fixture.away}
+              rows={rows}
+              lineup={matchDetails[fixture.fixtureId] ?? null}
+            />
+          </div>
+        ))}
       </PastDisclosure>
     </section>
   );

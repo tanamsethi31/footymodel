@@ -66,8 +66,9 @@ def build_upcoming_list(all_fixtures: list[dict], api_id_to_div: dict[int, str],
     return upcoming
 
 
-def process_one_fixture(fx: dict, client: ApiFootballClient, goals: LiveWatcher,
-                        props: PropsWatcher, div: str) -> tuple[dict | None, list[dict]] | None:
+def process_one_fixture(fx: dict, client: ApiFootballClient, goals: LiveWatcher | None,
+                        props: PropsWatcher, div: str,
+                        props_only: bool = False) -> tuple[dict | None, list[dict]] | None:
     """Fetch lineups+odds for one fixture and run both engines against it.
 
     Returns `None` if lineups aren't confirmed yet (or the lineups fetch
@@ -100,11 +101,12 @@ def process_one_fixture(fx: dict, client: ApiFootballClient, goals: LiveWatcher,
         print(f"  ! odds fetch failed for fixture {fid}: {e}")
         odds_resp = []
 
-    try:
-        goal_row = goals.process_fixture(div, fx, lineups, odds_resp)
-    except Exception as e:
-        print(f"  ! goals-engine error: {e}")
-        goal_row = None
+    goal_row = None
+    if not props_only and goals is not None:
+        try:
+            goal_row = goals.process_fixture(div, fx, lineups, odds_resp)
+        except Exception as e:
+            print(f"  ! goals-engine error: {e}")
 
     prop_rows = []
     # Player-props engine is E0-only for now (see shots_engine.py docstring).
@@ -113,14 +115,28 @@ def process_one_fixture(fx: dict, client: ApiFootballClient, goals: LiveWatcher,
             prop_rows = props.player_rows_for_fixture(fx, lineups, odds_resp)
         except Exception as e:
             print(f"  ! props-engine error: {e}")
+        if prop_rows and props_only:
+            teams = fx["teams"]
+            by_team_id = {l["team"]["id"]: l for l in lineups}
+            home_l = by_team_id.get(teams["home"]["id"])
+            away_l = by_team_id.get(teams["away"]["id"])
+            if home_l and away_l:
+                match_detail.append_details([match_detail.log_props_lineups(
+                    fid,
+                    teams["home"]["name"],
+                    teams["away"]["name"],
+                    [p["player"]["name"] for p in home_l.get("startXI", [])],
+                    [p["player"]["name"] for p in away_l.get("startXI", [])],
+                )])
 
     return goal_row, prop_rows
 
 
 def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
-            hours_behind: int = DEFAULT_HOURS_BEHIND) -> tuple[list[dict], list[dict]]:
+            hours_behind: int = DEFAULT_HOURS_BEHIND,
+            props_only: bool = False) -> tuple[list[dict], list[dict]]:
     client = ApiFootballClient()
-    goals = LiveWatcher(client)
+    goals = None if props_only else LiveWatcher(client)
     props = PropsWatcher(client)
 
     seen = _load_seen()
@@ -180,6 +196,8 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
         div = api_id_to_div.get(fx["league"]["id"])
         if div is None:
             continue  # not one of our confirmed-model leagues
+        if props_only and div != PROPS_LEAGUE:
+            continue
         fid = fx["fixture"]["id"]
         if fid in seen:
             continue
@@ -188,7 +206,7 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
         if not (-hours_behind * 60 <= mins_to_ko <= hours_ahead * 60):
             continue
 
-        result = process_one_fixture(fx, client, goals, props, div)
+        result = process_one_fixture(fx, client, goals, props, div, props_only=props_only)
         if result is None:
             fixture_health.record(
                 fid, kickoff=str(fx["fixture"]["date"]),
@@ -199,7 +217,14 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
             continue  # lineups not confirmed yet — caller will retry on next poll
 
         goal_row, fixture_prop_rows = result
-        if goal_row is None:
+        if props_only:
+            if fixture_prop_rows:
+                outcome = "processed"
+                detail = f"confirmed lineups and {len(fixture_prop_rows)} player-prop row(s) logged"
+            else:
+                outcome = "lineup_unusable"
+                detail = "confirmed lineups could not produce player-prop rows"
+        elif goal_row is None:
             outcome = "lineup_unusable"
             detail = "confirmed lineups could not produce a goals-model row"
         elif goal_row.get("odds_over25") and goal_row.get("odds_under25"):
@@ -239,13 +264,22 @@ def run_once(hours_ahead: int = DEFAULT_HOURS_AHEAD,
 
 
 if __name__ == "__main__":
+    import argparse
     import traceback
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--props-only",
+        action="store_true",
+        help="Run only the E0 player shots/SOT props engine (skip goals O/U).",
+    )
+    args = parser.parse_args()
 
     print("!" * 72)
     print("PAPER-TRADE / PREDICTION MODE. No bets placed, no money at risk.")
     print("!" * 72)
     try:
-        run_once()
+        run_once(props_only=args.props_only)
     except Exception:
         # Cron output only goes to a log file nobody watches live - make a
         # crash impossible to miss (grep-able marker) rather than a bare

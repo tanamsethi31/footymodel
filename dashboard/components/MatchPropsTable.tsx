@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { PropsPick } from "@/lib/data";
+import type { MatchDetail, PropsPick } from "@/lib/data";
 import { formatKickoff, odds, probClass } from "@/lib/format";
 import {
   cardEmphasisClass,
@@ -88,18 +88,53 @@ function PlayerMarketGrid({ rows }: { rows: PropsPick[] }) {
   );
 }
 
+function LineupBlock({ lineup, home, away }: { lineup: MatchDetail | null; home: string; away: string }) {
+  if (!lineup || (lineup.homeStarters.length === 0 && lineup.awayStarters.length === 0)) {
+    return null;
+  }
+  return (
+    <div className="mb-4 rounded-lg border border-neutral-200 dark:border-neutral-800 p-3">
+      <div className="text-neutral-500 text-xs mb-2">Confirmed starting XI</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div>
+          <div className="font-medium mb-1">{home}</div>
+          <ul className="text-neutral-600 dark:text-neutral-400 space-y-0.5">
+            {lineup.homeStarters.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <div className="font-medium mb-1">{away}</div>
+          <ul className="text-neutral-600 dark:text-neutral-400 space-y-0.5">
+            {lineup.awayStarters.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MatchPropsTable({
   fixtureId,
+  home,
+  away,
   rows,
+  lineup = null,
   emphasis = "preview",
   live = false,
 }: {
   fixtureId: string;
+  home: string;
+  away: string;
   rows: PropsPick[];
+  lineup?: MatchDetail | null;
   emphasis?: TimelineEmphasis;
   live?: boolean;
 }) {
-  const teams = [...new Set(rows.map((r) => r.team))];
+  const teams = home && away ? [home, away] : [...new Set(rows.map((r) => r.team))];
   const [activeTeam, setActiveTeam] = useState(0);
   const [thresh, setThresh] = useState(0);
   const [swapping, setSwapping] = useState(false);
@@ -150,7 +185,7 @@ export default function MatchPropsTable({
       <div className="flex items-baseline justify-between gap-2 flex-wrap mb-1">
         <span className="font-medium flex items-center gap-2 flex-wrap">
           {expandable && <Chevron open={open} />}
-          {teams.join(" v ")}
+          {home && away ? `${home} v ${away}` : teams.join(" v ")}
           <span className={badge.className}>{badge.label}</span>
           {live && <span className={livePill.className}>{livePill.label}</span>}
         </span>
@@ -169,6 +204,7 @@ export default function MatchPropsTable({
       >
         <div className={expandable ? "overflow-hidden" : ""}>
           <div className={expandable ? "pt-2" : ""}>
+            <LineupBlock lineup={lineup} home={home || teams[0] || ""} away={away || teams[1] || ""} />
             <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
               <div className="inline-flex bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-0.5 gap-0.5">
                 {teams.map((t, i) => (

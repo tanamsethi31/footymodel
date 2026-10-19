@@ -31,6 +31,47 @@ def _new_rows(path: str) -> list[dict]:
     return list(reader)
 
 
+def build_props_line(props: list[dict]) -> str:
+    """Summarize newly logged player-prop rows for push notifications."""
+    by_fixture: dict[str, list[dict]] = {}
+    for row in props:
+        fid = row.get("fixture_id") or ""
+        by_fixture.setdefault(str(fid), []).append(row)
+
+    def fixture_label(rows: list[dict]) -> str:
+        home = rows[0].get("home") or "?"
+        away = rows[0].get("away") or "?"
+        return f"{home} v {away}"
+
+    def top_player(rows: list[dict]) -> tuple[str, float]:
+        best_name, best_p = "?", 0.0
+        for r in rows:
+            for key in ("p_shots_gt0.5", "p_sot_gt0.5"):
+                try:
+                    p = float(r.get(key) or 0)
+                except (TypeError, ValueError):
+                    continue
+                if p > best_p:
+                    best_p, best_name = p, r.get("player") or "?"
+        return best_name, best_p
+
+    featured_fid = max(
+        by_fixture,
+        key=lambda fid: max(
+            float(r.get("p_shots_gt0.5") or 0) for r in by_fixture[fid]
+        ),
+    )
+    rows = by_fixture[featured_fid]
+    player, prob = top_player(rows)
+    line = f"{fixture_label(rows)}: {player} {round(prob * 100)}% shots/SOT lead"
+    extra_fixtures = len(by_fixture) - 1
+    if extra_fixtures > 0:
+        line += f" (+{extra_fixtures} more fixture(s), {len(props)} lines)"
+    else:
+        line += f" ({len(props)} player lines)"
+    return line
+
+
 def build_goals_line(goals: list[dict]) -> str:
     """One summary line for the newly-logged goals predictions, featuring
     whichever fixture has the model's most confident call (largest distance
@@ -53,31 +94,21 @@ def main() -> None:
         print("NOTIFY_URL/NOTIFY_SECRET not set, skipping notification")
         return
 
-    goals = _new_rows("data/processed/live_recommendations.csv")
     props = _new_rows("data/processed/live_player_props.csv")
     prop_fixtures = {r["fixture_id"] for r in props if r.get("fixture_id")}
 
-    if not goals and not prop_fixtures:
+    if not prop_fixtures:
         print("No new rows, skipping notification")
         return
 
     parts = []
-    if goals:
-        try:
-            parts.append(build_goals_line(goals))
-        except Exception as e:
-            # build_goals_line() trusts that model_p_over25/exp_total_goals
-            # are always populated - true for every engine today, but this
-            # falls back to a plain team-name list rather than crashing (and
-            # losing the notification entirely) if that ever isn't the case.
-            print(f"  ! build_goals_line failed, falling back to team names: {e}")
-            names = [f"{r['home']} v {r['away']}" for r in goals[:3]]
-            more = f" +{len(goals) - 3} more" if len(goals) > 3 else ""
-            parts.append(f"Goals: {', '.join(names)}{more}")
-    if prop_fixtures:
-        parts.append(f"Props: {len(prop_fixtures)} fixture(s), {len(props)} player line(s)")
+    try:
+        parts.append(build_props_line(props))
+    except Exception as e:
+        print(f"  ! build_props_line failed, falling back to counts: {e}")
+        parts.append(f"{len(prop_fixtures)} fixture(s), {len(props)} player line(s)")
 
-    title = f"{len(goals) + len(prop_fixtures)} new footymodel prediction(s)"
+    title = f"{len(prop_fixtures)} new footymodel prop fixture(s)"
     body = " | ".join(parts)
 
     try:

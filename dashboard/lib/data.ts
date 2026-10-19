@@ -30,12 +30,14 @@ export type GoalsPick = {
 
 export type MatchDetail = {
   fixtureId: string;
+  home?: string;
+  away?: string;
   homeStarters: string[];
   awayStarters: string[];
-  expTeam: number;
-  expFull: number;
-  pOver25Team: number;
-  pOver25Full: number;
+  expTeam: number | null;
+  expFull: number | null;
+  pOver25Team: number | null;
+  pOver25Full: number | null;
 };
 
 export type UpcomingFixture = {
@@ -94,6 +96,8 @@ export type KellySimResult = {
 export type PropsPick = {
   fixtureId: string;
   kickoff: string;
+  home: string;
+  away: string;
   team: string;
   player: string;
   pShotsGt05: number | null;
@@ -321,21 +325,37 @@ export async function getMatchDetails(): Promise<Record<string, MatchDetail>> {
   const rows = await fetchJsonl("match_detail.jsonl");
   const byFixtureId: Record<string, MatchDetail> = {};
   for (const r of rows) {
-    // A malformed/partial line (e.g. an interrupted write) should degrade to
-    // "no detail for this match", the same as a fixture with no line at all -
-    // not render NaN through pct()/toFixed() in the UI.
+    const fixtureId = String(r.fixture_id);
+    const homeStarters = Array.isArray(r.home_starters) ? (r.home_starters as string[]) : [];
+    const awayStarters = Array.isArray(r.away_starters) ? (r.away_starters as string[]) : [];
+    const kind = r.kind === "props" ? "props" : "goals";
     const expTeam = num(r.exp_team);
     const expFull = num(r.exp_full);
     const pOver25Team = num(r.p_over25_team);
     const pOver25Full = num(r.p_over25_full);
+
+    if (kind === "props" || (expTeam === null && expFull === null)) {
+      if (homeStarters.length === 0 && awayStarters.length === 0) continue;
+      byFixtureId[fixtureId] = {
+        fixtureId,
+        home: r.home ? String(r.home) : undefined,
+        away: r.away ? String(r.away) : undefined,
+        homeStarters,
+        awayStarters,
+        expTeam: null,
+        expFull: null,
+        pOver25Team: null,
+        pOver25Full: null,
+      };
+      continue;
+    }
     if (expTeam === null || expFull === null || pOver25Team === null || pOver25Full === null) {
       continue;
     }
-    const fixtureId = String(r.fixture_id);
     byFixtureId[fixtureId] = {
       fixtureId,
-      homeStarters: Array.isArray(r.home_starters) ? (r.home_starters as string[]) : [],
-      awayStarters: Array.isArray(r.away_starters) ? (r.away_starters as string[]) : [],
+      homeStarters,
+      awayStarters,
       expTeam,
       expFull,
       pOver25Team,
@@ -463,6 +483,8 @@ export async function getPropsPicks(): Promise<PropsPick[]> {
     .map((r) => ({
       fixtureId: r.fixture_id,
       kickoff: r.kickoff,
+      home: r.home ? String(r.home) : "",
+      away: r.away ? String(r.away) : "",
       team: r.team,
       player: r.player,
       pShotsGt05: num(r["p_shots_gt0.5"]),

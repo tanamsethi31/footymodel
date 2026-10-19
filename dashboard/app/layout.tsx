@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import DashboardRefreshListener from "@/components/DashboardRefreshListener";
 import "./globals.css";
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "footymodel",
-  description: "Live, backtested football predictions: goals O/U and player shots/SOT.",
+  description: "Premier League player shots and shots-on-target — live paper-trade research dashboard.",
   manifest: "/manifest.json",
 };
 
@@ -29,7 +30,7 @@ const THEME_INIT_SCRIPT = `(function () {
   } catch (e) {}
 })();`;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
