@@ -52,6 +52,7 @@ def main() -> None:
         return
 
     print("Next fixtures:")
+    next_ko = None
     for mins, rec, ko in upcoming:
         in_window = lo <= mins <= hi
         flag = "← POLL WINDOW" if in_window else ""
@@ -59,10 +60,23 @@ def main() -> None:
             f"  {_fmt(ko)}  {rec['home']} v {rec['away']}  "
             f"({mins:+.0f} min) {flag}"
         )
+        if next_ko is None and mins > 15:
+            next_ko = (mins, rec, ko)
+
+    if next_ko:
+        mins, rec, ko = next_ko
+        sweet_start = ko - pd.Timedelta(minutes=90)
+        sweet_end = ko - pd.Timedelta(minutes=15)
+        print(
+            f"\nLaptop props (home Wi‑Fi): run ./scripts/matchday_laptop.sh loop "
+            f"from {_fmt(sweet_start)} until lineups land (ideally before {_fmt(sweet_end)})."
+        )
+        if mins > 90:
+            wait_min = int(mins - 90)
+            print(f"  Next match is {wait_min} min until the usual T−90 window.")
 
     print(
-        "\nGitHub cron: every 20 min, 08:00–23:59 UTC "
-        "(props workflow only runs when gate says should_run=true)."
+        "\nCloud (laptop off): calendar + grading on GitHub Actions."
     )
     print("Post-match grading: grade_props.yml at 08:00 & 23:30 UTC.")
 
