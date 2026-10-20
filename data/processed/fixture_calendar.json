@@ -1,15 +1,8 @@
 {
-  "refreshed_at": "2026-10-19T14:14:47.760580+00:00",
+  "refreshed_at": "2026-10-20T12:32:49.121003+00:00",
   "horizon_days": 10,
   "source": "fantasy-premier-league",
   "fixtures": [
-    {
-      "fixture_id": "fpl_69",
-      "league_id": 39,
-      "home": "Nott'm Forest",
-      "away": "Arsenal",
-      "kickoff": "2026-10-18T15:30:00+00:00"
-    },
     {
       "fixture_id": "fpl_70",
       "league_id": 39,
