@@ -1,11 +1,11 @@
 fixture_id,kickoff,home,away,home_goals,away_goals,home_shots,away_shots,understat_match_id,proxy_xi,n_players_graded,source
-us_31239,2026-10-12T15:00:00+00:00,Coventry,Newcastle,4,1,9,19,31239,False,22,backfill_understat
-us_31238,2026-10-11T15:00:00+00:00,Liverpool,Man City,0,3,13,15,31238,False,22,backfill_understat
-us_31237,2026-10-11T15:00:00+00:00,Hull,Everton,2,2,9,15,31237,False,22,backfill_understat
-us_31236,2026-10-11T15:00:00+00:00,Crystal Palace,Nott'm Forest,3,1,13,24,31236,False,22,backfill_understat
-us_31235,2026-10-10T15:00:00+00:00,Man United,Tottenham,1,1,12,12,31235,False,22,backfill_understat
-us_31234,2026-10-10T15:00:00+00:00,Sunderland,Brighton,0,2,12,13,31234,False,22,backfill_understat
-us_31233,2026-10-10T15:00:00+00:00,Ipswich,Fulham,2,1,11,13,31233,False,22,backfill_understat
-us_31232,2026-10-10T15:00:00+00:00,Chelsea,Bournemouth,5,1,10,9,31232,False,22,backfill_understat
-us_31231,2026-10-10T15:00:00+00:00,Aston Villa,Brentford,2,2,20,14,31231,False,22,backfill_understat
-us_31230,2026-10-10T15:00:00+00:00,Arsenal,Leeds,2,1,13,11,31230,False,22,backfill_understat
+us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,3,1,16,12,31249,False,22,backfill_understat
+us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,0,1,14,9,31248,False,22,backfill_understat
+us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,1,1,12,13,31247,False,22,backfill_understat
+us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,5,0,17,5,31245,False,22,backfill_understat
+us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,2,0,29,3,31246,False,22,backfill_understat
+us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,1,2,10,21,31242,False,22,backfill_understat
+us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,0,2,6,18,31240,False,22,backfill_understat
+us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,1,0,18,5,31241,False,22,backfill_understat
+us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,3,2,19,8,31243,False,22,backfill_understat
+us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,0,1,16,15,31244,False,22,backfill_understat
