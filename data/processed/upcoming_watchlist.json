@@ -815,6 +815,40 @@
           "p_shots_gt0.5": 0.736
         }
       ]
+    },
+    {
+      "fixture_id": "us_31267",
+      "home": "Aston Villa",
+      "away": "Fulham",
+      "kickoff": "2026-10-31T20:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Johan Manzambi",
+          "p_shots_gt0.5": 0.871
+        },
+        {
+          "player": "Nicolas Jackson",
+          "p_shots_gt0.5": 0.859
+        },
+        {
+          "player": "Emiliano Buend\u00eda",
+          "p_shots_gt0.5": 0.817
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Gonzalo Garc\u00eda",
+          "p_shots_gt0.5": 0.825
+        },
+        {
+          "player": "C\u00e9sar Palacios",
+          "p_shots_gt0.5": 0.795
+        },
+        {
+          "player": "Joshua King",
+          "p_shots_gt0.5": 0.771
+        }
+      ]
     }
   ]
 }
