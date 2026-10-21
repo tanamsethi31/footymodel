@@ -112,5 +112,41 @@
     "home": "Chelsea",
     "away": "Man Utd",
     "kickoff": "2026-10-31T12:30:00+00:00"
+  },
+  {
+    "fixture_id": "us_31264",
+    "home": "Bournemouth",
+    "away": "Leeds",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31265",
+    "home": "Brentford",
+    "away": "Nottingham Forest",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31261",
+    "home": "Coventry",
+    "away": "Sunderland",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31262",
+    "home": "Hull",
+    "away": "Ipswich",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31263",
+    "home": "Manchester City",
+    "away": "Brighton",
+    "kickoff": "2026-10-31T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31266",
+    "home": "Tottenham",
+    "away": "Crystal Palace",
+    "kickoff": "2026-10-31T17:30:00+00:00"
   }
 ]
