@@ -100,5 +100,17 @@
     "home": "Sunderland",
     "away": "Leeds",
     "kickoff": "2026-10-25T16:30:00+00:00"
+  },
+  {
+    "fixture_id": "us_31260",
+    "home": "Chelsea",
+    "away": "Manchester United",
+    "kickoff": "2026-10-31T12:30:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_84",
+    "home": "Chelsea",
+    "away": "Man Utd",
+    "kickoff": "2026-10-31T12:30:00+00:00"
   }
 ]

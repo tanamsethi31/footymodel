@@ -1,15 +1,8 @@
 {
-  "refreshed_at": "2026-10-20T12:32:49.121003+00:00",
+  "refreshed_at": "2026-10-21T12:43:04.303049+00:00",
   "horizon_days": 10,
   "source": "fantasy-premier-league",
   "fixtures": [
-    {
-      "fixture_id": "fpl_70",
-      "league_id": 39,
-      "home": "Spurs",
-      "away": "Coventry City",
-      "kickoff": "2026-10-19T19:00:00+00:00"
-    },
     {
       "fixture_id": "fpl_77",
       "league_id": 39,
@@ -79,6 +72,13 @@
       "home": "Sunderland",
       "away": "Leeds",
       "kickoff": "2026-10-25T16:30:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_84",
+      "league_id": 39,
+      "home": "Chelsea",
+      "away": "Man Utd",
+      "kickoff": "2026-10-31T12:30:00+00:00"
     }
   ]
 }
