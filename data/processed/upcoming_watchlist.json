@@ -985,6 +985,40 @@
           "p_shots_gt0.5": 0.771
         }
       ]
+    },
+    {
+      "fixture_id": "us_31268",
+      "home": "Liverpool",
+      "away": "Arsenal",
+      "kickoff": "2026-11-01T16:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Alexander Isak",
+          "p_shots_gt0.5": 0.823
+        },
+        {
+          "player": "Lewis Koumas",
+          "p_shots_gt0.5": 0.811
+        },
+        {
+          "player": "Cody Gakpo",
+          "p_shots_gt0.5": 0.81
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Bukayo Saka",
+          "p_shots_gt0.5": 0.768
+        },
+        {
+          "player": "Eberechi Eze",
+          "p_shots_gt0.5": 0.765
+        },
+        {
+          "player": "Kai Havertz",
+          "p_shots_gt0.5": 0.73
+        }
+      ]
     }
   ]
 }
