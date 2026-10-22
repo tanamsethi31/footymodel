@@ -1,5 +1,5 @@
 {
-  "refreshed_at": "2026-10-21T12:43:04.303049+00:00",
+  "refreshed_at": "2026-10-22T12:47:17.856847+00:00",
   "horizon_days": 10,
   "source": "fantasy-premier-league",
   "fixtures": [
@@ -79,6 +79,55 @@
       "home": "Chelsea",
       "away": "Man Utd",
       "kickoff": "2026-10-31T12:30:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_82",
+      "league_id": 39,
+      "home": "Bournemouth",
+      "away": "Leeds",
+      "kickoff": "2026-10-31T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_83",
+      "league_id": 39,
+      "home": "Brentford",
+      "away": "Nott'm Forest",
+      "kickoff": "2026-10-31T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_85",
+      "league_id": 39,
+      "home": "Coventry City",
+      "away": "Sunderland",
+      "kickoff": "2026-10-31T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_86",
+      "league_id": 39,
+      "home": "Hull City",
+      "away": "Ipswich Town",
+      "kickoff": "2026-10-31T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_88",
+      "league_id": 39,
+      "home": "Man City",
+      "away": "Brighton",
+      "kickoff": "2026-10-31T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_90",
+      "league_id": 39,
+      "home": "Spurs",
+      "away": "Crystal Palace",
+      "kickoff": "2026-10-31T17:30:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_81",
+      "league_id": 39,
+      "home": "Aston Villa",
+      "away": "Fulham",
+      "kickoff": "2026-10-31T20:00:00+00:00"
     }
   ]
 }
