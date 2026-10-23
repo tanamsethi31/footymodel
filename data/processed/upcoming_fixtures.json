@@ -1,17 +1,5 @@
 [
   {
-    "fixture_id": "us_31250",
-    "home": "Ipswich",
-    "away": "Nottingham Forest",
-    "kickoff": "2026-10-23T19:00:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_77",
-    "home": "Ipswich Town",
-    "away": "Nott'm Forest",
-    "kickoff": "2026-10-23T19:00:00+00:00"
-  },
-  {
     "fixture_id": "us_31251",
     "home": "Aston Villa",
     "away": "Manchester City",
@@ -190,5 +178,11 @@
     "home": "Liverpool",
     "away": "Arsenal",
     "kickoff": "2026-11-01T16:30:00+00:00"
+  },
+  {
+    "fixture_id": "us_31269",
+    "home": "Newcastle United",
+    "away": "Everton",
+    "kickoff": "2026-11-02T20:00:00+00:00"
   }
 ]

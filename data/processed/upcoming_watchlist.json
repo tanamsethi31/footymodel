@@ -1,74 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "us_31250",
-      "home": "Ipswich",
-      "away": "Nottingham Forest",
-      "kickoff": "2026-10-23T19:00:00+00:00",
-      "home_watch": [
-        {
-          "player": "Julio Enciso",
-          "p_shots_gt0.5": 0.897
-        },
-        {
-          "player": "Emersonn",
-          "p_shots_gt0.5": 0.863
-        },
-        {
-          "player": "Jaden Philogene-Bidace",
-          "p_shots_gt0.5": 0.828
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Liam Delap",
-          "p_shots_gt0.5": 0.877
-        },
-        {
-          "player": "Igor Jesus",
-          "p_shots_gt0.5": 0.868
-        },
-        {
-          "player": "Morgan Gibbs-White",
-          "p_shots_gt0.5": 0.821
-        }
-      ]
-    },
-    {
-      "fixture_id": "fpl_77",
-      "home": "Ipswich Town",
-      "away": "Nott'm Forest",
-      "kickoff": "2026-10-23T19:00:00+00:00",
-      "home_watch": [
-        {
-          "player": "Julio Enciso",
-          "p_shots_gt0.5": 0.897
-        },
-        {
-          "player": "Emersonn",
-          "p_shots_gt0.5": 0.863
-        },
-        {
-          "player": "Jaden Philogene-Bidace",
-          "p_shots_gt0.5": 0.828
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Liam Delap",
-          "p_shots_gt0.5": 0.877
-        },
-        {
-          "player": "Igor Jesus",
-          "p_shots_gt0.5": 0.868
-        },
-        {
-          "player": "Morgan Gibbs-White",
-          "p_shots_gt0.5": 0.821
-        }
-      ]
-    },
-    {
       "fixture_id": "us_31251",
       "home": "Aston Villa",
       "away": "Manchester City",
@@ -1017,6 +949,40 @@
         {
           "player": "Kai Havertz",
           "p_shots_gt0.5": 0.73
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31269",
+      "home": "Newcastle United",
+      "away": "Everton",
+      "kickoff": "2026-11-02T20:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Harvey Barnes",
+          "p_shots_gt0.5": 0.86
+        },
+        {
+          "player": "Yoane Wissa",
+          "p_shots_gt0.5": 0.859
+        },
+        {
+          "player": "Jacob Murphy",
+          "p_shots_gt0.5": 0.804
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Thierno Barry",
+          "p_shots_gt0.5": 0.809
+        },
+        {
+          "player": "Tyrique George",
+          "p_shots_gt0.5": 0.794
+        },
+        {
+          "player": "Brennan Johnson",
+          "p_shots_gt0.5": 0.723
         }
       ]
     }
