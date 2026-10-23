@@ -1,5 +1,5 @@
 {
-  "refreshed_at": "2026-10-22T12:47:17.856847+00:00",
+  "refreshed_at": "2026-10-23T12:25:26.033153+00:00",
   "horizon_days": 10,
   "source": "fantasy-premier-league",
   "fixtures": [
@@ -128,6 +128,13 @@
       "home": "Aston Villa",
       "away": "Fulham",
       "kickoff": "2026-10-31T20:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_87",
+      "league_id": 39,
+      "home": "Liverpool",
+      "away": "Arsenal",
+      "kickoff": "2026-11-01T16:30:00+00:00"
     }
   ]
 }
