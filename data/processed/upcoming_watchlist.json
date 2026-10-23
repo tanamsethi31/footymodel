@@ -620,7 +620,7 @@
       "home_watch": [
         {
           "player": "David Brooks",
-          "p_shots_gt0.5": 0.883
+          "p_shots_gt0.5": 0.882
         },
         {
           "player": "Evanilson",
@@ -794,7 +794,7 @@
         },
         {
           "player": "Mohamed Belloumi",
-          "p_shots_gt0.5": 0.859
+          "p_shots_gt0.5": 0.858
         },
         {
           "player": "Oliver McBurnie",
@@ -828,7 +828,7 @@
         },
         {
           "player": "Mohamed Belloumi",
-          "p_shots_gt0.5": 0.859
+          "p_shots_gt0.5": 0.858
         },
         {
           "player": "Oliver McBurnie",
@@ -934,7 +934,7 @@
         },
         {
           "player": "S\u00e1vio",
-          "p_shots_gt0.5": 0.828
+          "p_shots_gt0.5": 0.827
         }
       ],
       "away_watch": [
