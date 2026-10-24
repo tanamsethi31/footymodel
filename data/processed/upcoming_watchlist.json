@@ -1,74 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "us_31251",
-      "home": "Aston Villa",
-      "away": "Manchester City",
-      "kickoff": "2026-10-24T11:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Johan Manzambi",
-          "p_shots_gt0.5": 0.772
-        },
-        {
-          "player": "Nicolas Jackson",
-          "p_shots_gt0.5": 0.755
-        },
-        {
-          "player": "Emiliano Buend\u00eda",
-          "p_shots_gt0.5": 0.7
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Erling Haaland",
-          "p_shots_gt0.5": 0.886
-        },
-        {
-          "player": "Mathis Cherki",
-          "p_shots_gt0.5": 0.828
-        },
-        {
-          "player": "Phil Foden",
-          "p_shots_gt0.5": 0.819
-        }
-      ]
-    },
-    {
-      "fixture_id": "fpl_72",
-      "home": "Aston Villa",
-      "away": "Man City",
-      "kickoff": "2026-10-24T11:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Johan Manzambi",
-          "p_shots_gt0.5": 0.772
-        },
-        {
-          "player": "Nicolas Jackson",
-          "p_shots_gt0.5": 0.755
-        },
-        {
-          "player": "Emiliano Buend\u00eda",
-          "p_shots_gt0.5": 0.7
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Erling Haaland",
-          "p_shots_gt0.5": 0.886
-        },
-        {
-          "player": "Mathis Cherki",
-          "p_shots_gt0.5": 0.828
-        },
-        {
-          "player": "Phil Foden",
-          "p_shots_gt0.5": 0.819
-        }
-      ]
-    },
-    {
       "fixture_id": "fpl_71",
       "home": "Arsenal",
       "away": "Everton",
@@ -910,7 +842,7 @@
         },
         {
           "player": "C\u00e9sar Palacios",
-          "p_shots_gt0.5": 0.795
+          "p_shots_gt0.5": 0.794
         },
         {
           "player": "Joshua King",
@@ -949,6 +881,40 @@
         {
           "player": "Kai Havertz",
           "p_shots_gt0.5": 0.73
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_89",
+      "home": "Newcastle",
+      "away": "Everton",
+      "kickoff": "2026-11-02T20:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Harvey Barnes",
+          "p_shots_gt0.5": 0.86
+        },
+        {
+          "player": "Yoane Wissa",
+          "p_shots_gt0.5": 0.859
+        },
+        {
+          "player": "Jacob Murphy",
+          "p_shots_gt0.5": 0.804
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Thierno Barry",
+          "p_shots_gt0.5": 0.809
+        },
+        {
+          "player": "Tyrique George",
+          "p_shots_gt0.5": 0.794
+        },
+        {
+          "player": "Brennan Johnson",
+          "p_shots_gt0.5": 0.723
         }
       ]
     },

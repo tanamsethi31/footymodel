@@ -1,17 +1,5 @@
 [
   {
-    "fixture_id": "us_31251",
-    "home": "Aston Villa",
-    "away": "Manchester City",
-    "kickoff": "2026-10-24T11:30:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_72",
-    "home": "Aston Villa",
-    "away": "Man City",
-    "kickoff": "2026-10-24T11:30:00+00:00"
-  },
-  {
     "fixture_id": "fpl_71",
     "home": "Arsenal",
     "away": "Everton",
@@ -178,6 +166,12 @@
     "home": "Liverpool",
     "away": "Arsenal",
     "kickoff": "2026-11-01T16:30:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_89",
+    "home": "Newcastle",
+    "away": "Everton",
+    "kickoff": "2026-11-02T20:00:00+00:00"
   },
   {
     "fixture_id": "us_31269",
