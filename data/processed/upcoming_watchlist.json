@@ -1,40 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "us_31255",
-      "home": "Chelsea",
-      "away": "Tottenham",
-      "kickoff": "2026-10-24T16:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Cole Palmer",
-          "p_shots_gt0.5": 0.891
-        },
-        {
-          "player": "Jo\u00e3o Pedro",
-          "p_shots_gt0.5": 0.856
-        },
-        {
-          "player": "Danny Welbeck",
-          "p_shots_gt0.5": 0.832
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Omar Marmoush",
-          "p_shots_gt0.5": 0.802
-        },
-        {
-          "player": "Dominic Solanke",
-          "p_shots_gt0.5": 0.748
-        },
-        {
-          "player": "S\u00e1vio",
-          "p_shots_gt0.5": 0.736
-        }
-      ]
-    },
-    {
       "fixture_id": "us_31257",
       "home": "Crystal Palace",
       "away": "Newcastle United",
