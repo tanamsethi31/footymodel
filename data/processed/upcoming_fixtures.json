@@ -1,53 +1,5 @@
 [
   {
-    "fixture_id": "us_31257",
-    "home": "Crystal Palace",
-    "away": "Newcastle United",
-    "kickoff": "2026-10-25T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_75",
-    "home": "Crystal Palace",
-    "away": "Newcastle",
-    "kickoff": "2026-10-25T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "us_31258",
-    "home": "Hull",
-    "away": "Brentford",
-    "kickoff": "2026-10-25T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_76",
-    "home": "Hull City",
-    "away": "Brentford",
-    "kickoff": "2026-10-25T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_78",
-    "home": "Liverpool",
-    "away": "Brighton",
-    "kickoff": "2026-10-25T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_79",
-    "home": "Man Utd",
-    "away": "Bournemouth",
-    "kickoff": "2026-10-25T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "us_31256",
-    "home": "Manchester United",
-    "away": "Bournemouth",
-    "kickoff": "2026-10-25T14:00:00+00:00"
-  },
-  {
-    "fixture_id": "fpl_80",
-    "home": "Sunderland",
-    "away": "Leeds",
-    "kickoff": "2026-10-25T16:30:00+00:00"
-  },
-  {
     "fixture_id": "us_31260",
     "home": "Chelsea",
     "away": "Manchester United",
