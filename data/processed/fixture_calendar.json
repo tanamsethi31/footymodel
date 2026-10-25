@@ -1,22 +1,8 @@
 {
-  "refreshed_at": "2026-10-24T11:51:35.678149+00:00",
+  "refreshed_at": "2026-10-25T12:21:04.613662+00:00",
   "horizon_days": 10,
   "source": "fantasy-premier-league",
   "fixtures": [
-    {
-      "fixture_id": "fpl_77",
-      "league_id": 39,
-      "home": "Ipswich Town",
-      "away": "Nott'm Forest",
-      "kickoff": "2026-10-23T19:00:00+00:00"
-    },
-    {
-      "fixture_id": "fpl_72",
-      "league_id": 39,
-      "home": "Aston Villa",
-      "away": "Man City",
-      "kickoff": "2026-10-24T11:30:00+00:00"
-    },
     {
       "fixture_id": "fpl_71",
       "league_id": 39,
