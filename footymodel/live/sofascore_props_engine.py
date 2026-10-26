@@ -5,8 +5,9 @@ local match-day cron). GitHub-hosted ubuntu-latest IPs are bot-blocked by
 SofaScore; this module is not meant to run there.
 
 Uses confirmed SofaScore lineups and the same shots/SOT models as
-shots_engine.py. Book odds are **not** fetched (model-only rows; EV columns
-stay empty). No API-Football or RapidAPI quota required.
+shots_engine.py. Fetches SofaScore book odds when the match exposes player
+shots/SOT markets (often absent); otherwise logs model-only rows and the
+paper bankroll uses confidence-based stakes. No API-Football or RapidAPI.
 """
 from __future__ import annotations
 
@@ -17,8 +18,10 @@ import pandas as pd
 from ..data import PROCESSED_DIR
 from . import fixture_health
 from . import match_detail
+from .paper_props_bankroll import place_paper_bets_for_fixture
 from .shots_engine import append_props_rows, PropsWatcher
 from .sofascore_client import SofaScoreClient, SofaScoreError
+from .sofascore_props_odds import parse_sofascore_player_prop_odds
 
 # Premier League — same tournament id as sofascore_engine.py
 TOURNAMENT_IDS = {
@@ -73,6 +76,15 @@ class SofaScorePropsWatcher:
             print(f"  ! too few starters ({len(home_names)}/{len(away_names)}) for {home_api} v {away_api}")
             return None
 
+        try:
+            markets = self.client.odds(event_id)
+        except SofaScoreError as e:
+            print(f"  ! SofaScore odds fetch failed: {e}")
+            markets = []
+        shots_odds, sot_odds = parse_sofascore_player_prop_odds(markets)
+        if shots_odds or sot_odds:
+            print(f"  + parsed {len(shots_odds)} shots / {len(sot_odds)} SOT player odds from SofaScore")
+
         rows = self.props.build_rows_for_starters(
             fixture_id=fixture_id,
             kickoff=kickoff,
@@ -80,6 +92,8 @@ class SofaScorePropsWatcher:
             away_name=away_api,
             home_starter_names=home_names,
             away_starter_names=away_names,
+            shots_odds=shots_odds,
+            sot_odds=sot_odds,
         )
         if not rows:
             return None
@@ -169,6 +183,11 @@ class SofaScorePropsWatcher:
         if all_rows:
             n = append_props_rows(all_rows)
             print(f"Logged {n} player-prop rows")
+            by_fixture: dict[str, list[dict]] = {}
+            for row in all_rows:
+                by_fixture.setdefault(str(row["fixture_id"]), []).append(row)
+            for fid, rows in by_fixture.items():
+                place_paper_bets_for_fixture(fid, rows)
         else:
             print("No new confirmed-lineup fixtures this poll (SofaScore props).")
 
@@ -180,7 +199,7 @@ if __name__ == "__main__":
     import traceback
 
     print("!" * 72)
-    print("PAPER-TRADE / PREDICTION MODE (SofaScore props, model-only).")
+    print("PAPER-TRADE MODE (SofaScore props + € paper bankroll). No real money.")
     print("!" * 72)
     try:
         with SofaScoreClient() as client:
