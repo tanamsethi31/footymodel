@@ -1,30 +1,31 @@
-# footymodel dashboard — props-only feature checklist
+# footymodel dashboard — player shots & SOT
 
-Use the **Features** tab on [footymodel.vercel.app](https://footymodel.vercel.app/) for the live checklist (same content, kept in sync with `components/FeaturesPanel.tsx`).
+Use the **Features** tab on [footymodel.vercel.app](https://footymodel.vercel.app/) for the live checklist (synced with `components/FeaturesPanel.tsx`).
 
-## Live today (Option A — free data)
+**Repo docs:** [`docs/SHOTS_SOT_OPERATING.md`](../docs/SHOTS_SOT_OPERATING.md),
+[`docs/PAPER_PROPS_EXPERIMENT.md`](../docs/PAPER_PROPS_EXPERIMENT.md).
 
+## Live today
+
+- **Product:** Premier League **player shots** (1+/2+/3+) and **SOT** (1+/2+) only
 - **Cloud:** fixture calendar + pre-match watchlists (`live_poll.yml`)
-- **Self-hosted / home:** SofaScore Playwright props (`live_poll_props_selfhosted.yml` or `scripts/poll_props_local.sh`) — see [docs/SELF_HOSTED_PROPS.md](../docs/SELF_HOSTED_PROPS.md)
-- Premier League player shots & SOT predictions (confirmed-lineup window, model-only)
-- Today / Upcoming / Past fixture timeline
-- Pre-match “players to watch” watchlists
-- Confirmed starting XI on logged fixtures
-- Per-player probability grids + quick-scan table
-- Web Push when new `live_player_props.csv` rows are committed
-- Glossary and feature status tab
+- **Home network:** SofaScore Playwright props + **€100 paper bankroll**
+  (`matchday_laptop.sh` or `live_poll_props_selfhosted.yml`)
+- Confirmed starting XI, per-player probability grids, fixture timeline (Irish time)
+- **Track record:** Understat grading + paper bankroll summary when ledger files are committed
+- Web Push on new `live_player_props.csv` rows
+- Glossary + Features tab
 
 ## Partial
 
-- Book odds & EV on props (when API-Football returns player line markets)
+- SofaScore **player-prop book odds** (often absent — model-confidence paper stakes used)
 - PWA install (manifest without icons)
 
 ## Planned
 
-- Post-match grading vs actual shots/SOT (Track record tab)
-- Prop CLV / yield
+- Prop CLV when closing player lines are captured reliably
 - Notification deep links to a fixture card
 
 ## Retired
 
-- Goals Over/Under 2.5 tab and Kelly staking tab (goals paper-trade)
+- Goals Over/Under 2.5 live tab and goals Kelly staking tab (research only in repo)

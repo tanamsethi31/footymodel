@@ -41,9 +41,14 @@ const FEATURES: {
         note: "1+/2+/3+ shots and 1+/2+ SOT thresholds.",
       },
       {
-        name: "Full market grid (odds when fetched)",
+        name: "SofaScore player-prop odds + EV",
         status: "partial",
-        note: "Option A is model-only (no EV). Paid/API paths can add odds later.",
+        note: "Parsed when SofaScore exposes shots/SOT markets; else model-confidence paper stakes.",
+      },
+      {
+        name: "€100 internal paper bankroll",
+        status: "live",
+        note: "Kelly when odds exist; 1% confidence stakes otherwise. Track record tab.",
       },
       {
         name: "Most probable strip",
@@ -71,9 +76,9 @@ const FEATURES: {
         note: "Understat rosters + shot logs via scripts/backfill_recent_props.py; proxy XI when rosters lag.",
       },
       {
-        name: "CLV / yield on prop bets",
+        name: "CLV / yield vs closing prop lines",
         status: "planned",
-        note: "Depends on grading + closing prop odds capture.",
+        note: "Needs reliable SofaScore closing player-prop capture.",
       },
     ],
   },

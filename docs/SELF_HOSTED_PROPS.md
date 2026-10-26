@@ -45,7 +45,9 @@ Or run `python -m footymodel.live.sofascore_props_engine` directly, then commit/
 
 - Confirmed starting XI in the dashboard
 - Per-player P(shots 1+/2+/3+) and P(SOT 1+/2+)
-- **No book odds / EV** in this mode (model-only). Grading vs actual shots still uses post-match WhoScored/FBref (planned).
+- **€100 internal paper bankroll** (`paper_props_bankroll.json` + `paper_props_bets.csv`) — see
+  [`PAPER_PROPS_EXPERIMENT.md`](PAPER_PROPS_EXPERIMENT.md). SofaScore player-prop odds are
+  used when present; otherwise model-confidence stakes.
 
 ## What this does *not* use
 

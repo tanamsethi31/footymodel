@@ -194,10 +194,10 @@ export default function PropsPanel({
     <section>
       <h2 className="text-lg font-semibold mb-1">Player shots &amp; shots-on-target</h2>
       <p className="text-sm text-neutral-500 mb-5">
-        Premier League only. Fixtures move Preview → Today → Past as kickoff
-        approaches. Pre-match cards show players to watch; confirmed starting
-        XIs and full prop lines land ~20–40 minutes before kickoff. Paper-trade
-        research only — not betting advice.
+        Premier League only — no match goals O/U. Fixtures move Preview → Today →
+        Past; confirmed XIs and prop lines land ~20–40 minutes before kickoff via
+        SofaScore on home Wi‑Fi. Internal €100 paper ledger sizes stakes after each
+        poll. Research only, not betting advice.
       </p>
 
       <MostProbableStrip picks={mostProbable} />

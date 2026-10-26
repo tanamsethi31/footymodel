@@ -1,5 +1,8 @@
 # Match-day automation (how timing works)
 
+**Product scope:** Premier League **player shots** and **SOT** only, via SofaScore
+lineups on a home network. See [`SHOTS_SOT_OPERATING.md`](SHOTS_SOT_OPERATING.md).
+
 Footymodel does **not** schedule one cron job per fixture (GitHub Actions cannot create dynamic crons). Instead it uses the same pattern most small/medium sports-data products use:
 
 1. **Coarse heartbeat** — poll every N minutes during match hours.
@@ -22,8 +25,8 @@ We stay on **cron + gate** for cost and simplicity; Irish kickoffs are shown in 
 | Workflow | Where | When (UTC cron) | Purpose |
 |----------|--------|-----------------|--------|
 | `live_poll.yml` | GitHub cloud | `*/20 8-23 * * *` | Calendar + watchlists (free APIs). |
-| `live_poll_props_selfhosted.yml` | **Self-hosted** runner | `*/20 8-23 * * *` | SofaScore lineups → model props (~60–180 min before KO). |
-| `grade_props.yml` | GitHub cloud | `08:00`, `23:30` daily | Understat refresh + `backfill_recent_props.py`. |
+| `live_poll_props_selfhosted.yml` | **Self-hosted** runner | `*/20 8-23 * * *` | SofaScore lineups → props + **€ paper bets** (~60–180 min before KO). |
+| `grade_props.yml` | GitHub cloud | `08:00`, `23:30` daily | Understat refresh, grade props, **`settle_paper_props.py`**. |
 | `refresh_training_data.yml` | GitHub cloud | daily | Training parquet refresh. |
 
 The **gate** (`python -m footymodel.live.calendar --gate`) sets `should_run=true` only when an unseen fixture is inside `DEFAULT_HOURS_BEHIND` / `DEFAULT_HOURS_AHEAD` (see `footymodel/live/calendar.py`). That is how we align polls with kickoff **without** per-match timers.

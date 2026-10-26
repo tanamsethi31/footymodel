@@ -60,7 +60,9 @@ maybe_push() {
   for f in data/processed/live_player_props.csv \
            data/processed/match_detail.jsonl \
            data/processed/sofascore_props_seen_fixtures.json \
-           data/processed/live_fixture_health.json; do
+           data/processed/live_fixture_health.json \
+           data/processed/paper_props_bankroll.json \
+           data/processed/paper_props_bets.csv; do
     [[ -f "$f" ]] && git add "$f" && changed=true
   done
   if [[ "$changed" != "true" ]]; then
@@ -112,6 +114,7 @@ case "$cmd" in
   once)
     if gate_should_run; then
       echo "Gate open — running SofaScore props..."
+      python3 scripts/settle_paper_props.py || true
       run_props_engine
       maybe_push
     else
@@ -125,6 +128,7 @@ case "$cmd" in
       echo ""
       echo "=== $(date -u +'%Y-%m-%d %H:%M:%S UTC') ==="
       if gate_should_run; then
+        python3 scripts/settle_paper_props.py || true
         run_props_engine || echo "! props engine failed (network or SofaScore) — will retry."
         maybe_push
       else
