@@ -32,18 +32,39 @@ jobs:
           python -m footymodel.live.calendar --gate || true
           python -m footymodel.live.calendar --from-understat
 
+      - name: Export matchday ICS (phone calendar reminders)
+        run: python scripts/export_matchday_ics.py
+
       - name: Commit + push calendar / preview state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for f in data/processed/upcoming_fixtures.json \
                    data/processed/upcoming_watchlist.json \
-                   data/processed/fixture_calendar.json; do
+                   data/processed/fixture_calendar.json \
+                   data/processed/matchday_reminders.ics; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --cached --quiet && exit 0
           git commit -m "live poll (calendar): $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git push
+
+      - name: Restore matchday nudge cooldown
+        uses: actions/cache@v4
+        with:
+          path: .cache/matchday_nudge
+          key: matchday-nudge-${{ github.run_id }}
+          restore-keys: |
+            matchday-nudge-
+
+      - name: Home poll nudge (push — laptop or self-hosted runner)
+        env:
+          NOTIFY_URL: https://footymodel.vercel.app/api/notify
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: python scripts/matchday_cloud_nudge.py --cooldown-file .cache/matchday_nudge/last_sent.txt
+
+      - name: Matchday integration check (cloud files)
+        run: python scripts/matchday_integration_check.py
 
       - name: Calendar health (no props age check on cloud)
         run: python scripts/live_healthcheck.py --calendar-only

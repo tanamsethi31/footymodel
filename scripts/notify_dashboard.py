@@ -87,6 +87,40 @@ def build_goals_line(goals: list[dict]) -> str:
     return line
 
 
+def build_notification(
+    props: list[dict], goals: list[dict]
+) -> tuple[str, str] | None:
+    """Return (title, body) for a combined matchday push, or None if empty."""
+    prop_fixtures = {r["fixture_id"] for r in props if r.get("fixture_id")}
+    if not prop_fixtures and not goals:
+        return None
+
+    parts: list[str] = []
+    if goals:
+        try:
+            parts.append(build_goals_line(goals))
+        except Exception as e:
+            print(f"  ! build_goals_line failed, falling back to count: {e}")
+            parts.append(f"{len(goals)} goals O/U line(s)")
+
+    if props:
+        try:
+            parts.append(build_props_line(props))
+        except Exception as e:
+            print(f"  ! build_props_line failed, falling back to counts: {e}")
+            parts.append(f"{len(prop_fixtures)} fixture(s), {len(props)} player line(s)")
+
+    if prop_fixtures and goals:
+        title = (
+            f"Matchday: {len(prop_fixtures)} props + {len(goals)} goals update(s)"
+        )
+    elif goals:
+        title = f"{len(goals)} new footymodel goals O/U prediction(s)"
+    else:
+        title = f"{len(prop_fixtures)} new footymodel prop fixture(s)"
+    return title, " | ".join(parts)
+
+
 def main() -> None:
     url = os.environ.get("NOTIFY_URL")
     secret = os.environ.get("NOTIFY_SECRET")
@@ -95,21 +129,12 @@ def main() -> None:
         return
 
     props = _new_rows("data/processed/live_player_props.csv")
-    prop_fixtures = {r["fixture_id"] for r in props if r.get("fixture_id")}
-
-    if not prop_fixtures:
-        print("No new rows, skipping notification")
+    goals = _new_rows("data/processed/live_recommendations.csv")
+    built = build_notification(props, goals)
+    if built is None:
+        print("No new props or goals rows, skipping notification")
         return
-
-    parts = []
-    try:
-        parts.append(build_props_line(props))
-    except Exception as e:
-        print(f"  ! build_props_line failed, falling back to counts: {e}")
-        parts.append(f"{len(prop_fixtures)} fixture(s), {len(props)} player line(s)")
-
-    title = f"{len(prop_fixtures)} new footymodel prop fixture(s)"
-    body = " | ".join(parts)
+    title, body = built
 
     try:
         resp = requests.post(

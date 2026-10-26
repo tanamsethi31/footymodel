@@ -46,6 +46,7 @@ gate_should_run() {
 }
 
 run_matchday_poll() {
+  python3 scripts/matchday_integration_check.py || true
   python3 -m footymodel.live.sofascore_matchday
 }
 

@@ -118,7 +118,12 @@ const FEATURES: {
       {
         name: "Cloud calendar / watchlist poll",
         status: "live",
-        note: "GitHub-hosted job updates preview without Playwright.",
+        note: "GitHub-hosted job updates preview, ICS reminders, home-poll push nudge.",
+      },
+      {
+        name: "matchday_reminders.ics",
+        status: "live",
+        note: "Import into Google/Apple Calendar from data/processed (T−90 poll window).",
       },
       {
         name: "PWA manifest / install",

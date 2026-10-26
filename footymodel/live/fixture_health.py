@@ -36,3 +36,36 @@ def record(fixture_id: str | int, *, kickoff: str, home: str, away: str,
     }
     STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
     STATE_FILE.write_text(json.dumps(state, indent=2, sort_keys=True))
+
+
+def load_all() -> dict[str, dict]:
+    if not STATE_FILE.exists():
+        return {}
+    try:
+        payload = json.loads(STATE_FILE.read_text())
+    except (json.JSONDecodeError, OSError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+_SUCCESS_OUTCOMES = frozenset({"processed", "processed_model_only", "odds_unavailable"})
+
+
+def calendar_row_processed(rec: dict, *, source: str = "sofascore") -> bool:
+    """True if a live engine already logged this calendar fixture (home/away/kickoff day)."""
+    from .calendar import match_key
+
+    target = match_key(rec)
+    for entry in load_all().values():
+        if not isinstance(entry, dict):
+            continue
+        if source and entry.get("source") != source:
+            continue
+        if entry.get("outcome") not in _SUCCESS_OUTCOMES:
+            continue
+        try:
+            if match_key(entry) == target:
+                return True
+        except (KeyError, TypeError):
+            continue
+    return False

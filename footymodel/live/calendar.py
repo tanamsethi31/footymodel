@@ -724,6 +724,10 @@ def _unseen_in_live_window(
             continue
         if _fixture_seen(fid, seen):
             continue
+        from .fixture_health import calendar_row_processed
+
+        if calendar_row_processed(rec):
+            continue
         unseen.append(rec)
     return unseen
 

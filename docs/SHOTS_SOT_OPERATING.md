@@ -39,7 +39,10 @@ home machine for the matchday poll.
    python scripts/paper_props_summary.py
    ```
 
-Details: [`MATCHDAY_AUTOMATION.md`](MATCHDAY_AUTOMATION.md), [`SELF_HOSTED_PROPS.md`](SELF_HOSTED_PROPS.md).
+Details: [`MATCHDAY_AUTOMATION.md`](MATCHDAY_AUTOMATION.md), [`MATCHDAY_CLOUD_AUTOMATION.md`](MATCHDAY_CLOUD_AUTOMATION.md), [`SELF_HOSTED_PROPS.md`](SELF_HOSTED_PROPS.md).
+
+**Automation:** cloud job refreshes `matchday_reminders.ics` and can Web Push when a
+home poll is due; run `python scripts/matchday_integration_check.py` before match day.
 
 ## Paper bankroll rules
 
