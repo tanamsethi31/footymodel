@@ -67,6 +67,8 @@ jobs:
         run: python scripts/paper_props_bankroll_test.py
       - name: Goals O/U live math audit (pure, data-free)
         run: python scripts/goals_ou_math_audit.py
+      - name: Matchday status + notify composition (pure, data-free)
+        run: python scripts/matchday_status_test.py
       - name: Missed-fixture backfill script recovery + idempotency (mocked API)
         run: python scripts/backfill_missed_fixtures_test.py
       - name: Push notification content - featured-fixture selection (pure, data-free)

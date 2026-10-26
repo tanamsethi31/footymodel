@@ -184,7 +184,9 @@ playwright install chromium
 | Cloud grade goals + settle | `.github/workflows/grade_results.yml` |
 | Optional always-on home PC | `.github/workflows/live_poll_props_selfhosted.yml` |
 
-Full playbook: [`docs/SHOTS_SOT_OPERATING.md`](docs/SHOTS_SOT_OPERATING.md). Goals plan: [`docs/GOALS_OU_PAPER_PLAN.md`](docs/GOALS_OU_PAPER_PLAN.md).
+Full playbook: [`docs/SHOTS_SOT_OPERATING.md`](docs/SHOTS_SOT_OPERATING.md). Automation:
+[`docs/MATCHDAY_CLOUD_AUTOMATION.md`](docs/MATCHDAY_CLOUD_AUTOMATION.md). Goals plan:
+[`docs/GOALS_OU_PAPER_PLAN.md`](docs/GOALS_OU_PAPER_PLAN.md).
 
 Dry-run (no network):
 

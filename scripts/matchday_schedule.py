@@ -68,8 +68,12 @@ def main() -> None:
         sweet_start = ko - pd.Timedelta(minutes=90)
         sweet_end = ko - pd.Timedelta(minutes=15)
         print(
-            f"\nLaptop props (home Wi‑Fi): run ./scripts/matchday_laptop.sh loop "
+            f"\nHome poll (goals O/U + props, Wi‑Fi): ./scripts/matchday_laptop.sh loop 900 --push "
             f"from {_fmt(sweet_start)} until lineups land (ideally before {_fmt(sweet_end)})."
+        )
+        print(
+            "  Phone calendar: subscribe to data/processed/matchday_reminders.ics "
+            "(refreshed by live_poll.yml on GitHub)."
         )
         if mins > 90:
             wait_min = int(mins - 90)
