@@ -44,6 +44,7 @@ data/logs/
 !data/processed/paper_props_bankroll.json
 !data/processed/paper_props_bets.csv
 !data/processed/paper_bankroll_bets.csv
+!data/processed/matchday_reminders.ics
 !data/processed/kelly_simulation.csv
 !data/raw_fbref/player_match.jsonl
 .superpowers/
