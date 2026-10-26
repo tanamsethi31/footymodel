@@ -15,7 +15,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from ..data import PROCESSED_DIR
+from ..data import PROCESSED_DIR, load as load_matches
 from . import apify_engine, namematch, rapidapi_engine, sofascore_engine
 from .apify_client import ApifyFootballClient
 from .client import ApiFootballClient, ApiFootballError
@@ -325,12 +325,99 @@ def _lookup_finished_apify_by_teams(
     return None
 
 
+def _lookup_finished_from_parquet(row: pd.Series) -> tuple[int, int] | None:
+    """Free PL score lookup from football-data.co.uk parquet (no API keys)."""
+    try:
+        df = load_matches()
+    except (FileNotFoundError, OSError):
+        return None
+    pl = df[df["league"] == "E0"].copy()
+    if pl.empty:
+        return None
+    kickoff = pd.Timestamp(row["kickoff"])
+    if kickoff.tzinfo is not None:
+        kickoff = kickoff.tz_convert("UTC")
+    day = kickoff.normalize().tz_localize(None) if kickoff.tzinfo else kickoff.normalize()
+    pl["date"] = pd.to_datetime(pl["date"]).dt.normalize()
+    day_rows = pl[pl["date"] == day]
+    if day_rows.empty:
+        return None
+    names = list(day_rows["home_team"]) + list(day_rows["away_team"])
+    home_m = namematch.best_match(str(row["home"]), names, threshold=0.55)
+    away_m = namematch.best_match(str(row["away"]), names, threshold=0.55)
+    if not home_m or not away_m:
+        return None
+    hit = day_rows[
+        (day_rows["home_team"] == home_m) & (day_rows["away_team"] == away_m)
+    ]
+    if hit.empty:
+        return None
+    r = hit.iloc[-1]
+    if pd.isna(r.get("fthg")) or pd.isna(r.get("ftag")):
+        return None
+    return int(r["fthg"]), int(r["ftag"])
+
+
+def _lookup_finished_sofa_event(clients: dict, fixture_id: str) -> tuple[int, int] | None:
+    if not fixture_id.startswith("sofa_"):
+        return None
+    client = clients.get("sofascore")
+    if client is None:
+        return None
+    try:
+        event_id = int(fixture_id.removeprefix("sofa_"))
+    except ValueError:
+        return None
+    try:
+        event = client.event(event_id)
+    except Exception as e:
+        print(f"  ! SofaScore event {event_id} lookup failed: {e}")
+        return None
+    status = (event.get("status") or {}).get("type") or ""
+    if status not in ("finished",):
+        return None
+    home = event.get("homeScore", {}).get("current")
+    away = event.get("awayScore", {}).get("current")
+    if home is None or away is None:
+        return None
+    return int(home), int(away)
+
+
 def _lookup_finished_fixture(
     row: pd.Series,
     cache: dict[str, list[dict]],
     clients: dict,
 ) -> tuple[int, int] | None:
     fixture_id = str(row["fixture_id"])
+
+    # Plain numeric ids are legacy API-Football keys — prefer by-id API when available
+    # so grading does not accidentally match an unrelated row in matches.parquet.
+    apifootball = clients.get("apifootball")
+    if apifootball is not None and fixture_id.isdigit():
+        try:
+            fx = apifootball.fixture_by_id(int(fixture_id))
+        except (ValueError, ApiFootballError) as e:
+            print(f"  ! fixture id {fixture_id} lookup failed: {e}")
+            fx = None
+        if fx is not None:
+            if fx["fixture"]["status"]["short"] not in ("FT", "AET", "PEN"):
+                return None
+            home_goals = fx["goals"]["home"]
+            away_goals = fx["goals"]["away"]
+            if home_goals is None or away_goals is None:
+                return None
+            return int(home_goals), int(away_goals)
+
+    scores = _lookup_finished_sofa_event(clients, fixture_id)
+    if scores is not None:
+        return scores
+
+    # Free PL scores for SofaScore paper path (cloud grade_results has no Playwright).
+    if fixture_id.startswith("sofa_"):
+        scores = _lookup_finished_from_parquet(row)
+        if scores is not None:
+            return scores
+
     rapidapi = clients.get("rapidapi")
     rapidapi_budget = clients.get("rapidapi_budget")
 
@@ -366,18 +453,10 @@ def _lookup_finished_fixture(
         if scores is not None:
             return scores
 
-    apifootball = clients.get("apifootball")
     if apifootball is None:
         return None
 
     fx = None
-    try:
-        fx = apifootball.fixture_by_id(int(fixture_id))
-    except ValueError:
-        pass
-    except ApiFootballError as e:
-        print(f"  ! fixture id {fixture_id} lookup failed: {e}")
-
     if fx is None:
         kickoff = pd.Timestamp(row["kickoff"])
         date_str = kickoff.strftime("%Y-%m-%d")
@@ -504,10 +583,6 @@ def main() -> None:
             clients["apify_budget"] = apify_engine._load_budget()
         except Exception as e:
             print(f"! Apify client unavailable ({e})")
-
-    if not clients:
-        print("! no grading data source available (set RAPIDAPI_KEY)")
-        return
 
     sofascore_client = None
     if fixture_ids.str.startswith("sofa_").any():

@@ -2,21 +2,23 @@
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
-const TABS = ["Predictions", "Track record", "Features", "Glossary"];
+const TABS = ["Predictions", "Goals O/U", "Track record", "Features", "Glossary"];
 
 export default function DashboardTabs({
   predictions,
+  goalsOu,
   trackRecord,
   features,
   glossary,
 }: {
   predictions: ReactNode;
+  goalsOu: ReactNode;
   trackRecord: ReactNode;
   features: ReactNode;
   glossary: ReactNode;
 }) {
   const [active, setActive] = useState(0);
-  const panels = [predictions, trackRecord, features, glossary];
+  const panels = [predictions, goalsOu, trackRecord, features, glossary];
 
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -54,7 +56,7 @@ export default function DashboardTabs({
                 buttonRefs.current[i] = el;
               }}
               onClick={() => setActive(i)}
-              className="relative z-10 w-28 sm:w-32 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-neutral-500 dark:text-neutral-400 whitespace-nowrap text-center active:scale-[0.97] transition-transform duration-150"
+              className="relative z-10 w-24 sm:w-28 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-neutral-500 dark:text-neutral-400 whitespace-nowrap text-center active:scale-[0.97] transition-transform duration-150"
             >
               {t}
             </button>
@@ -69,7 +71,7 @@ export default function DashboardTabs({
               {TABS.map((t) => (
                 <span
                   key={t}
-                  className="w-28 sm:w-32 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-white whitespace-nowrap text-center"
+                  className="w-24 sm:w-28 shrink-0 px-2 py-1.5 rounded-full text-sm font-medium text-white whitespace-nowrap text-center"
                 >
                   {t}
                 </span>

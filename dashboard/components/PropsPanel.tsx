@@ -194,7 +194,7 @@ export default function PropsPanel({
     <section>
       <h2 className="text-lg font-semibold mb-1">Player shots &amp; shots-on-target</h2>
       <p className="text-sm text-neutral-500 mb-5">
-        Premier League only — no match goals O/U. Fixtures move Preview → Today →
+        Premier League player props. Fixtures move Preview → Today →
         Past; confirmed XIs and prop lines land ~20–40 minutes before kickoff via
         SofaScore on home Wi‑Fi. Internal €100 paper ledger sizes stakes after each
         poll. Research only, not betting advice.

@@ -29,16 +29,27 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Refresh PL results in matches.parquet (free football-data.co.uk)
+        run: python -m footymodel.data --leagues E0 --seasons 2025 2026
+
       - name: Grade past predictions against real results (goals only, v1)
         env:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: python -m footymodel.live.grade_results
 
+      - name: Settle € paper bankroll (goals legs)
+        run: PYTHONPATH=. python scripts/settle_paper_props.py
+
       - name: Commit + push any newly graded results
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          [ -f data/processed/graded_results.csv ] && git add data/processed/graded_results.csv
+          for f in data/processed/graded_results.csv \
+                   data/processed/matches.parquet \
+                   data/processed/paper_props_bankroll.json \
+                   data/processed/paper_bankroll_bets.csv; do
+            [ -f "$f" ] && git add "$f"
+          done
           git diff --cached --quiet && exit 0
           git commit -m "grade results: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git push

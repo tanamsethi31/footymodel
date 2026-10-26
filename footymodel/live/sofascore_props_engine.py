@@ -18,7 +18,7 @@ import pandas as pd
 from ..data import PROCESSED_DIR
 from . import fixture_health
 from . import match_detail
-from .paper_props_bankroll import place_paper_bets_for_fixture
+from .paper_bankroll import place_paper_bets_for_fixture
 from .shots_engine import append_props_rows, PropsWatcher
 from .sofascore_client import SofaScoreClient, SofaScoreError
 from .sofascore_props_odds import parse_sofascore_player_prop_odds

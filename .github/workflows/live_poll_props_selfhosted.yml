@@ -34,10 +34,10 @@ jobs:
         id: gate
         run: python -m footymodel.live.calendar --gate
 
-      - name: Run SofaScore player props (model-only)
+      - name: Run SofaScore matchday (goals O/U + props)
         id: props
         if: steps.gate.outputs.should_run == 'true'
-        run: python -m footymodel.live.sofascore_props_engine
+        run: python -m footymodel.live.sofascore_matchday
 
       - name: Commit + push props state
         env:
@@ -51,6 +51,9 @@ jobs:
                    data/processed/sofascore_props_seen_fixtures.json \
                    data/processed/live_fixture_health.json \
                    data/processed/paper_props_bankroll.json \
+                   data/processed/live_recommendations.csv \
+                   data/processed/sofascore_seen_fixtures.json \
+                   data/processed/paper_bankroll_bets.csv \
                    data/processed/paper_props_bets.csv \
                    data/processed/upcoming_fixtures.json \
                    data/processed/upcoming_watchlist.json; do
@@ -61,8 +64,10 @@ jobs:
           git commit -m "live poll (props): $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git push
 
-      - name: Props pipeline health
-        run: python scripts/live_healthcheck.py --props-only
+      - name: Matchday pipeline health (props + goals recommendations)
+        run: |
+          python scripts/live_healthcheck.py --props-only
+          python scripts/live_healthcheck.py
 
       - name: Fail when SofaScore props did not complete in a fixture window
         if: always() && steps.gate.outputs.should_run == 'true' && steps.props.outcome != 'success'
