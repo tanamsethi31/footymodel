@@ -29,6 +29,9 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Refresh PL results in matches.parquet (free football-data.co.uk)
+        run: python -m footymodel.data --leagues E0 --seasons 2025 2026
+
       - name: Grade past predictions against real results (goals only, v1)
         env:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
@@ -42,6 +45,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for f in data/processed/graded_results.csv \
+                   data/processed/matches.parquet \
                    data/processed/paper_props_bankroll.json \
                    data/processed/paper_bankroll_bets.csv; do
             [ -f "$f" ] && git add "$f"

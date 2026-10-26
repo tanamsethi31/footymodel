@@ -52,6 +52,7 @@ jobs:
                    data/processed/live_player_props.csv \
                    data/processed/match_detail.jsonl \
                    data/processed/paper_props_bankroll.json \
+                   data/processed/paper_bankroll_bets.csv \
                    data/processed/paper_props_bets.csv \
                    data/processed/matches_xg.parquet \
                    data/raw_understat/EPL_2026.json; do

@@ -142,6 +142,18 @@ def _fixture_key(home: str, away: str, kickoff: str) -> tuple[str, str, str]:
     return (_norm_label(home), _norm_label(away), day)
 
 
+def _open_stake_for_fixture(ledger: list[dict], home: str, away: str, kickoff: str) -> float:
+    """Stake already committed on this fixture (props + goals), open bets only."""
+    fkey = _fixture_key(home, away, kickoff)
+    total = 0.0
+    for bet in ledger:
+        if bet.get("status") != "open":
+            continue
+        if _fixture_key(str(bet["home"]), str(bet["away"]), str(bet["kickoff"])) == fkey:
+            total += float(bet["stake_eur"])
+    return total
+
+
 def _props_candidates_from_row(row: dict, min_ev: float) -> list[_Candidate]:
     out: list[_Candidate] = []
     player = str(row["player"])
@@ -217,7 +229,7 @@ def _place_candidates(
     candidates.sort(key=lambda c: c.score, reverse=True)
     placed: list[dict] = []
     fixture_stake_cap = bankroll * max_fixture_stake_fraction
-    fixture_stake_used = 0.0
+    fixture_stake_used = _open_stake_for_fixture(ledger, home, away, kickoff)
     placed_count = 0
 
     for cand in candidates:

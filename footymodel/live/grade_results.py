@@ -390,13 +390,33 @@ def _lookup_finished_fixture(
 ) -> tuple[int, int] | None:
     fixture_id = str(row["fixture_id"])
 
-    scores = _lookup_finished_from_parquet(row)
-    if scores is not None:
-        return scores
+    # Plain numeric ids are legacy API-Football keys — prefer by-id API when available
+    # so grading does not accidentally match an unrelated row in matches.parquet.
+    apifootball = clients.get("apifootball")
+    if apifootball is not None and fixture_id.isdigit():
+        try:
+            fx = apifootball.fixture_by_id(int(fixture_id))
+        except (ValueError, ApiFootballError) as e:
+            print(f"  ! fixture id {fixture_id} lookup failed: {e}")
+            fx = None
+        if fx is not None:
+            if fx["fixture"]["status"]["short"] not in ("FT", "AET", "PEN"):
+                return None
+            home_goals = fx["goals"]["home"]
+            away_goals = fx["goals"]["away"]
+            if home_goals is None or away_goals is None:
+                return None
+            return int(home_goals), int(away_goals)
 
     scores = _lookup_finished_sofa_event(clients, fixture_id)
     if scores is not None:
         return scores
+
+    # Free PL scores for SofaScore paper path (cloud grade_results has no Playwright).
+    if fixture_id.startswith("sofa_"):
+        scores = _lookup_finished_from_parquet(row)
+        if scores is not None:
+            return scores
 
     rapidapi = clients.get("rapidapi")
     rapidapi_budget = clients.get("rapidapi_budget")
@@ -433,18 +453,10 @@ def _lookup_finished_fixture(
         if scores is not None:
             return scores
 
-    apifootball = clients.get("apifootball")
     if apifootball is None:
         return None
 
     fx = None
-    try:
-        fx = apifootball.fixture_by_id(int(fixture_id))
-    except ValueError:
-        pass
-    except ApiFootballError as e:
-        print(f"  ! fixture id {fixture_id} lookup failed: {e}")
-
     if fx is None:
         kickoff = pd.Timestamp(row["kickoff"])
         date_str = kickoff.strftime("%Y-%m-%d")
