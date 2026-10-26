@@ -31,6 +31,7 @@ from ..strategy import remove_margin
 from . import namematch
 from . import match_detail
 from . import fixture_health
+from .paper_bankroll import place_paper_goals_from_row
 from .sofascore_client import SofaScoreClient, SofaScoreError
 
 # Only E0 - the one league with individually significant backtested
@@ -49,6 +50,7 @@ SEEN_FIXTURES_FILE = PROCESSED_DIR / "sofascore_seen_fixtures.json"
 # hasn't been characterized as precisely, so keep the same 2hr lookback -
 # a poll well before confirmation just gets confirmed=false and retries.
 DEFAULT_HOURS_AHEAD = 2
+LINEUP_LOOKBACK_MINUTES = 180
 
 
 def _load_seen() -> set:
@@ -169,7 +171,11 @@ class SofaScoreWatcher:
             row["fixture_id"], home_names, away_names, pred)
         return row
 
-    def run_once(self, hours_ahead: int = DEFAULT_HOURS_AHEAD) -> list[dict]:
+    def run_once(
+        self,
+        hours_ahead: int = DEFAULT_HOURS_AHEAD,
+        lookback_minutes: int = LINEUP_LOOKBACK_MINUTES,
+    ) -> list[dict]:
         seen = _load_seen()
         now = pd.Timestamp.now(tz="UTC")
         new_rows = []
@@ -192,7 +198,7 @@ class SofaScoreWatcher:
                         continue
                     kickoff = pd.Timestamp(ev["startTimestamp"], unit="s", tz="UTC")
                     mins_to_ko = (kickoff - now).total_seconds() / 60
-                    if not (0 <= mins_to_ko <= hours_ahead * 60):
+                    if not (-lookback_minutes <= mins_to_ko <= hours_ahead * 60):
                         continue
                     print(f"  checking {ev['homeTeam']['name']} v {ev['awayTeam']['name']} "
                           f"(kickoff in {mins_to_ko:.0f}min)")
@@ -235,6 +241,9 @@ class SofaScoreWatcher:
             LIVE_LOG.parent.mkdir(parents=True, exist_ok=True)
             df.to_csv(LIVE_LOG, mode="a", header=not LIVE_LOG.exists(), index=False)
             print(f"Logged {len(new_rows)} new recommendation(s) -> {LIVE_LOG}")
+            for row in new_rows:
+                clean = {k: v for k, v in row.items() if not str(k).startswith("_")}
+                place_paper_goals_from_row(clean)
         else:
             print("No new confirmed-lineup fixtures this poll (SofaScore).")
         _save_seen(seen)

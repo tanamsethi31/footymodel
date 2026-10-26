@@ -34,10 +34,10 @@ jobs:
         id: gate
         run: python -m footymodel.live.calendar --gate
 
-      - name: Run SofaScore player props (model-only)
+      - name: Run SofaScore matchday (goals O/U + props)
         id: props
         if: steps.gate.outputs.should_run == 'true'
-        run: python -m footymodel.live.sofascore_props_engine
+        run: python -m footymodel.live.sofascore_matchday
 
       - name: Commit + push props state
         env:
@@ -51,6 +51,9 @@ jobs:
                    data/processed/sofascore_props_seen_fixtures.json \
                    data/processed/live_fixture_health.json \
                    data/processed/paper_props_bankroll.json \
+                   data/processed/live_recommendations.csv \
+                   data/processed/sofascore_seen_fixtures.json \
+                   data/processed/paper_bankroll_bets.csv \
                    data/processed/paper_props_bets.csv \
                    data/processed/upcoming_fixtures.json \
                    data/processed/upcoming_watchlist.json; do

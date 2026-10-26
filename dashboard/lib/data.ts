@@ -258,6 +258,20 @@ export type PaperBankrollSummary = {
   lostBets: number;
 };
 
+export type PaperBet = {
+  betId: string;
+  betKind: string;
+  fixtureId: string;
+  home: string;
+  away: string;
+  market: string;
+  modelP: number;
+  decimalOdds: number | null;
+  stakeEur: number;
+  status: string;
+  pnlEur: number | null;
+};
+
 export async function getPaperBankrollSummary(): Promise<PaperBankrollSummary | null> {
   const text = await fetchTextFile("paper_props_bankroll.json");
   if (!text) return null;
@@ -267,7 +281,10 @@ export async function getPaperBankrollSummary(): Promise<PaperBankrollSummary | 
   } catch {
     return null;
   }
-  const betRows = await fetchCsv("paper_props_bets.csv");
+  let betRows = await fetchCsv("paper_bankroll_bets.csv");
+  if (betRows.length === 0) {
+    betRows = await fetchCsv("paper_props_bets.csv");
+  }
   const openBets = betRows.filter((r) => r.status === "open").length;
   const wonBets = betRows.filter((r) => r.status === "won").length;
   const lostBets = betRows.filter((r) => r.status === "lost").length;
@@ -673,6 +690,28 @@ export async function getGradedPropsPlayers(): Promise<GradedPropsPlayer[]> {
       proxyXi: bool(r.proxy_xi) ?? false,
     }))
     .filter((r) => r.fixtureId && r.player);
+}
+
+export async function getPaperBets(): Promise<PaperBet[]> {
+  let rows = await fetchCsv("paper_bankroll_bets.csv");
+  if (rows.length === 0) {
+    rows = await fetchCsv("paper_props_bets.csv");
+  }
+  return rows
+    .map((r) => ({
+      betId: r.bet_id,
+      betKind: r.bet_kind || "props",
+      fixtureId: r.fixture_id,
+      home: r.home,
+      away: r.away,
+      market: r.market,
+      modelP: num(r.model_p) ?? 0,
+      decimalOdds: num(r.decimal_odds),
+      stakeEur: num(r.stake_eur) ?? 0,
+      status: r.status || "open",
+      pnlEur: num(r.pnl_eur),
+    }))
+    .filter((r) => r.betId);
 }
 
 export async function getKellySimResults(): Promise<KellySimResult[]> {

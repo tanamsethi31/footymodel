@@ -6,9 +6,12 @@ import {
   getMostProbablePicks,
   getGradedPropsFixtures,
   getGradedPropsPlayers,
+  getGoalsPicks,
+  getPaperBets,
   getPaperBankrollSummary,
   type PaperBankrollSummary,
 } from "@/lib/data";
+import GoalsOuPaperPanel from "@/components/GoalsOuPaperPanel";
 import { buildFixtureTimeline } from "@/lib/fixtureTimeline";
 import { buildGradedKeys } from "@/lib/graded";
 import { buildLoggedFixturesFromProps } from "@/lib/propsFixtures";
@@ -109,9 +112,11 @@ function TrackRecordPanel({
 }
 
 export default async function Home() {
-  const [props, matchDetails, upcomingFixtures, watchlists, gradedFixtures, gradedPlayers, paperBankroll] =
+  const [props, goals, paperBets, matchDetails, upcomingFixtures, watchlists, gradedFixtures, gradedPlayers, paperBankroll] =
     await Promise.all([
       getPropsPicks(),
+      getGoalsPicks(),
+      getPaperBets(),
       getMatchDetails(),
       getUpcomingFixtures(),
       getWatchlists(),
@@ -149,7 +154,7 @@ export default async function Home() {
           <Logo />
           <p className="text-sm text-neutral-500 mt-1">
             Premier League player shots and shots-on-target — confirmed-lineup
-            models, SofaScore-only live path, €100 internal paper bankroll.
+            models, SofaScore live path, shared €100 paper bankroll (props + goals O/U).
             Irish time. Not real betting.
           </p>
         </div>
@@ -163,6 +168,7 @@ export default async function Home() {
       </header>
 
       <DashboardTabs
+        goalsOu={<GoalsOuPaperPanel goals={goals} paperBets={paperBets} />}
         predictions={
           <PropsPanel
             props={props}

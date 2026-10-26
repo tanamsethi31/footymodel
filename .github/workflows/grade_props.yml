@@ -40,7 +40,7 @@ jobs:
           N="${{ github.event.inputs.n_fixtures || '10' }}"
           PYTHONPATH=. python scripts/backfill_recent_props.py -n "$N"
 
-      - name: Settle € paper props bankroll
+      - name: Settle € paper bankroll (props + goals)
         run: PYTHONPATH=. python scripts/settle_paper_props.py
 
       - name: Commit + push graded props

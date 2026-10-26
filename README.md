@@ -4,7 +4,7 @@
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![CI](https://github.com/tanamsethi31/footymodel/actions/workflows/ci.yml/badge.svg)
 ![Live poll](https://github.com/tanamsethi31/footymodel/actions/workflows/live_poll.yml/badge.svg)
-![Status](https://img.shields.io/badge/status-PL%20player%20props%20paper--trade-brightgreen)
+![Status](https://img.shields.io/badge/status-PL%20SofaScore%20paper--trade-brightgreen)
 ![License](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)
 
 A stats-first football betting research project: does **positive expected
@@ -21,9 +21,9 @@ do — see [Results at a glance](#results-at-a-glance) and the full
 ## Live dashboard
 
 **[footymodel.vercel.app](https://footymodel.vercel.app/)**
-— public view of the **Premier League player shots & shots-on-target** pipeline.
-Tabs: **Predictions** (confirmed-lineup model lines + fixture timeline),
-**Track record** (graded vs Understat actuals + **€100 paper bankroll** when
+— public view of the **Premier League** SofaScore paper-trading pipeline:
+**player shots/SOT** and **goals Over/Under 2.5**. Tabs: **Predictions**,
+**Goals O/U**, **Track record** (graded actuals + **€100 paper bankroll** when
 synced from the repo), **Features**, and **Glossary**. Paper-trade only; no
 login.
 
@@ -56,9 +56,10 @@ login.
 | Over/Under, 1X2 (goals model) | ❌ No edge | CLV ≈ −0.2%, yield ≈ −7% |
 | Asian Handicap (all 7 leagues) | ❌ No edge | best config +2.05% yield but −1.52% CLV — the "positive yield, negative CLV" noise trap |
 | Lineup-aware total-goals accuracy | ✅ Confirmed | pooled t = 3.04 across all big-5 leagues |
-| Lineup-edge → live goals profit | ⏸ Not in production | goals O/U live polling retired; research only (`RESULTS.md`) |
+| Closing-line goals O/U (historical) | ❌ No edge | see row above; live path is lineup-window paper only |
+| Lineup-edge → live goals paper | 🔴 Active (hypothesis) | SofaScore match O/U + shared **€100** ledger — `live_recommendations.csv` |
 | Player shots/SOT calibration | ✅ Well-calibrated | gaps mostly within ±0.03, full PL + Bundesliga seasons |
-| Player shots/SOT → live paper | 🔴 Active | SofaScore lineups + **€100 internal bankroll** — [dashboard](https://footymodel.vercel.app/) + `paper_props_bets.csv` |
+| Player shots/SOT → live paper | 🔴 Active | same bankroll — [dashboard](https://footymodel.vercel.app/) + `paper_bankroll_bets.csv` |
 
 Full detail, per-league tables, and every rejected hypothesis (rest-days,
 mid-tier lineup extension, etc.) are in [`RESULTS.md`](RESULTS.md).
@@ -72,40 +73,45 @@ statistical core (Dixon-Coles / Poisson).
 
 ## Architecture
 
-**Production (live)** — player shots & SOT only, zero paid live APIs:
+**Production (live)** — player shots/SOT + goals O/U 2.5, zero paid live APIs:
 
 ```mermaid
 flowchart LR
     subgraph Free_cloud
         FPL[FPL fixture feed]
         US[Understat rosters<br/>post-match grade]
+        MP[matches.parquet<br/>goals grade]
         GH1[live_poll.yml<br/>calendar + watchlists]
-        GH2[grade_props.yml<br/>grade + settle € bankroll]
+        GH2[grade_props.yml<br/>grade props + settle]
+        GH3[grade_results.yml<br/>grade goals + settle]
     end
 
     subgraph Home_network
         SS[SofaScore Playwright<br/>confirmed XI]
-        ENG[sofascore_props_engine]
-        PB[paper_props_bankroll]
+        MD[sofascore_matchday]
+        PB[paper_bankroll]
     end
 
     FPL --> CAL[(fixture_calendar.json)]
     CAL --> GH1
     GH1 --> REPO[(GitHub repo)]
-    SS --> ENG
-    ENG --> PROPS[(live_player_props.csv)]
-    ENG --> PB
-    PB --> BETS[(paper_props_bets.csv)]
+    SS --> MD
+    MD --> PROPS[(live_player_props.csv)]
+    MD --> RECS[(live_recommendations.csv)]
+    MD --> PB
+    PB --> BETS[(paper_bankroll_bets.csv)]
     PROPS --> REPO
+    RECS --> REPO
     BETS --> REPO
     US --> GH2
+    MP --> GH3
     GH2 --> REPO
+    GH3 --> REPO
     REPO --> DASH[Next.js dashboard<br/>Vercel]
 ```
 
-**Research / legacy** (not used in production): Dixon-Coles goals backtests,
-`recommend.py`, `live_recommendations.csv`, API-Football / RapidAPI / Apify
-engines — see [`RESULTS.md`](RESULTS.md).
+**Research / legacy** (not used in production): Dixon-Coles closing-line backtests,
+`recommend.py`, API-Football / RapidAPI / Apify engines — see [`RESULTS.md`](RESULTS.md).
 
 The dashboard reads committed files from the repo (no separate database).
 Props polling **must** run on a **home IP** (laptop script or self-hosted runner);
@@ -119,21 +125,23 @@ footymodel/
   data.py      # Phase 1 — download + normalize football-data.co.uk CSVs
   players.py   # Phase A — LineupModel (confirmed-lineup goals prediction)
   live/        # Phase B — live detection/paper-trade pipeline
-    sofascore_props_engine.py  # **production** — PL props + € paper bets
-    paper_props_bankroll.py    # internal €100 ledger + staking
+    sofascore_matchday.py      # **production** — one poll: goals then props
+    sofascore_props_engine.py  # PL player props + paper bets
+    sofascore_engine.py        # lineup-aware goals O/U + paper bets
+    paper_bankroll.py          # shared €100 ledger + staking
+    paper_props_bankroll.py    # re-export shim
     sofascore_props_odds.py    # SofaScore player-prop odds (when exposed)
     shots_engine.py            # shots/SOT models + row builder
     calendar.py                # FPL calendar + idle-poll gate
     fpl_client.py              # free PL fixture feed
     match_detail.py            # JSONL: lineups + breakdown
-    sofascore_engine.py        # legacy goals O/U (not production)
     engine.py / rapidapi_engine.py / apify_engine.py  # legacy, not production
 docs/
   SHOTS_SOT_OPERATING.md       # match-week playbook (start here)
   PAPER_PROPS_EXPERIMENT.md    # € bankroll rules
   SELF_HOSTED_PROPS.md         # laptop vs self-hosted runner
   MATCHDAY_AUTOMATION.md       # cron + calendar gate
-dashboard/    # Next.js app (Vercel) — props-only public UI
+dashboard/    # Next.js app (Vercel) — props + goals O/U public UI
 data/
   raw/         # downloaded CSVs (gitignored)
   processed/   # normalized tidy tables + live logs (mostly gitignored,
@@ -160,10 +168,11 @@ SofaScore props polling also needs Playwright Chromium:
 playwright install chromium
 ```
 
-## Live player props — shots & SOT (production)
+## Live SofaScore paper trading (production)
 
-**Scope:** Premier League only. Markets: player **shots** (1+/2+/3+) and
-**SOT** (1+/2+). Internal **€100** paper bankroll (`paper_props_bankroll.json`).
+**Scope:** Premier League only. Markets: player **shots** (1+/2+/3+),
+**SOT** (1+/2+), and **Over/Under 2.5 goals** (lineup-aware). One internal
+**€100** paper bankroll (`paper_props_bankroll.json`, ledger `paper_bankroll_bets.csv`).
 
 | What | Command / workflow |
 |------|---------------------|
@@ -171,16 +180,18 @@ playwright install chromium
 | **Poll + paper bets** (home Wi‑Fi) | `./scripts/matchday_laptop.sh loop 900 --push` |
 | Bankroll summary | `python scripts/paper_props_summary.py` |
 | Cloud calendar | `.github/workflows/live_poll.yml` |
-| Cloud grade + settle | `.github/workflows/grade_props.yml` |
+| Cloud grade props + settle | `.github/workflows/grade_props.yml` |
+| Cloud grade goals + settle | `.github/workflows/grade_results.yml` |
 | Optional always-on home PC | `.github/workflows/live_poll_props_selfhosted.yml` |
 
-Full playbook: [`docs/SHOTS_SOT_OPERATING.md`](docs/SHOTS_SOT_OPERATING.md).
+Full playbook: [`docs/SHOTS_SOT_OPERATING.md`](docs/SHOTS_SOT_OPERATING.md). Goals plan: [`docs/GOALS_OU_PAPER_PLAN.md`](docs/GOALS_OU_PAPER_PLAN.md).
 
 Dry-run (no network):
 
 ```bash
 python scripts/sofascore_props_dryrun.py
 python scripts/paper_props_bankroll_test.py
+python scripts/goals_ou_math_audit.py
 ```
 
 ## Phase 1 usage
@@ -219,7 +230,9 @@ football-data.co.uk spellings (e.g. "Sheffield United", "Nott'm Forest").
 > exception is the **lineup-aware model** (Phase A below) — knowing the
 > actual starting XI (attack + defence) measurably improves O/U prediction
 > accuracy, replicated significantly across all 5 big-5 leagues (pooled
-> t=3.04). Live goals paper-trading is **not** in production; see player props above.
+> t=3.04). **Live** lineup-window goals O/U is paper-traded on SofaScore (see
+> [Live SofaScore paper trading](#live-sofascore-paper-trading-production)); closing-line
+> backtests above remain the honest baseline.
 
 ## Phase A — lineup-aware model (research)
 

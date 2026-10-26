@@ -2,7 +2,7 @@
 """Settle open € paper player-prop bets using graded_props_players.csv."""
 from __future__ import annotations
 
-from footymodel.live.paper_props_bankroll import settle_open_bets
+from footymodel.live.paper_bankroll import settle_open_bets
 
 
 def main() -> None:

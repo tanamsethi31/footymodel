@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Laptop match-day helper: Irish-time schedule + gated SofaScore props polls.
+# Laptop match-day helper: goals O/U + player props (one SofaScore session).
 #
 # Usage:
 #   ./scripts/matchday_laptop.sh show              # upcoming kickoffs + when to poll
@@ -45,8 +45,8 @@ gate_should_run() {
   [[ "$val" == "true" ]]
 }
 
-run_props_engine() {
-  python3 -m footymodel.live.sofascore_props_engine
+run_matchday_poll() {
+  python3 -m footymodel.live.sofascore_matchday
 }
 
 maybe_push() {
@@ -61,7 +61,10 @@ maybe_push() {
            data/processed/match_detail.jsonl \
            data/processed/sofascore_props_seen_fixtures.json \
            data/processed/live_fixture_health.json \
+           data/processed/live_recommendations.csv \
+           data/processed/sofascore_seen_fixtures.json \
            data/processed/paper_props_bankroll.json \
+           data/processed/paper_bankroll_bets.csv \
            data/processed/paper_props_bets.csv; do
     [[ -f "$f" ]] && git add "$f" && changed=true
   done
@@ -113,9 +116,8 @@ case "$cmd" in
     ;;
   once)
     if gate_should_run; then
-      echo "Gate open — running SofaScore props..."
-      python3 scripts/settle_paper_props.py || true
-      run_props_engine
+      echo "Gate open — running SofaScore matchday (goals O/U + props)..."
+      run_matchday_poll
       maybe_push
     else
       echo "Gate closed — no fixture in the live window (or all seen). Nothing to do."
@@ -128,8 +130,7 @@ case "$cmd" in
       echo ""
       echo "=== $(date -u +'%Y-%m-%d %H:%M:%S UTC') ==="
       if gate_should_run; then
-        python3 scripts/settle_paper_props.py || true
-        run_props_engine || echo "! props engine failed (network or SofaScore) — will retry."
+        run_matchday_poll || echo "! matchday poll failed (network or SofaScore) — will retry."
         maybe_push
       else
         echo "Gate closed — sleeping ${INTERVAL}s."

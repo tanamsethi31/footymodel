@@ -46,9 +46,14 @@ const FEATURES: {
         note: "Parsed when SofaScore exposes shots/SOT markets; else model-confidence paper stakes.",
       },
       {
-        name: "€100 internal paper bankroll",
+        name: "€100 internal paper bankroll (shared)",
         status: "live",
-        note: "Kelly when odds exist; 1% confidence stakes otherwise. Track record tab.",
+        note: "Player props + goals O/U 2.5 on one ledger; Kelly when odds exist.",
+      },
+      {
+        name: "Match goals Over/Under 2.5 (lineup-aware)",
+        status: "live",
+        note: "SofaScore match O/U odds + LineupModel; Goals O/U tab + paper bets.",
       },
       {
         name: "Most probable strip",
@@ -96,14 +101,19 @@ const FEATURES: {
         note: "Highlights fixture + top player line when new props land.",
       },
       {
-        name: "Self-hosted SofaScore props poll",
+        name: "Self-hosted SofaScore matchday poll",
         status: "live",
-        note: "Cron every 20m (08–23 UTC) + calendar gate ~T−24h→T+2h — docs/MATCHDAY_AUTOMATION.md.",
+        note: "Goals O/U then player props in one Playwright session — docs/MATCHDAY_AUTOMATION.md.",
       },
       {
         name: "Post-match props grading (Understat)",
         status: "live",
         note: "grade_props.yml twice daily + backfill_recent_props.py.",
+      },
+      {
+        name: "Post-match goals O/U grading + bankroll settle",
+        status: "live",
+        note: "grade_results.yml from matches.parquet + settle_paper_props.py.",
       },
       {
         name: "Cloud calendar / watchlist poll",
@@ -123,17 +133,17 @@ const FEATURES: {
     ],
   },
   {
-    area: "Retired (goals O/U)",
+    area: "Research / legacy (not live)",
     items: [
       {
-        name: "Match goals Over/Under 2.5 tab",
+        name: "football-data.co.uk goals recommender CLI",
         status: "planned",
-        note: "Removed from dashboard; code kept in repo for reference only.",
+        note: "Historical closing-line backtest only — no edge in RESULTS.md.",
       },
       {
         name: "Goals Kelly staking sim tab",
         status: "planned",
-        note: "Hidden; was tied to goals paper-trade history.",
+        note: "Historical paper_trades.csv demos; not the SofaScore live ledger.",
       },
     ],
   },
@@ -151,7 +161,7 @@ export default function FeaturesPanel() {
       <div>
         <h2 className="text-lg font-semibold mb-1">Features checklist</h2>
         <p className="text-sm text-neutral-500">
-          What the props-focused app ships today vs what is still on the roadmap.
+          What the SofaScore paper-trading app ships today vs what is still on the roadmap.
           Use this to sanity-check releases before matchday.
         </p>
       </div>
