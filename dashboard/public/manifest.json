@@ -1,7 +1,7 @@
 {
   "name": "footymodel",
   "short_name": "footymodel",
-  "description": "Premier League player shots & SOT predictions",
+  "description": "PL player shots & SOT — SofaScore live, €100 paper bankroll",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",

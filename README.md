@@ -4,7 +4,7 @@
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![CI](https://github.com/tanamsethi31/footymodel/actions/workflows/ci.yml/badge.svg)
 ![Live poll](https://github.com/tanamsethi31/footymodel/actions/workflows/live_poll.yml/badge.svg)
-![Status](https://img.shields.io/badge/status-live%20paper--trading-brightgreen)
+![Status](https://img.shields.io/badge/status-PL%20player%20props%20paper--trade-brightgreen)
 ![License](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)
 
 A stats-first football betting research project: does **positive expected
@@ -21,13 +21,15 @@ do — see [Results at a glance](#results-at-a-glance) and the full
 ## Live dashboard
 
 **[footymodel.vercel.app](https://footymodel.vercel.app/)**
-— the public-facing view of the live paper-trade pipeline below. Five tabs:
-**Track record** (graded results vs. real scores), **Goals O/U** (upcoming
-confirmed-lineup predictions, click a match to expand the team-model vs.
-lineup-model breakdown, confidence read, and starting XI), **Player props**
-(shots / shots-on-target), **Staking** (Kelly bankroll simulation), and
-**Glossary** (every term on the other tabs explained). Auto-refreshes as new
-predictions land; no login, nothing to configure.
+— public view of the **Premier League player shots & shots-on-target** pipeline.
+Tabs: **Predictions** (confirmed-lineup model lines + fixture timeline),
+**Track record** (graded vs Understat actuals + **€100 paper bankroll** when
+synced from the repo), **Features**, and **Glossary**. Paper-trade only; no
+login.
+
+**Operating docs:** [`docs/SHOTS_SOT_OPERATING.md`](docs/SHOTS_SOT_OPERATING.md)
+(match-week playbook), [`docs/PAPER_PROPS_EXPERIMENT.md`](docs/PAPER_PROPS_EXPERIMENT.md)
+(staking rules).
 
 ## Table of contents
 
@@ -37,11 +39,12 @@ predictions land; no login, nothing to configure.
 - [Architecture](#architecture)
 - [Layout](#layout)
 - [Setup](#setup)
+- [Live player props — shots & SOT (production)](#live-player-props--shots--sot-production)
 - [Phase 1 usage](#phase-1-usage)
-- [Betting tool — weekly workflow (Over/Under)](#betting-tool--weekly-workflow-overunder)
-- [Phase A — lineup-aware model](#phase-a--lineup-aware-model-confirmed)
-- [Phase B — live pipeline](#phase-b--live-pipeline-detection--paper-trade-not-execution)
-- [Checking performance once real data is logged](#checking-performance-once-real-data-is-logged)
+- [Historical — goals O/U recommender](#historical--goals-ou-recommender)
+- [Phase A — lineup-aware model (research)](#phase-a--lineup-aware-model-research)
+- [Legacy live engines (not production)](#legacy-live-engines-not-production)
+- [Checking performance](#checking-performance)
 - [Roadmap](#roadmap)
 - [Testing](#testing)
 - [License](#license)
@@ -53,9 +56,9 @@ predictions land; no login, nothing to configure.
 | Over/Under, 1X2 (goals model) | ❌ No edge | CLV ≈ −0.2%, yield ≈ −7% |
 | Asian Handicap (all 7 leagues) | ❌ No edge | best config +2.05% yield but −1.52% CLV — the "positive yield, negative CLV" noise trap |
 | Lineup-aware total-goals accuracy | ✅ Confirmed | pooled t = 3.04 across all big-5 leagues |
-| Lineup-edge → live profit | 🔴 Live now | paper-trading since the season kicked off — see the [dashboard](#live-dashboard)'s Track record tab for the running total, not hardcoded here since it changes every match |
+| Lineup-edge → live goals profit | ⏸ Not in production | goals O/U live polling retired; research only (`RESULTS.md`) |
 | Player shots/SOT calibration | ✅ Well-calibrated | gaps mostly within ±0.03, full PL + Bundesliga seasons |
-| Player shots/SOT → live profit | 🔴 Live now | forward paper-trade only (no historical prop-odds archive exists to backtest against) — see the dashboard's Player props tab |
+| Player shots/SOT → live paper | 🔴 Active | SofaScore lineups + **€100 internal bankroll** — [dashboard](https://footymodel.vercel.app/) + `paper_props_bets.csv` |
 
 Full detail, per-league tables, and every rejected hypothesis (rest-days,
 mid-tier lineup extension, etc.) are in [`RESULTS.md`](RESULTS.md).
@@ -69,66 +72,44 @@ statistical core (Dixon-Coles / Poisson).
 
 ## Architecture
 
+**Production (live)** — player shots & SOT only, zero paid live APIs:
+
 ```mermaid
 flowchart LR
-    subgraph Sources
-        FD[football-data.co.uk<br/>results + odds]
-        US[Understat<br/>xG + rosters]
-        FB[FBref<br/>player SOT]
-        WS[WhoScored<br/>player shots/SOT,<br/>real minutes]
-        FPL[Fantasy Premier League<br/>free fixture calendar]
-        AP[Apify football-api-scraper<br/>local/legacy fallback]
-        RA2[RapidAPI<br/>local/legacy fallback]
-        AF[API-Football<br/>optional fallback]
-        SS[SofaScore<br/>fallback, browser-scraped]
+    subgraph Free_cloud
+        FPL[FPL fixture feed]
+        US[Understat rosters<br/>post-match grade]
+        GH1[live_poll.yml<br/>calendar + watchlists]
+        GH2[grade_props.yml<br/>grade + settle € bankroll]
     end
 
-    FD --> DC[Dixon-Coles goals engine]
-    US --> DC
-    DC --> BT[Walk-forward backtest + CLV harness]
+    subgraph Home_network
+        SS[SofaScore Playwright<br/>confirmed XI]
+        ENG[sofascore_props_engine]
+        PB[paper_props_bankroll]
+    end
 
-    US --> LM[LineupModel]
-    WS --> LM
-    FB --> SM[SOTModel]
-    WS --> SM
-
-    FPL --> CAL
-    AP --> APE[live/apify_engine.py]
-    AF --> RUN[live/run_all.py<br/>optional goals + props poll]
-    RA2 --> RAE[live/rapidapi_engine.py]
-    SS --> SSE[live/sofascore_engine.py]
-    LM --> RUN
-    LM --> RAE
-    LM --> SSE
-    SM --> RUN
-
-    RUN --> LOG1[(live_recommendations.csv)]
-    RUN --> LOG2[(live_player_props.csv)]
-    RAE --> LOG1
-    SSE --> LOG1
-    APE --> LOG1
-    RUN --> LOG3[(match_detail.jsonl<br/>lineups + model breakdown)]
-    RAE --> LOG3
-    SSE --> LOG3
-    APE --> LOG3
-    CAL[fixture_calendar.json<br/>PL kickoffs, ~10 days]
-
-    CAL --> GH[GitHub Actions cron<br/>live_poll.yml, every 20min]
-    LOG1 --> GH
-    LOG2 --> GH
-    LOG3 --> GH
-    GH -- skip engines if calendar<br/>says nothing in the live window --> GH
-    GH -- commits + pushes --> REPO[(this repo)]
-    REPO -- GitHub Contents API --> DASH[Next.js dashboard<br/>on Vercel]
+    FPL --> CAL[(fixture_calendar.json)]
+    CAL --> GH1
+    GH1 --> REPO[(GitHub repo)]
+    SS --> ENG
+    ENG --> PROPS[(live_player_props.csv)]
+    ENG --> PB
+    PB --> BETS[(paper_props_bets.csv)]
+    PROPS --> REPO
+    BETS --> REPO
+    US --> GH2
+    GH2 --> REPO
+    REPO --> DASH[Next.js dashboard<br/>Vercel]
 ```
 
-All four live engines write to the SAME `live_recommendations.csv`, tagged
-by source. Production uses FPL for the free Premier League calendar and
-SofaScore for best-effort confirmed lineups; Apify, RapidAPI, and API-Football
-remain available for local recovery work. The whole
-thing runs unattended on a GitHub Actions cron, not a local machine — the
-dashboard reads straight from the repo, so there's no separate database or
-backend server.
+**Research / legacy** (not used in production): Dixon-Coles goals backtests,
+`recommend.py`, `live_recommendations.csv`, API-Football / RapidAPI / Apify
+engines — see [`RESULTS.md`](RESULTS.md).
+
+The dashboard reads committed files from the repo (no separate database).
+Props polling **must** run on a **home IP** (laptop script or self-hosted runner);
+see [`docs/SHOTS_SOT_OPERATING.md`](docs/SHOTS_SOT_OPERATING.md).
 
 ## Layout
 
@@ -138,17 +119,21 @@ footymodel/
   data.py      # Phase 1 — download + normalize football-data.co.uk CSVs
   players.py   # Phase A — LineupModel (confirmed-lineup goals prediction)
   live/        # Phase B — live detection/paper-trade pipeline
-    engine.py            # API-Football goals/O-U engine (optional fallback)
-    fpl_client.py          # free Fantasy Premier League fixture feed
-    rapidapi_engine.py     # legacy RapidAPI source (budget-capped)
-    sofascore_engine.py   # production lineup source (browser-scraped, no API key)
-    apify_engine.py       # legacy Apify source (pay-per-run cap)
-    calendar.py            # FPL-backed PL calendar + idle-poll gate
-    match_detail.py        # shared JSONL side-log: lineups + model breakdown
-    run_all.py             # shares one fetch across goals + props engines
-    grade_results.py       # grades logged predictions against real results
-    shots_engine.py         # player shots/SOT props engine
-dashboard/    # Next.js app (Vercel) — the public-facing live view, see below
+    sofascore_props_engine.py  # **production** — PL props + € paper bets
+    paper_props_bankroll.py    # internal €100 ledger + staking
+    sofascore_props_odds.py    # SofaScore player-prop odds (when exposed)
+    shots_engine.py            # shots/SOT models + row builder
+    calendar.py                # FPL calendar + idle-poll gate
+    fpl_client.py              # free PL fixture feed
+    match_detail.py            # JSONL: lineups + breakdown
+    sofascore_engine.py        # legacy goals O/U (not production)
+    engine.py / rapidapi_engine.py / apify_engine.py  # legacy, not production
+docs/
+  SHOTS_SOT_OPERATING.md       # match-week playbook (start here)
+  PAPER_PROPS_EXPERIMENT.md    # € bankroll rules
+  SELF_HOSTED_PROPS.md         # laptop vs self-hosted runner
+  MATCHDAY_AUTOMATION.md       # cron + calendar gate
+dashboard/    # Next.js app (Vercel) — props-only public UI
 data/
   raw/         # downloaded CSVs (gitignored)
   processed/   # normalized tidy tables + live logs (mostly gitignored,
@@ -169,6 +154,35 @@ pip install -r requirements.txt
 `requirements.in`, then regenerate it with
 `uv pip compile requirements.in --output-file requirements.txt --python-version 3.11`.
 
+SofaScore props polling also needs Playwright Chromium:
+
+```bash
+playwright install chromium
+```
+
+## Live player props — shots & SOT (production)
+
+**Scope:** Premier League only. Markets: player **shots** (1+/2+/3+) and
+**SOT** (1+/2+). Internal **€100** paper bankroll (`paper_props_bankroll.json`).
+
+| What | Command / workflow |
+|------|---------------------|
+| Match-week schedule (Irish time) | `PYTHONPATH=. python scripts/matchday_schedule.py` |
+| **Poll + paper bets** (home Wi‑Fi) | `./scripts/matchday_laptop.sh loop 900 --push` |
+| Bankroll summary | `python scripts/paper_props_summary.py` |
+| Cloud calendar | `.github/workflows/live_poll.yml` |
+| Cloud grade + settle | `.github/workflows/grade_props.yml` |
+| Optional always-on home PC | `.github/workflows/live_poll_props_selfhosted.yml` |
+
+Full playbook: [`docs/SHOTS_SOT_OPERATING.md`](docs/SHOTS_SOT_OPERATING.md).
+
+Dry-run (no network):
+
+```bash
+python scripts/sofascore_props_dryrun.py
+python scripts/paper_props_bankroll_test.py
+```
+
 ## Phase 1 usage
 
 ```bash
@@ -179,7 +193,10 @@ python -m footymodel.data --leagues E0 E1 N1 --seasons 2021 2022 2023 2024
 
 Output: `data/processed/matches.parquet` — one tidy row per match.
 
-## Betting tool — weekly workflow (Over/Under)
+## Historical — goals O/U recommender
+
+> **Not part of the live product.** Kept for backtests and `paper_trades.csv`
+> demos on historical football-data.co.uk odds.
 
 The recommender fits the model on all history and outputs O/U value bets with
 fractional-Kelly stakes for upcoming fixtures, logging them for paper-trading.
@@ -202,10 +219,9 @@ football-data.co.uk spellings (e.g. "Sheffield United", "Nott'm Forest").
 > exception is the **lineup-aware model** (Phase A below) — knowing the
 > actual starting XI (attack + defence) measurably improves O/U prediction
 > accuracy, replicated significantly across all 5 big-5 leagues (pooled
-> t=3.04). That edge is now live paper-trading — see Phase B and the
-> [dashboard](#live-dashboard).
+> t=3.04). Live goals paper-trading is **not** in production; see player props above.
 
-## Phase A — lineup-aware model (CONFIRMED)
+## Phase A — lineup-aware model (research)
 
 `players.py`'s `LineupModel` predicts total goals from the actual starting XI
 (both attack AND defence ratings, not team averages) using scraped Understat
@@ -220,96 +236,32 @@ python scripts/build_players.py E0,SP1,D1,I1,F1    # scrape rosters (slow, cache
 python scripts/lineup_test.py E0,SP1,D1,I1,F1      # reproduce the t=3.04 confirmation
 ```
 
-## Phase B — live pipeline (detection / paper-trade, not execution)
+## Legacy live engines (not production)
 
-The closing line already prices lineups, so Phase A's edge can't be captured
-in a backtest — it can only exist in the **live window** right after lineups
-are confirmed (~20–40 min pre-kickoff) and before bookmakers re-price.
-`footymodel/live/` watches upcoming big-5 fixtures, detects confirmed
-lineups, runs the exact same `LineupModel` used in the confirmed backtest,
-fetches best-price O/U odds, and logs a timestamped recommendation.
-**No staking, no order placement — detection/paper-trade only.**
+Goals O/U live polling (`sofascore_engine.py`, `rapidapi_engine.py`, etc.) and
+paid API keys are **legacy / local recovery only**. Production live data is:
 
-### Production data sources
+- **Cloud:** `live_poll.yml` (calendar + watchlists), `grade_props.yml` (Understat grade + € settle).
+- **Home network:** `sofascore_props_engine.py` via `matchday_laptop.sh` or
+  `live_poll_props_selfhosted.yml`.
 
-- **Fantasy Premier League (FPL)** — public, keyless Premier League fixture
-  feed. It owns the calendar and dashboard preview, but does not claim to
-  provide lineups or odds.
-- **`sofascore_engine.py`** — production, best-effort lineup source. It uses
-  a real headless browser because direct requests are bot-blocked. The poll
-  fails visibly when SofaScore is unavailable during an expected fixture
-  window; it does not silently fall back to a paid API.
-- **Odds are optional enrichment** — a confirmed lineup still writes a
-  model-only prediction when no O/U price is available. EV and fair-price
-  fields are simply absent; a missing lineup remains a health failure.
+See [`docs/SELF_HOSTED_PROPS.md`](docs/SELF_HOSTED_PROPS.md). Optional `.env`
+keys (`API_FOOTBALL_KEY`, `RAPIDAPI_KEY`, `APIFY_TOKEN`) are documented in
+`.env.example` but **not required** for the props product.
 
-The goals engines log to the same `data/processed/live_recommendations.csv`, tagged
-by `source`, plus `data/processed/match_detail.jsonl` (starting XI names and
-a team-model vs. lineup-model breakdown, consumed by the dashboard's
-expandable match cards).
+Legacy dry-runs (mocked APIs, no quota):
 
-### Running it — production is GitHub Actions, not a local cron
-
-Production polling is [`.github/workflows/live_poll.yml`](.github/workflows/live_poll.yml):
-every 20 minutes, 14:30 IST–03:29 IST the next day (9:00–21:59 UTC - GitHub
-Actions cron is always UTC). A saved PL calendar (`fixture_calendar.json`,
-refreshed daily, ~10-day horizon) is checked first: if no tracked fixture
-is inside the live window (2h before kickoff through 24h after), the poll
-rewrites the dashboard's upcoming list from the calendar and **skips**
-lineup/odds fetches and Playwright. That keeps midweek ticks cheap without
-slowing the cron to 30 minutes — confirmed lineups only exist ~20–40 min
-pre-kickoff, and GitHub's scheduled triggers already slip by hours under
-load, so a slower cadence would miss more of that window. On a real match
-poll, `sofascore_engine.py` drives the goals pipeline with no provider token.
-The API-Football, RapidAPI, and Apify engines remain available for local
-recovery work. The calendar also adds yesterday's date
-bucket when a delayed poll still has an unseen fixture in the 24h backward
-window, so that window is not limited to "same UTC calendar day".
-
-To run any engine manually (e.g. local debugging):
 ```bash
-python -m footymodel.live.run_all          # API-Football: goals + props
-python -m footymodel.live.sofascore_engine  # SofaScore fallback (goals only)
-python -m footymodel.live.rapidapi_engine   # RapidAPI fallback (goals only)
-python -m footymodel.live.apify_engine      # Apify primary (goals only)
+python scripts/shots_live_dryrun.py
+python scripts/live_dryrun.py          # goals engine only
+python scripts/run_all_dryrun.py
 ```
-Each needs its own key/setup, in a local `.env` file at the repo root
-(gitignored, never committed):
-- `API_FOOTBALL_KEY` — https://www.api-football.com/pricing (Free tier is
-  100 req/day; Pro is $19/mo for 7,500 req/day if scaling up)
-- `RAPIDAPI_KEY` — subscribe to the "Free API Live Football Data" listing
-  on RapidAPI
-- `APIFY_TOKEN` — https://console.apify.com/account/integrations (runs
-  `sian.agency/football-api-scraper`; budget-capped in `apify_budget.json`)
-- SofaScore needs no key, just Playwright installed
-  (`playwright install chromium`)
 
-Claude cannot create any of these accounts on your behalf.
+## Checking performance
 
-### Before spending API quota — dry-run tests (no key needed)
-```bash
-python scripts/live_dryrun.py        # API-Football goals engine only
-python scripts/shots_live_dryrun.py  # props engine only
-python scripts/run_all_dryrun.py     # both, via run_all.py — asserts lineups
-                                     # are fetched ONCE and shared, not per-engine
-```
-All three run the pipeline (team/player matching, lineup parsing, best-price
-odds selection, EV calc) against a mocked API response built from real
-historical rosters.
-
-## Checking performance once real data is logged
-
-The [dashboard](#live-dashboard)'s Track record tab is the primary way to
-check this now — it grades goals/O-U recommendations against real final
-scores automatically (`footymodel/live/grade_results.py`, run as part of the
-same cron) and shows accuracy, bet win rate, and cumulative return live.
-For a CLI alternative:
-```bash
-python scripts/live_summary.py
-```
-Player-prop rows are listed but NOT graded — that needs actual match
-shots/SOT stats, only available once WhoScored/FBref/Understat are
-re-scraped after the fact (manual step).
+- **Dashboard → Track record:** graded props vs Understat + **€ paper bankroll** when ledger files are in the repo.
+- **CLI:** `python scripts/paper_props_summary.py`
+- **Historical goals paper:** `python scripts/live_summary.py` (legacy `live_recommendations.csv`)
 
 ## Roadmap
 

@@ -6,6 +6,8 @@ import {
   getMostProbablePicks,
   getGradedPropsFixtures,
   getGradedPropsPlayers,
+  getPaperBankrollSummary,
+  type PaperBankrollSummary,
 } from "@/lib/data";
 import { buildFixtureTimeline } from "@/lib/fixtureTimeline";
 import { buildGradedKeys } from "@/lib/graded";
@@ -27,10 +29,12 @@ function TrackRecordPanel({
   gradedFixtures,
   gradedPlayers,
   liveFixtureCount,
+  paperBankroll,
 }: {
   gradedFixtures: Awaited<ReturnType<typeof getGradedPropsFixtures>>;
   gradedPlayers: Awaited<ReturnType<typeof getGradedPropsPlayers>>;
   liveFixtureCount: number;
+  paperBankroll: PaperBankrollSummary | null;
 }) {
   const withActuals = gradedPlayers.filter((g) => g.actualShots !== null);
   const shotsHits = withActuals.filter((g) => g.shots1PlusHit).length;
@@ -43,9 +47,38 @@ function TrackRecordPanel({
       <h2 className="text-lg font-semibold mb-1">Track record</h2>
       <p className="text-sm text-neutral-500 mb-5">
         Player shots/SOT props graded against Understat match stats when rosters
-        are available; otherwise proxy XI from recent appearances. All kickoffs
-        shown in Irish time.
+        are available; otherwise proxy XI from recent appearances. Internal
+        €100 paper bankroll (SofaScore path only). Kickoffs in Irish time.
       </p>
+      {paperBankroll && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/20 p-4">
+            <div className="text-neutral-500 text-xs">Paper bankroll</div>
+            <div className="text-xl font-mono mt-1">
+              €{paperBankroll.bankroll.toFixed(2)}
+            </div>
+            <div className="text-xs text-neutral-400">
+              started €{paperBankroll.startingBankroll.toFixed(0)}
+            </div>
+          </div>
+          <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+            <div className="text-neutral-500 text-xs">Open paper bets</div>
+            <div className="text-xl font-mono mt-1">{paperBankroll.openBets}</div>
+          </div>
+          <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+            <div className="text-neutral-500 text-xs">Won / lost</div>
+            <div className="text-xl font-mono mt-1">
+              {paperBankroll.wonBets} / {paperBankroll.lostBets}
+            </div>
+          </div>
+          <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 sm:col-span-1 col-span-2">
+            <div className="text-neutral-500 text-xs">Live scope</div>
+            <div className="text-sm mt-1 text-neutral-600 dark:text-neutral-300">
+              PL player shots &amp; SOT · SofaScore lineups
+            </div>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
           <div className="text-neutral-500 text-xs">Graded fixtures</div>
@@ -76,7 +109,7 @@ function TrackRecordPanel({
 }
 
 export default async function Home() {
-  const [props, matchDetails, upcomingFixtures, watchlists, gradedFixtures, gradedPlayers] =
+  const [props, matchDetails, upcomingFixtures, watchlists, gradedFixtures, gradedPlayers, paperBankroll] =
     await Promise.all([
       getPropsPicks(),
       getMatchDetails(),
@@ -84,6 +117,7 @@ export default async function Home() {
       getWatchlists(),
       getGradedPropsFixtures(),
       getGradedPropsPlayers(),
+      getPaperBankrollSummary(),
     ]);
 
   const loggedFixtures = buildLoggedFixturesFromProps(props, upcomingFixtures);
@@ -114,9 +148,9 @@ export default async function Home() {
         <div className="min-w-0 flex-1">
           <Logo />
           <p className="text-sm text-neutral-500 mt-1">
-            Premier League player shots and shots-on-target — walk-forward
-            calibrated models, confirmed-lineup updates. Times in Irish time.
-            Paper-trade only.
+            Premier League player shots and shots-on-target — confirmed-lineup
+            models, SofaScore-only live path, €100 internal paper bankroll.
+            Irish time. Not real betting.
           </p>
         </div>
         <div className="flex flex-col items-end gap-2 shrink-0">
@@ -146,6 +180,7 @@ export default async function Home() {
             gradedFixtures={gradedFixtures}
             gradedPlayers={gradedPlayers}
             liveFixtureCount={liveFixtureCount}
+            paperBankroll={paperBankroll}
           />
         }
         features={<FeaturesPanel />}
@@ -153,8 +188,8 @@ export default async function Home() {
       />
 
       <footer className="mt-16 text-xs text-neutral-400">
-        Research project. Paper-trade only. Kickoffs use Europe/Dublin. Data
-        refreshes about every minute; enable notifications for new prop lines.
+        Research project — PL player shots/SOT only. Paper-trade (€100 internal
+        ledger). SofaScore on home Wi‑Fi for live polls. Kickoffs: Europe/Dublin.
       </footer>
     </div>
   );

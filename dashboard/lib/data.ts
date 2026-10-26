@@ -216,6 +216,71 @@ function parseCsvText(text: string): Record<string, string>[] {
   return parsed.data;
 }
 
+async function readLocalText(name: string): Promise<string | null> {
+  const candidates = [
+    path.join(process.cwd(), "data", name),
+    path.join(process.cwd(), "..", "data", "processed", name),
+  ];
+  for (const filePath of candidates) {
+    try {
+      return await readFile(filePath, "utf-8");
+    } catch {
+      // try next path
+    }
+  }
+  return null;
+}
+
+async function fetchTextFile(name: string): Promise<string | null> {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return readLocalText(name);
+  const res = await fetch(
+    `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}/${name}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.raw+json",
+      },
+      next: { revalidate: 60 },
+    }
+  );
+  if (res.status === 404) return readLocalText(name);
+  if (!res.ok) return readLocalText(name);
+  return await res.text();
+}
+
+export type PaperBankrollSummary = {
+  currency: string;
+  bankroll: number;
+  startingBankroll: number;
+  openBets: number;
+  wonBets: number;
+  lostBets: number;
+};
+
+export async function getPaperBankrollSummary(): Promise<PaperBankrollSummary | null> {
+  const text = await fetchTextFile("paper_props_bankroll.json");
+  if (!text) return null;
+  let state: Record<string, unknown>;
+  try {
+    state = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  const betRows = await fetchCsv("paper_props_bets.csv");
+  const openBets = betRows.filter((r) => r.status === "open").length;
+  const wonBets = betRows.filter((r) => r.status === "won").length;
+  const lostBets = betRows.filter((r) => r.status === "lost").length;
+  return {
+    currency: String(state.currency ?? "EUR"),
+    bankroll: num(state.bankroll) ?? 100,
+    startingBankroll: num(state.starting_bankroll) ?? 100,
+    openBets,
+    wonBets,
+    lostBets,
+  };
+}
+
 async function readLocalCsv(name: string): Promise<Record<string, string>[]> {
   const candidates = [
     path.join(process.cwd(), "data", name),

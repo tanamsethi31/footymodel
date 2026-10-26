@@ -3,6 +3,8 @@
 Internal paper trading for **Premier League player shots** and **shots on target**.
 No API-Football, RapidAPI, or Apify on this path.
 
+See also: [`SHOTS_SOT_OPERATING.md`](SHOTS_SOT_OPERATING.md) (match-week playbook).
+
 ## Bankroll
 
 - Starting balance: **€100** (`data/processed/paper_props_bankroll.json`)
