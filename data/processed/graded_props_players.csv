@@ -1,221 +1,221 @@
-fixture_id,kickoff,home,away,player,team,proxy_xi,actual_shots,actual_sot,actual_xg,p_shots_gt0.5,shots_gt0.5_hit,p_shots_gt1.5,shots_gt1.5_hit,p_shots_gt2.5,shots_gt2.5_hit,p_sot_gt0.5,sot_gt0.5_hit,p_sot_gt1.5,sot_gt1.5_hit
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Antonín Kinsky,Tottenham,False,0,0,0.0,0.001,False,0.0,False,0.0,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Tosin Adarabioyo,Tottenham,False,0,0,0.0,0.514,False,0.202,False,0.069,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Jan Paul van Hecke,Tottenham,False,0,0,0.0,0.526,False,0.213,False,0.075,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Micky van de Ven,Tottenham,False,1,0,0.05073491856455803,0.465,True,0.163,False,0.049,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Sandro Tonali,Tottenham,False,2,0,0.10390505939722061,0.761,True,0.488,True,0.282,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Mohammed Kudus,Tottenham,False,2,0,0.07168123126029968,0.872,True,0.682,True,0.493,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,James Maddison,Tottenham,False,2,1,0.07269567996263504,0.888,True,0.715,True,0.535,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Archie Gray,Tottenham,False,1,0,0.11584596335887909,0.477,True,0.172,False,0.054,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Andrew Robertson,Tottenham,False,0,0,0.0,0.527,False,0.213,False,0.075,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Omar Marmoush,Tottenham,False,2,2,0.05691641569137573,0.928,True,0.802,True,0.655,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Dominic Solanke,Tottenham,False,3,0,0.34134870767593384,0.899,True,0.736,True,0.563,True,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Carl Rushworth,Coventry,False,0,0,0.0,0.001,False,0.0,False,0.0,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Milan van Ewijk,Coventry,False,0,0,0.0,0.223,False,0.035,False,0.005,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Ethan Pinnock,Coventry,False,1,0,0.016823604702949524,0.358,True,0.094,False,0.021,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Bobby Thomas,Coventry,False,2,0,0.05169826000928879,0.594,True,0.278,True,0.114,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Jay Dasilva,Coventry,False,0,0,0.0,0.339,False,0.083,False,0.017,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Caleb Yirenkyi,Coventry,False,0,0,0.0,0.41,False,0.125,False,0.033,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Matt Grimes,Coventry,False,0,0,0.0,0.457,False,0.157,False,0.047,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Tatsuhiro Sakamoto,Coventry,False,1,0,0.1040259599685669,0.746,True,0.466,False,0.261,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Jack Rudoni,Coventry,False,2,1,0.6299986839294434,0.741,True,0.46,True,0.255,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Brandon Thomas-Asante,Coventry,False,2,0,0.13360553979873657,0.753,True,0.476,True,0.271,False,,,,
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,Sidiki Chérif,Coventry,False,1,0,0.019552545621991158,0.804,True,0.558,False,0.352,False,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Matz Sels,Nott'm Forest,False,0,0,0.0,0.0,False,0.0,False,0.0,False,0.0,False,0.0,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Ousmane Diomande,Nott'm Forest,False,0,0,0.0,0.39,False,0.112,False,0.028,False,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Jair,Nott'm Forest,False,0,0,0.0,0.321,False,0.074,False,0.015,False,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Murillo,Nott'm Forest,False,3,1,0.17502491176128387,0.433,True,0.14,True,0.039,True,0.122,True,0.01,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Daniel Muñoz,Nott'm Forest,False,0,0,0.0,0.525,False,0.212,False,0.074,False,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Neco Williams,Nott'm Forest,False,1,0,0.08211032301187515,0.576,True,0.26,False,0.102,False,0.141,False,0.014,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Xaver Schlager,Nott'm Forest,False,1,0,0.014368751086294651,0.633,True,0.32,False,0.142,False,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,James McAtee,Nott'm Forest,False,2,0,0.09329120069742203,0.663,True,0.356,True,0.169,False,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Dan Ndoye,Nott'm Forest,False,2,0,0.12340622395277023,0.742,True,0.46,True,0.256,False,0.0,False,0.0,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Nicolás Domínguez,Nott'm Forest,False,0,0,0.0,0.541,False,0.227,False,0.082,False,0.144,False,0.014,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Liam Delap,Nott'm Forest,False,4,1,0.17527981102466583,0.819,True,0.583,True,0.378,True,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,David Raya,Arsenal,False,0,0,0.0,0.002,False,0.0,False,0.0,False,0.0,False,0.0,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Ben White,Arsenal,False,0,0,0.0,0.327,False,0.077,False,0.016,False,0.211,False,0.031,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Ezri Konsa Ngoyo,Arsenal,False,0,0,0.0,0.282,False,0.057,False,0.01,False,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Gabriel,Arsenal,False,2,0,0.4805752635002136,0.504,True,0.194,True,0.065,False,0.574,False,0.258,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Riccardo Calafiori,Arsenal,False,0,0,0.0,0.62,False,0.306,False,0.132,False,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Bruno Guimarães,Arsenal,False,0,0,0.0,0.649,False,0.339,False,0.156,False,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Declan Rice,Arsenal,False,1,0,0.11029597371816635,0.611,True,0.296,False,0.126,False,0.312,False,0.07,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Bukayo Saka,Arsenal,False,0,0,0.0,0.85,False,0.64,False,0.442,False,0.57,False,0.254,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Martin Odegaard,Arsenal,False,0,0,0.0,0.718,False,0.427,False,0.226,False,0.335,False,0.082,False
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Eberechi Eze,Arsenal,False,0,0,0.0,0.848,False,0.635,False,0.437,False,,,,
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,Kai Havertz,Arsenal,False,2,0,0.14376062154769897,0.82,True,0.585,True,0.38,False,0.408,False,0.123,False
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,James Trafford,Leeds,False,0,0,0.0,0.001,False,0.0,False,0.0,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,James Justin,Leeds,False,0,0,0.0,0.541,False,0.226,False,0.082,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Tarik Muharemovic,Leeds,False,1,0,0.034435924142599106,0.478,True,0.173,False,0.054,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Nico Elvedi,Leeds,False,1,1,0.3408430516719818,0.4,True,0.118,False,0.03,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Jayden Bogle,Leeds,False,1,1,0.061304524540901184,0.521,True,0.208,False,0.072,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Gabriel Gudmundsson,Leeds,False,0,0,0.0,0.447,False,0.15,False,0.043,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Ao Tanaka,Leeds,False,2,1,0.051978226751089096,0.658,True,0.349,True,0.164,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Ethan Ampadu,Leeds,False,0,0,0.0,0.496,False,0.187,False,0.061,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Noah Okafor,Leeds,False,1,0,0.032693251967430115,0.788,True,0.531,False,0.324,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Anton Stach,Leeds,False,2,0,0.1503434032201767,0.753,True,0.476,True,0.271,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Dominic Calvert-Lewin,Leeds,False,3,1,0.6362648010253906,0.836,True,0.613,True,0.411,True,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Senne Lammens,Man United,False,0,0,0.0,0.0,False,0.0,False,0.0,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Leny Yoro,Man United,False,0,0,0.0,0.328,False,0.078,False,0.016,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Lisandro Martínez,Man United,False,1,0,0.023369118571281433,0.438,True,0.143,False,0.04,False,0.189,False,0.025,False
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Harry Maguire,Man United,False,0,0,0.0,0.518,False,0.206,False,0.071,False,0.191,False,0.025,False
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Diogo Dalot,Man United,False,0,0,0.0,0.518,False,0.206,False,0.071,False,0.19,False,0.025,False
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Andrey Santos,Man United,False,0,0,0.0,0.481,False,0.175,False,0.055,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Carlos Baleba,Man United,False,1,0,0.013135837391018867,0.633,True,0.32,False,0.142,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Amad Diallo Traore,Man United,False,2,0,0.10514692217111588,0.789,True,0.532,True,0.325,False,0.242,False,0.041,False
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Youri Tielemans,Man United,False,1,0,0.023422619327902794,0.624,True,0.31,False,0.135,False,,,,
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Bruno Fernandes,Man United,False,3,1,0.08745986968278885,0.84,True,0.62,True,0.419,True,0.414,True,0.127,False
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,Bryan Mbeumo,Man United,False,3,2,0.7564645409584045,0.829,True,0.601,True,0.398,True,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Bart Verbruggen,Brighton,False,0,0,0.0,0.0,False,0.0,False,0.0,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Ferdi Kadioglu,Brighton,False,1,1,0.021336127072572708,0.509,True,0.198,False,0.067,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Lewis Dunk,Brighton,False,0,0,0.0,0.452,False,0.154,False,0.045,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Luka Vuskovic,Brighton,False,3,1,0.3958897292613983,0.657,True,0.349,True,0.164,True,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Olivier Boscagli,Brighton,False,0,0,0.0,0.304,False,0.067,False,0.012,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Chema Andres,Brighton,False,0,0,0.0,0.566,False,0.249,False,0.096,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Pascal Groß,Brighton,False,2,0,0.17659272253513336,0.656,True,0.348,True,0.163,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Diego Gómez,Brighton,False,1,1,0.01583120785653591,0.795,True,0.543,False,0.336,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Yasin Ayari,Brighton,False,4,2,0.3216022551059723,0.75,True,0.473,True,0.268,True,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Maxim De Cuyper,Brighton,False,0,0,0.0,0.666,False,0.359,False,0.171,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Charalampos Kostoulas,Brighton,False,4,2,0.8379529714584351,0.901,True,0.742,True,0.57,True,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Walter Benítez,Crystal Palace,False,0,0,0.0,0.001,False,0.0,False,0.0,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Chris Richards,Crystal Palace,False,0,0,0.0,0.315,False,0.071,False,0.014,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Jaydee Canvot,Crystal Palace,False,0,0,0.0,0.266,False,0.05,False,0.008,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Honest Ahanor,Crystal Palace,False,0,0,0.0,0.279,False,0.056,False,0.009,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Anan Khalaili,Crystal Palace,False,2,1,0.048069119453430176,0.597,True,0.281,True,0.116,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Tyrick Mitchell,Crystal Palace,False,0,0,0.0,0.305,False,0.067,False,0.012,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Adam Wharton,Crystal Palace,False,0,0,0.0,0.493,False,0.185,False,0.06,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Quinten Timber,Crystal Palace,False,0,0,0.0,0.571,False,0.255,False,0.099,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Daichi Kamada,Crystal Palace,False,0,0,0.0,0.485,False,0.179,False,0.057,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Yeremi Pino,Crystal Palace,False,1,0,0.05480184406042099,0.695,True,0.395,False,0.2,False,,,,
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,Jørgen Strand Larsen,Crystal Palace,False,0,0,0.0,0.701,False,0.403,False,0.206,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Djordje Petrovic,Bournemouth,False,0,0,0.0,0.0,False,0.0,False,0.0,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Adam Smith,Bournemouth,False,1,0,0.4976522624492645,0.216,True,0.033,False,0.004,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,James Hill,Bournemouth,False,2,0,0.05107755959033966,0.417,True,0.129,True,0.034,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,António Silva,Bournemouth,False,0,0,0.0,0.519,False,0.207,False,0.071,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Adrien Truffert,Bournemouth,False,1,0,0.01849338226020336,0.414,True,0.127,False,0.033,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Tyler Adams,Bournemouth,False,1,0,0.06256331503391266,0.417,True,0.129,False,0.034,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Rayan,Bournemouth,False,7,3,0.7980163097381592,0.861,True,0.661,True,0.467,True,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Lewis Cook,Bournemouth,False,1,0,0.09235058724880219,0.401,True,0.119,False,0.03,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Ryan Christie,Bournemouth,False,3,0,0.22240634262561798,0.77,True,0.503,True,0.296,True,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Marcus Tavernier,Bournemouth,False,3,2,0.8303084969520569,0.851,True,0.641,True,0.443,True,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Evanilson,Bournemouth,False,6,1,1.070113182067871,0.864,True,0.666,True,0.474,True,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Robin Roefs,Sunderland,False,0,0,0.0,0.0,False,0.0,False,0.0,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Nordi Mukiele,Sunderland,False,0,0,0.0,0.53,False,0.217,False,0.077,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Kevin Danso,Sunderland,False,1,0,0.04314059019088745,0.447,True,0.15,False,0.043,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Omar Alderete,Sunderland,False,0,0,0.0,0.445,False,0.148,False,0.043,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Reinildo,Sunderland,False,0,0,0.0,0.187,False,0.024,False,0.003,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Noah Sadiki,Sunderland,False,0,0,0.0,0.476,False,0.172,False,0.053,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Granit Xhaka,Sunderland,False,0,0,0.0,0.474,False,0.169,False,0.052,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Trai Hume,Sunderland,False,1,0,0.04272020608186722,0.54,True,0.225,False,0.082,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Chris Rigg,Sunderland,False,0,0,0.0,0.715,False,0.422,False,0.222,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Enzo Le Fée,Sunderland,False,1,0,0.008480628952383995,0.672,True,0.367,False,0.178,False,,,,
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,Tymur Tutierov,Sunderland,False,0,0,0.0,0.8,False,0.551,False,0.344,False,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Caoimhin Kelleher,Brentford,False,0,0,0.0,0.0,False,0.0,False,0.0,False,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Michael Kayode,Brentford,False,1,0,0.035453278571367264,0.287,True,0.059,False,0.01,False,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Sepp van den Berg,Brentford,False,0,0,0.0,0.395,False,0.115,False,0.029,False,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Kristoffer Ajer,Brentford,False,0,0,0.0,0.316,False,0.072,False,0.014,False,0.195,False,0.027,False
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Keane Lewis-Potter,Brentford,False,2,1,0.2860100269317627,0.58,True,0.263,True,0.104,False,0.564,True,0.248,False
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Yehor Yarmolyuk,Brentford,False,0,0,0.0,0.388,False,0.111,False,0.027,False,0.241,False,0.041,False
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Vitaly Janelt,Brentford,False,0,0,0.0,0.403,False,0.12,False,0.031,False,0.19,False,0.025,False
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Dango Ouattara,Brentford,False,0,0,0.0,0.753,False,0.476,False,0.271,False,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Mathias Jensen,Brentford,False,0,0,0.0,0.503,False,0.193,False,0.064,False,0.214,False,0.032,False
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Jaidon Anthony,Brentford,False,4,1,0.21554015576839447,0.674,True,0.369,True,0.179,True,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Thiago,Brentford,False,3,0,0.3217291235923767,0.76,True,0.487,True,0.281,True,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Alisson,Liverpool,False,0,0,0.0,0.001,False,0.0,False,0.0,False,0.0,False,0.0,False
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Ronald Araújo,Liverpool,False,0,0,0.0,0.265,False,0.05,False,0.008,False,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Virgil van Dijk,Liverpool,False,1,0,0.04244218394160271,0.498,True,0.189,False,0.062,False,0.273,False,0.053,False
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Jérémy Jacquet,Liverpool,False,1,0,0.01849941350519657,0.332,True,0.08,False,0.016,False,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Milos Kerkez,Liverpool,False,0,0,0.0,0.354,False,0.091,False,0.02,False,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Alexis Mac Allister,Liverpool,False,4,1,0.17138837277889252,0.73,True,0.444,True,0.241,True,0.264,True,0.05,False
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Dominik Szoboszlai,Liverpool,False,1,0,0.06074007600545883,0.804,True,0.557,False,0.35,False,0.309,False,0.069,False
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Víctor Muñoz,Liverpool,False,3,2,0.26327773928642273,0.809,True,0.567,True,0.361,True,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Florian Wirtz,Liverpool,False,1,0,0.03692900389432907,0.787,True,0.529,False,0.322,False,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Bradley Barcola,Liverpool,False,4,1,0.6259388327598572,0.78,True,0.518,True,0.31,True,,,,
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,Alexander Isak,Liverpool,False,2,1,0.19504506886005402,0.861,True,0.659,True,0.465,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Jordan Pickford,Everton,False,0,0,0.0,0.0,False,0.0,False,0.0,False,0.0,False,0.0,False
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Ainsley Maitland-Niles,Everton,False,0,0,0.0,0.331,False,0.079,False,0.016,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,James Tarkowski,Everton,False,0,0,0.0,0.365,False,0.097,False,0.022,False,0.214,False,0.032,False
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Jarrad Branthwaite,Everton,False,1,0,0.041955381631851196,0.352,True,0.09,False,0.02,False,0.206,False,0.03,False
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Vitalii Mykolenko,Everton,False,0,0,0.0,0.266,False,0.05,False,0.008,False,0.229,False,0.037,False
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,James Garner,Everton,False,0,0,0.0,0.53,False,0.216,False,0.077,False,0.275,False,0.054,False
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Harrison Armstrong,Everton,False,0,0,0.0,0.502,False,0.192,False,0.064,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Merlin Röhl,Everton,False,1,1,0.030539467930793762,0.639,True,0.327,False,0.147,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Kiernan Dewsbury-Hall,Everton,False,0,0,0.0,0.688,False,0.387,False,0.193,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Jack Grealish,Everton,False,1,1,0.05682725831866264,0.692,True,0.392,False,0.198,False,0.296,True,0.063,False
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Thierno Barry,Everton,False,3,3,0.4414267838001251,0.795,True,0.542,True,0.335,True,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Emiliano Martinez,Chelsea,False,0,0,0.0,0.0,False,0.0,False,0.0,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Josh Acheampong,Chelsea,False,0,0,0.0,0.303,False,0.066,False,0.012,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Maxence Lacroix,Chelsea,False,1,0,0.1367393136024475,0.448,True,0.151,False,0.044,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Levi Colwill,Chelsea,False,0,0,0.0,0.309,False,0.069,False,0.013,False,0.191,False,0.025,False
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Jorrel Hato,Chelsea,False,0,0,0.0,0.278,False,0.055,False,0.009,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Jordan Henderson,Chelsea,False,2,0,0.14138838648796082,0.463,True,0.161,True,0.049,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Moisés Caicedo,Chelsea,False,1,1,0.02364903874695301,0.456,True,0.156,False,0.046,False,0.172,True,0.02,False
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Pedro Neto,Chelsea,False,3,3,0.5096821188926697,0.747,True,0.468,True,0.263,True,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Cole Palmer,Chelsea,False,6,1,0.1880987137556076,0.862,True,0.662,True,0.468,True,0.466,True,0.163,False
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,Morgan Rogers,Chelsea,False,2,0,0.15732361376285553,0.778,True,0.515,True,0.307,False,,,,
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,João Pedro,Chelsea,False,3,2,0.45620712637901306,0.821,True,0.587,True,0.383,True,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Bernd Leno,Fulham,False,0,0,0.0,0.0,False,0.0,False,0.0,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Timothy Castagne,Fulham,False,0,0,0.0,0.455,False,0.156,False,0.046,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,David Affengruber,Fulham,False,0,0,0.0,0.383,False,0.108,False,0.026,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Calvin Bassey,Fulham,False,1,0,0.3360060453414917,0.37,True,0.1,False,0.023,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Antonee Robinson,Fulham,False,0,0,0.0,0.385,False,0.109,False,0.026,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Shea Charles,Fulham,False,1,0,0.02532990090548992,0.585,True,0.269,False,0.108,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Sander Berge,Fulham,False,1,0,0.041514355689287186,0.463,True,0.161,False,0.048,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Oscar Bobb,Fulham,False,5,1,0.33393269777297974,0.77,True,0.502,True,0.295,True,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Joshua King,Fulham,False,3,2,0.46582162380218506,0.84,True,0.62,True,0.42,True,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Alex Iwobi,Fulham,False,5,2,0.5015035271644592,0.786,True,0.527,True,0.32,True,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Gonzalo García,Fulham,False,1,1,0.5393564105033875,0.883,True,0.704,False,0.521,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Konstantinos Tzolakis,Hull,False,0,0,0.0,0.001,False,0.0,False,0.0,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Lewie Coyle,Hull,False,1,0,0.03374257683753967,0.303,True,0.066,False,0.012,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Lucas Herrington,Hull,False,0,0,0.0,0.331,False,0.08,False,0.016,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,John Egan,Hull,False,0,0,0.0,0.331,False,0.079,False,0.016,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Semi Ajayi,Hull,False,0,0,0.0,0.324,False,0.076,False,0.015,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Brooke Norton-Cuffy,Hull,False,0,0,0.0,0.378,False,0.105,False,0.025,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Mohamed Belloumi,Hull,False,3,0,0.06378192454576492,0.753,True,0.476,True,0.271,True,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Matt Crooks,Hull,False,0,0,0.0,0.431,False,0.138,False,0.038,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Regan Slater,Hull,False,1,0,0.03339418023824692,0.513,True,0.202,False,0.069,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Sorba Thomas,Hull,False,0,0,0.0,0.585,False,0.268,False,0.108,False,,,,
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,Oliver McBurnie,Hull,False,0,0,0.0,0.727,False,0.44,False,0.237,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Gianluigi Donnarumma,Man City,False,0,0,0.0,0.0,False,0.0,False,0.0,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Matheus Nunes,Man City,False,0,0,0.0,0.355,False,0.092,False,0.02,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Marc Guehi,Man City,False,0,0,0.0,0.517,False,0.205,False,0.07,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Rúben Dias,Man City,False,3,2,0.11902039498090744,0.501,True,0.192,True,0.063,True,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Nico O&#039;Reilly,Man City,False,1,0,0.39530736207962036,0.722,True,0.433,False,0.231,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Ayyoub Bouaddi,Man City,False,0,0,0.0,0.636,False,0.324,False,0.145,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Mateo Kovacic,Man City,False,0,0,0.0,0.757,False,0.483,False,0.277,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Iliman Ndiaye,Man City,False,4,1,0.8783857822418213,0.789,True,0.533,True,0.326,True,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Phil Foden,Man City,False,3,1,0.7144832015037537,0.896,True,0.731,True,0.556,True,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Jéremy Doku,Man City,False,1,0,0.08633162081241608,0.864,True,0.666,False,0.473,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Erling Haaland,Man City,False,5,2,1.3126614093780518,0.941,True,0.832,True,0.699,True,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Christian Walton,Ipswich,False,0,0,0.0,0.001,False,0.0,False,0.0,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Dara O&#039;Shea,Ipswich,False,0,0,0.0,0.238,False,0.04,False,0.006,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Jacob Greaves,Ipswich,False,1,0,0.018439246341586113,0.19,True,0.025,False,0.003,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Issa Diop,Ipswich,False,0,0,0.0,0.161,False,0.018,False,0.002,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Guemissongui Ouattara,Ipswich,False,1,0,0.05369894951581955,0.296,True,0.063,False,0.011,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Leif Davis,Ipswich,False,0,0,0.0,0.293,False,0.061,False,0.011,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Florentino Luís,Ipswich,False,0,0,0.0,0.297,False,0.063,False,0.011,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Exequiel Palacios,Ipswich,False,0,0,0.0,0.254,False,0.046,False,0.007,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Daizen Maeda,Ipswich,False,1,1,0.17094235122203827,0.529,True,0.215,False,0.076,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Julio Enciso,Ipswich,False,0,0,0.0,0.735,False,0.451,False,0.247,False,,,,
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,Emersonn,Ipswich,False,3,0,0.3426067531108856,0.681,True,0.377,True,0.186,True,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Lukás Hornícek,Newcastle,False,0,0,0.0,0.001,False,0.0,False,0.0,False,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Lewis Miley,Newcastle,False,0,0,0.0,0.493,False,0.185,False,0.06,False,0.236,False,0.039,False
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Malick Thiaw,Newcastle,False,0,0,0.0,0.444,False,0.148,False,0.042,False,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Sven Botman,Newcastle,False,2,1,0.07548601180315018,0.491,True,0.183,True,0.059,False,0.241,True,0.041,False
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Lewis Hall,Newcastle,False,0,0,0.0,0.539,False,0.224,False,0.081,False,0.304,False,0.066,False
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Nico González,Newcastle,False,2,0,0.035676464438438416,0.536,True,0.222,True,0.08,False,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Joelinton,Newcastle,False,0,0,0.0,0.708,False,0.413,False,0.215,False,0.318,False,0.073,False
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Matias Fernandez-Pardo,Newcastle,False,0,0,0.0,0.73,False,0.444,False,0.241,False,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Joe Willock,Newcastle,False,1,0,0.08114522695541382,0.779,True,0.516,False,0.309,False,0.312,False,0.07,False
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Harvey Barnes,Newcastle,False,3,0,0.1993025839328766,0.855,True,0.648,True,0.452,True,0.591,False,0.275,False
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Yoane Wissa,Newcastle,False,7,0,0.4568990170955658,0.853,True,0.645,True,0.448,True,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Zion Suzuki,Aston Villa,False,0,0,0.0,0.001,False,0.0,False,0.0,False,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Matthew Cash,Aston Villa,False,2,0,0.09103945642709732,0.466,True,0.164,True,0.05,False,0.301,False,0.065,False
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Victor Lindelöf,Aston Villa,False,0,0,0.0,0.218,False,0.033,False,0.004,False,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Tyrone Mings,Aston Villa,False,0,0,0.0,0.393,False,0.114,False,0.028,False,0.252,False,0.045,False
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Aaron Wan-Bissaka,Aston Villa,False,0,0,0.0,0.198,False,0.027,False,0.003,False,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,João Gomes,Aston Villa,False,0,0,0.0,0.463,False,0.161,False,0.048,False,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Boubacar Kamara,Aston Villa,False,0,0,0.0,0.343,False,0.085,False,0.018,False,0.199,False,0.028,False
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Alysson Edward,Aston Villa,False,0,0,0.0,0.74,False,0.458,False,0.254,False,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Johan Manzambi,Aston Villa,False,3,1,0.5409361720085144,0.852,True,0.644,True,0.447,True,,,,
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Emiliano Buendía,Aston Villa,False,1,0,0.12325642257928848,0.794,True,0.541,False,0.334,False,0.596,False,0.28,False
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,Nicolas Jackson,Aston Villa,False,4,1,0.6461489200592041,0.839,True,0.618,True,0.417,True,,,,
+fixture_id,kickoff,home,away,player,team,proxy_xi,actual_shots,actual_sot,actual_xg,p_shots_gt0.5,p_shots_gt1.5,p_shots_gt2.5,p_sot_gt0.5,p_sot_gt1.5
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Robin Roefs,Sunderland,True,,,,0.0,0.0,0.0,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Nordi Mukiele,Sunderland,True,,,,0.589,0.272,0.11,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Noah Sadiki,Sunderland,True,,,,0.534,0.22,0.078,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Reinildo,Sunderland,True,,,,0.22,0.034,0.004,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Trai Hume,Sunderland,True,,,,0.598,0.282,0.116,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Granit Xhaka,Sunderland,True,,,,0.531,0.217,0.077,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Enzo Le Fée,Sunderland,True,,,,0.728,0.44,0.238,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Chris Rigg,Sunderland,True,,,,0.767,0.498,0.292,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Tymur Tutierov,Sunderland,True,,,,0.843,0.627,0.427,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Omar Alderete,Sunderland,True,,,,0.501,0.191,0.063,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Luke O&#039;Nien,Sunderland,True,,,,0.481,0.175,0.055,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,James Trafford,Leeds,True,,,,0.001,0.0,0.0,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,James Justin,Leeds,True,,,,0.529,0.215,0.076,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Tarik Muharemovic,Leeds,True,,,,0.466,0.164,0.05,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Nico Elvedi,Leeds,True,,,,0.389,0.112,0.027,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Jayden Bogle,Leeds,True,,,,0.509,0.198,0.067,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Gabriel Gudmundsson,Leeds,True,,,,0.436,0.142,0.04,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Ethan Ampadu,Leeds,True,,,,0.484,0.178,0.056,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Dominic Calvert-Lewin,Leeds,True,,,,0.827,0.597,0.394,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Anton Stach,Leeds,True,,,,0.741,0.46,0.256,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Ao Tanaka,Leeds,True,,,,0.645,0.335,0.153,,
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,Noah Okafor,Leeds,True,,,,0.778,0.515,0.308,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Senne Lammens,Man United,True,,,,0.0,0.0,0.0,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Leny Yoro,Man United,True,,,,0.371,0.101,0.023,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Harry Maguire,Man United,True,,,,0.57,0.253,0.098,0.273,0.053
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Diogo Dalot,Man United,True,,,,0.57,0.253,0.098,0.272,0.053
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Andrey Santos,Man United,True,,,,0.532,0.218,0.078,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Amad Diallo Traore,Man United,True,,,,0.829,0.6,0.397,0.339,0.083
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Bryan Mbeumo,Man United,True,,,,0.864,0.666,0.474,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Bruno Fernandes,Man United,True,,,,0.873,0.684,0.495,0.542,0.227
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Youri Tielemans,Man United,True,,,,0.674,0.37,0.179,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Carlos Baleba,Man United,True,,,,0.683,0.38,0.188,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Lisandro Martínez,Man United,True,,,,0.487,0.18,0.058,0.27,0.052
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Djordje Petrovic,Bournemouth,True,,,,0.0,0.0,0.0,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Adam Smith,Bournemouth,True,,,,0.166,0.019,0.002,0.165,0.019
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,James Hill,Bournemouth,True,,,,0.333,0.08,0.017,0.261,0.048
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,António Silva,Bournemouth,True,,,,0.425,0.134,0.037,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Adrien Truffert,Bournemouth,True,,,,0.33,0.079,0.016,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Tyler Adams,Bournemouth,True,,,,0.333,0.081,0.017,0.245,0.043
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Rayan,Bournemouth,True,,,,0.79,0.535,0.328,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Ryan Christie,Bournemouth,True,,,,0.681,0.378,0.186,0.265,0.05
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Evanilson,Bournemouth,True,,,,0.794,0.541,0.334,,
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Marcus Tavernier,Bournemouth,True,,,,0.777,0.514,0.307,0.332,0.08
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,Lewis Cook,Bournemouth,True,,,,0.32,0.074,0.014,0.196,0.027
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Alisson,Liverpool,True,,,,0.001,0.0,0.0,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Virgil van Dijk,Liverpool,True,,,,0.478,0.173,0.054,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Jérémy Jacquet,Liverpool,True,,,,0.317,0.073,0.014,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Milos Kerkez,Liverpool,True,,,,0.338,0.083,0.017,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Alexis Mac Allister,Liverpool,True,,,,0.712,0.418,0.219,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Florian Wirtz,Liverpool,True,,,,0.77,0.503,0.296,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Bradley Barcola,Liverpool,True,,,,0.763,0.492,0.286,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Víctor Muñoz,Liverpool,True,,,,0.794,0.541,0.334,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Alexander Isak,Liverpool,True,,,,0.848,0.635,0.436,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Treymaurice Nyoni,Liverpool,True,,,,0.645,0.334,0.152,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Ronald Araújo,Liverpool,True,,,,0.253,0.045,0.007,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Bart Verbruggen,Brighton,True,,,,0.0,0.0,0.0,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Ferdi Kadioglu,Brighton,True,,,,0.379,0.106,0.025,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Lewis Dunk,Brighton,True,,,,0.331,0.079,0.016,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Luka Vuskovic,Brighton,True,,,,0.518,0.206,0.071,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Chema Andres,Brighton,True,,,,0.431,0.138,0.038,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Diego Gómez,Brighton,True,,,,0.671,0.366,0.176,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Maxim De Cuyper,Brighton,True,,,,0.528,0.215,0.076,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Olivier Boscagli,Brighton,True,,,,0.213,0.032,0.004,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Yasin Ayari,Brighton,True,,,,0.618,0.304,0.131,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Pascal Groß,Brighton,True,,,,0.518,0.206,0.071,,
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Charalampos Kostoulas,Brighton,True,,,,0.813,0.572,0.367,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Konstantinos Tzolakis,Hull,True,,,,0.001,0.0,0.0,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Lewie Coyle,Hull,True,,,,0.39,0.112,0.028,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,John Egan,Hull,True,,,,0.423,0.133,0.036,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Semi Ajayi,Hull,True,,,,0.414,0.127,0.034,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Mohamed Belloumi,Hull,True,,,,0.836,0.613,0.412,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Oliver McBurnie,Hull,True,,,,0.816,0.578,0.373,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Regan Slater,Hull,True,,,,0.619,0.305,0.132,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Brooke Norton-Cuffy,Hull,True,,,,0.476,0.171,0.053,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Sorba Thomas,Hull,True,,,,0.689,0.388,0.194,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Matt Crooks,Hull,True,,,,0.535,0.221,0.079,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Lucas Herrington,Hull,True,,,,0.423,0.133,0.036,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Caoimhin Kelleher,Brentford,True,,,,0.0,0.0,0.0,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Michael Kayode,Brentford,True,,,,0.343,0.085,0.018,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Kristoffer Ajer,Brentford,True,,,,0.376,0.103,0.024,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Vitaly Janelt,Brentford,True,,,,0.471,0.167,0.051,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Thiago,Brentford,True,,,,0.819,0.582,0.377,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Keane Lewis-Potter,Brentford,True,,,,0.651,0.341,0.158,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Jaidon Anthony,Brentford,True,,,,0.741,0.46,0.255,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Sepp van den Berg,Brentford,True,,,,0.461,0.16,0.048,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Mathias Jensen,Brentford,True,,,,0.575,0.258,0.102,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Dango Ouattara,Brentford,True,,,,0.812,0.571,0.366,,
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,Yehor Yarmolyuk,Brentford,True,,,,0.454,0.155,0.046,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Walter Benítez,Crystal Palace,True,,,,0.001,0.0,0.0,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Chris Richards,Crystal Palace,True,,,,0.401,0.119,0.03,0.256,0.047
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Jaydee Canvot,Crystal Palace,True,,,,0.344,0.086,0.018,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Anan Khalaili,Crystal Palace,True,,,,0.697,0.399,0.203,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Adam Wharton,Crystal Palace,True,,,,0.596,0.28,0.115,0.256,0.046
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Tyrick Mitchell,Crystal Palace,True,,,,0.389,0.111,0.027,0.229,0.037
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Daichi Kamada,Crystal Palace,True,,,,0.588,0.272,0.11,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Yeremi Pino,Crystal Palace,True,,,,0.786,0.529,0.321,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Jørgen Strand Larsen,Crystal Palace,True,,,,0.792,0.537,0.33,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Honest Ahanor,Crystal Palace,True,,,,0.36,0.095,0.021,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Quinten Timber,Crystal Palace,True,,,,0.674,0.369,0.179,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Lukás Hornícek,Newcastle,True,,,,0.001,0.0,0.0,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Lewis Miley,Newcastle,True,,,,0.432,0.139,0.039,0.165,0.019
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Malick Thiaw,Newcastle,True,,,,0.386,0.109,0.027,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Sven Botman,Newcastle,True,,,,0.429,0.137,0.038,0.168,0.02
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Lewis Hall,Newcastle,True,,,,0.475,0.171,0.053,0.216,0.033
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Nico González,Newcastle,True,,,,0.473,0.169,0.052,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Joelinton,Newcastle,True,,,,0.646,0.335,0.153,0.226,0.036
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Harvey Barnes,Newcastle,True,,,,0.809,0.565,0.359,0.46,0.159
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Yoane Wissa,Newcastle,True,,,,0.807,0.562,0.356,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Matias Fernandez-Pardo,Newcastle,True,,,,0.67,0.365,0.176,,
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,Joe Willock,Newcastle,True,,,,0.722,0.432,0.231,0.221,0.034
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Carl Rushworth,Coventry,True,,,,0.001,0.0,0.0,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Milan van Ewijk,Coventry,True,,,,0.245,0.042,0.006,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Ethan Pinnock,Coventry,True,,,,0.387,0.11,0.027,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Bobby Thomas,Coventry,True,,,,0.627,0.313,0.138,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Jay Dasilva,Coventry,True,,,,0.367,0.099,0.023,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Matt Grimes,Coventry,True,,,,0.49,0.183,0.059,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Jack Rudoni,Coventry,True,,,,0.771,0.504,0.297,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Tatsuhiro Sakamoto,Coventry,True,,,,0.775,0.511,0.303,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Brandon Thomas-Asante,Coventry,True,,,,0.782,0.521,0.314,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Caleb Yirenkyi,Coventry,True,,,,0.442,0.146,0.042,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Sidiki Chérif,Coventry,True,,,,0.83,0.603,0.4,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Bernd Leno,Fulham,True,,,,0.0,0.0,0.0,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Timothy Castagne,Fulham,True,,,,0.457,0.157,0.046,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,David Affengruber,Fulham,True,,,,0.385,0.109,0.026,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Calvin Bassey,Fulham,True,,,,0.372,0.101,0.024,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Antonee Robinson,Fulham,True,,,,0.387,0.11,0.027,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Shea Charles,Fulham,True,,,,0.587,0.271,0.109,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Sander Berge,Fulham,True,,,,0.465,0.163,0.049,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Alex Iwobi,Fulham,True,,,,0.787,0.53,0.322,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Gonzalo García,Fulham,True,,,,0.884,0.706,0.524,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Oscar Bobb,Fulham,True,,,,0.771,0.505,0.298,,
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,Joshua King,Fulham,True,,,,0.841,0.622,0.422,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Zion Suzuki,Aston Villa,True,,,,0.001,0.0,0.0,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Matthew Cash,Aston Villa,True,,,,0.369,0.1,0.023,0.204,0.029
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Victor Lindelöf,Aston Villa,True,,,,0.163,0.018,0.002,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Tyrone Mings,Aston Villa,True,,,,0.306,0.067,0.013,0.169,0.02
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Boubacar Kamara,Aston Villa,True,,,,0.264,0.049,0.008,0.131,0.012
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Nicolas Jackson,Aston Villa,True,,,,0.755,0.479,0.273,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Aaron Wan-Bissaka,Aston Villa,True,,,,0.148,0.015,0.001,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,João Gomes,Aston Villa,True,,,,0.367,0.098,0.023,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Emiliano Buendía,Aston Villa,True,,,,0.7,0.403,0.206,0.45,0.152
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Johan Manzambi,Aston Villa,True,,,,0.771,0.505,0.298,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Alysson Edward,Aston Villa,True,,,,0.64,0.328,0.148,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Gianluigi Donnarumma,Man City,True,,,,0.0,0.0,0.0,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Marc Guehi,Man City,True,,,,0.402,0.119,0.03,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Rúben Dias,Man City,True,,,,0.388,0.111,0.027,0.212,0.031
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Ayyoub Bouaddi,Man City,True,,,,0.515,0.203,0.07,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Iliman Ndiaye,Man City,True,,,,0.681,0.378,0.186,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Erling Haaland,Man City,True,,,,0.886,0.71,0.529,0.649,0.339
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Phil Foden,Man City,True,,,,0.819,0.584,0.379,0.481,0.175
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Jéremy Doku,Man City,True,,,,0.774,0.51,0.303,0.324,0.076
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Matheus Nunes,Man City,True,,,,0.264,0.049,0.008,0.254,0.046
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Nico O&#039;Reilly,Man City,True,,,,0.605,0.289,0.121,,
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,Mateo Kovacic,Man City,True,,,,0.643,0.332,0.151,0.233,0.038
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,David Raya,Arsenal,True,,,,0.002,0.0,0.0,0.0,0.0
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Ezri Konsa Ngoyo,Arsenal,True,,,,0.319,0.073,0.014,,
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Gabriel,Arsenal,True,,,,0.553,0.237,0.089,0.606,0.29
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Declan Rice,Arsenal,True,,,,0.66,0.352,0.166,0.336,0.082
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Riccardo Calafiori,Arsenal,True,,,,0.668,0.361,0.173,,
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Martin Odegaard,Arsenal,True,,,,0.762,0.49,0.284,0.361,0.095
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Bukayo Saka,Arsenal,True,,,,0.881,0.699,0.514,0.602,0.286
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Bruno Guimarães,Arsenal,True,,,,0.697,0.398,0.202,,
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Ben White,Arsenal,True,,,,0.367,0.099,0.023,0.229,0.037
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Kai Havertz,Arsenal,True,,,,0.854,0.647,0.451,0.436,0.142
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Eberechi Eze,Arsenal,True,,,,0.879,0.695,0.509,,
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Jordan Pickford,Everton,True,,,,0.0,0.0,0.0,0.0,0.0
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,James Tarkowski,Everton,True,,,,0.313,0.071,0.014,0.09,0.005
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Vitalii Mykolenko,Everton,True,,,,0.225,0.036,0.005,0.096,0.006
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Jarrad Branthwaite,Everton,True,,,,0.301,0.065,0.012,0.086,0.005
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,James Garner,Everton,True,,,,0.467,0.165,0.05,0.119,0.01
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Merlin Röhl,Everton,True,,,,0.576,0.259,0.102,,
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Thierno Barry,Everton,True,,,,0.74,0.459,0.254,,
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Kiernan Dewsbury-Hall,Everton,True,,,,0.626,0.312,0.137,,
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Jack Grealish,Everton,True,,,,0.63,0.317,0.14,0.129,0.011
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Harrison Armstrong,Everton,True,,,,0.441,0.145,0.041,,
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,Ainsley Maitland-Niles,Everton,True,,,,0.283,0.057,0.01,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Josh Acheampong,Chelsea,True,,,,0.342,0.085,0.018,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Maxence Lacroix,Chelsea,True,,,,0.496,0.187,0.061,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Levi Colwill,Chelsea,True,,,,0.349,0.088,0.019,0.225,0.035
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Jorrel Hato,Chelsea,True,,,,0.315,0.071,0.014,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Moisés Caicedo,Chelsea,True,,,,0.504,0.194,0.065,0.203,0.029
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Jordan Henderson,Chelsea,True,,,,0.512,0.201,0.068,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Pedro Neto,Chelsea,True,,,,0.789,0.533,0.326,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Cole Palmer,Chelsea,True,,,,0.891,0.72,0.542,0.523,0.21
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,João Pedro,Chelsea,True,,,,0.856,0.651,0.455,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Morgan Rogers,Chelsea,True,,,,0.817,0.58,0.375,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Emiliano Martinez,Chelsea,True,,,,0.0,0.0,0.0,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Antonín Kinsky,Tottenham,True,,,,0.0,0.0,0.0,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Jan Paul van Hecke,Tottenham,True,,,,0.333,0.08,0.016,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Micky van de Ven,Tottenham,True,,,,0.285,0.058,0.01,0.182,0.023
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Sandro Tonali,Tottenham,True,,,,0.557,0.241,0.091,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Archie Gray,Tottenham,True,,,,0.294,0.062,0.011,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Mohammed Kudus,Tottenham,True,,,,0.705,0.409,0.211,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Dominic Solanke,Tottenham,True,,,,0.748,0.47,0.265,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Omar Marmoush,Tottenham,True,,,,0.802,0.555,0.348,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Tosin Adarabioyo,Tottenham,True,,,,0.323,0.075,0.015,,
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,James Maddison,Tottenham,True,,,,0.731,0.445,0.242,0.345,0.086
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,Andrew Robertson,Tottenham,True,,,,0.333,0.08,0.016,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Christian Walton,Ipswich,True,,,,0.001,0.0,0.0,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Dara O&#039;Shea,Ipswich,True,,,,0.411,0.125,0.033,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Jacob Greaves,Ipswich,True,,,,0.339,0.083,0.017,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Issa Diop,Ipswich,True,,,,0.294,0.062,0.011,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Guemissongui Ouattara,Ipswich,True,,,,0.49,0.182,0.059,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Leif Davis,Ipswich,True,,,,0.486,0.179,0.057,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Exequiel Palacios,Ipswich,True,,,,0.434,0.141,0.039,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Julio Enciso,Ipswich,True,,,,0.897,0.732,0.557,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Emersonn,Ipswich,True,,,,0.863,0.664,0.471,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Florentino Luís,Ipswich,True,,,,0.493,0.185,0.06,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Daizen Maeda,Ipswich,True,,,,0.747,0.468,0.263,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Matz Sels,Nott'm Forest,True,,,,0.0,0.0,0.0,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Ousmane Diomande,Nott'm Forest,True,,,,0.47,0.167,0.051,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Murillo,Nott'm Forest,True,,,,0.516,0.204,0.07,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Neco Williams,Nott'm Forest,True,,,,0.662,0.355,0.168,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Daniel Muñoz,Nott'm Forest,True,,,,0.612,0.297,0.127,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Xaver Schlager,Nott'm Forest,True,,,,0.716,0.425,0.224,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Liam Delap,Nott'm Forest,True,,,,0.877,0.692,0.505,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Jair,Nott'm Forest,True,,,,0.394,0.114,0.028,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,James McAtee,Nott'm Forest,True,,,,0.745,0.465,0.26,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Nicolás Domínguez,Nott'm Forest,True,,,,0.628,0.315,0.139,,
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,Dan Ndoye,Nott'm Forest,True,,,,0.814,0.574,0.369,,

@@ -1,11 +1,11 @@
 fixture_id,kickoff,home,away,home_goals,away_goals,home_shots,away_shots,understat_match_id,proxy_xi,n_players_graded,source
-us_31249,2026-10-19T15:00:00+00:00,Tottenham,Coventry,3,1,16,12,31249,False,22,backfill_understat
-us_31248,2026-10-18T15:00:00+00:00,Nott'm Forest,Arsenal,0,1,14,9,31248,False,22,backfill_understat
-us_31247,2026-10-18T15:00:00+00:00,Leeds,Man United,1,1,12,13,31247,False,22,backfill_understat
-us_31245,2026-10-18T15:00:00+00:00,Brighton,Crystal Palace,5,0,17,5,31245,False,22,backfill_understat
-us_31246,2026-10-18T15:00:00+00:00,Bournemouth,Sunderland,2,0,29,3,31246,False,22,backfill_understat
-us_31242,2026-10-17T15:00:00+00:00,Brentford,Liverpool,1,2,10,21,31242,False,22,backfill_understat
-us_31240,2026-10-17T15:00:00+00:00,Everton,Chelsea,0,2,6,18,31240,False,22,backfill_understat
-us_31241,2026-10-17T15:00:00+00:00,Fulham,Hull,1,0,18,5,31241,False,22,backfill_understat
-us_31243,2026-10-17T15:00:00+00:00,Man City,Ipswich,3,2,19,8,31243,False,22,backfill_understat
-us_31244,2026-10-17T15:00:00+00:00,Newcastle,Aston Villa,0,1,16,15,31244,False,22,backfill_understat
+hist_sunderland_leeds_20261025,2026-10-25T15:00:00+00:00,Sunderland,Leeds,0,0,15,11,,True,0,backfill_proxy_xi
+hist_manunited_bournemouth_20261025,2026-10-25T15:00:00+00:00,Man United,Bournemouth,0,3,17,10,,True,0,backfill_proxy_xi
+hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,2,0,13,17,,True,0,backfill_proxy_xi
+hist_hull_brentford_20261025,2026-10-25T15:00:00+00:00,Hull,Brentford,1,1,12,14,,True,0,backfill_proxy_xi
+hist_crystalpalace_newcastle_20261025,2026-10-25T15:00:00+00:00,Crystal Palace,Newcastle,0,2,17,10,,True,0,backfill_proxy_xi
+hist_coventry_fulham_20261024,2026-10-24T15:00:00+00:00,Coventry,Fulham,0,1,13,12,,True,0,backfill_proxy_xi
+hist_astonvilla_mancity_20261024,2026-10-24T15:00:00+00:00,Aston Villa,Man City,2,1,8,15,,True,0,backfill_proxy_xi
+hist_arsenal_everton_20261024,2026-10-24T15:00:00+00:00,Arsenal,Everton,2,0,20,8,,True,0,backfill_proxy_xi
+hist_chelsea_tottenham_20261024,2026-10-24T15:00:00+00:00,Chelsea,Tottenham,0,2,7,15,,True,0,backfill_proxy_xi
+hist_ipswich_nottmforest_20261023,2026-10-23T15:00:00+00:00,Ipswich,Nott'm Forest,1,1,7,17,,True,0,backfill_proxy_xi
