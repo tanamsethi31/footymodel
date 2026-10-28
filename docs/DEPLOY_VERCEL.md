@@ -8,7 +8,7 @@ In [Vercel → Project Settings → General → Root Directory](https://vercel.c
 
 **Root Directory:** `dashboard`
 
-Alternatively, the repo root **`vercel.json`** runs `cd dashboard && npm run build` when Root Directory is left empty.
+Do **not** add a repo-root `vercel.json` with `cd dashboard` — that breaks when Root Directory is already `dashboard`.
 
 ## Required environment variables (Vercel → Settings → Environment Variables)
 
