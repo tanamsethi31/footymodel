@@ -9,6 +9,15 @@ import { sortGradedResults } from "./graded";
 const REPO = "tanamsethi31/footymodel";
 const DATA_PATH = "data/processed";
 
+/** Vercel builds must not touch repo-root data/ (Turbopack traces the whole tree). */
+function useLocalProcessedFiles(): boolean {
+  return process.env.VERCEL !== "1";
+}
+
+function localProcessedPath(name: string): string {
+  return path.join(process.cwd(), "..", "data", "processed", name);
+}
+
 export type GoalsPick = {
   loggedAt: string;
   fixtureId: string;
@@ -217,18 +226,12 @@ function parseCsvText(text: string): Record<string, string>[] {
 }
 
 async function readLocalText(name: string): Promise<string | null> {
-  const candidates = [
-    path.join(process.cwd(), "data", name),
-    path.join(process.cwd(), "..", "data", "processed", name),
-  ];
-  for (const filePath of candidates) {
-    try {
-      return await readFile(filePath, "utf-8");
-    } catch {
-      // try next path
-    }
+  if (!useLocalProcessedFiles()) return null;
+  try {
+    return await readFile(localProcessedPath(name), "utf-8");
+  } catch {
+    return null;
   }
-  return null;
 }
 
 async function fetchTextFile(name: string): Promise<string | null> {
@@ -299,20 +302,14 @@ export async function getPaperBankrollSummary(): Promise<PaperBankrollSummary | 
 }
 
 async function readLocalCsv(name: string): Promise<Record<string, string>[]> {
-  const candidates = [
-    path.join(process.cwd(), "data", name),
-    path.join(process.cwd(), "..", "data", "processed", name),
-  ];
-  for (const filePath of candidates) {
-    try {
-      const text = await readFile(filePath, "utf-8");
-      const rows = parseCsvText(text);
-      if (rows.length > 0) return rows;
-    } catch {
-      // try next path
-    }
+  if (!useLocalProcessedFiles()) return [];
+  try {
+    const text = await readFile(localProcessedPath(name), "utf-8");
+    const rows = parseCsvText(text);
+    return rows.length > 0 ? rows : [];
+  } catch {
+    return [];
   }
-  return [];
 }
 
 async function fetchCsv(name: string): Promise<Record<string, string>[]> {
@@ -331,7 +328,10 @@ async function fetchCsv(name: string): Promise<Record<string, string>[]> {
     }
   );
   if (res.status === 404) return readLocalCsv(name);
-  if (!res.ok) throw new Error(`Failed to fetch ${name}: ${res.status} ${await res.text()}`);
+  if (!res.ok) {
+    console.warn(`GitHub fetch ${name}: ${res.status}`);
+    return readLocalCsv(name);
+  }
   const rows = parseCsvText(await res.text());
   return rows.length > 0 ? rows : readLocalCsv(name);
 }
@@ -350,7 +350,10 @@ async function fetchJsonl(name: string): Promise<Record<string, unknown>[]> {
     }
   );
   if (res.status === 404) return []; // file doesn't exist yet (no rows logged)
-  if (!res.ok) throw new Error(`Failed to fetch ${name}: ${res.status} ${await res.text()}`);
+  if (!res.ok) {
+    console.warn(`GitHub fetch ${name}: ${res.status}`);
+    return [];
+  }
   const text = await res.text();
   return text
     .split("\n")
@@ -372,7 +375,10 @@ async function fetchJson(name: string): Promise<unknown[]> {
     }
   );
   if (res.status === 404) return []; // file doesn't exist yet
-  if (!res.ok) throw new Error(`Failed to fetch ${name}: ${res.status} ${await res.text()}`);
+  if (!res.ok) {
+    console.warn(`GitHub fetch ${name}: ${res.status}`);
+    return [];
+  }
   const text = await res.text();
   return JSON.parse(text);
 }
@@ -584,7 +590,10 @@ async function fetchCalendarFixtures(): Promise<Record<string, unknown>[]> {
     }
   );
   if (res.status === 404) return [];
-  if (!res.ok) throw new Error(`Failed to fetch fixture_calendar.json: ${res.status} ${await res.text()}`);
+  if (!res.ok) {
+    console.warn(`GitHub fetch fixture_calendar.json: ${res.status}`);
+    return [];
+  }
   const payload = JSON.parse(await res.text()) as { fixtures?: unknown };
   return Array.isArray(payload.fixtures)
     ? (payload.fixtures as Record<string, unknown>[])
