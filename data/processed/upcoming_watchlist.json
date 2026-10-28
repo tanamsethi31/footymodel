@@ -543,6 +543,40 @@
           "p_shots_gt0.5": 0.723
         }
       ]
+    },
+    {
+      "fixture_id": "fpl_94",
+      "home": "Everton",
+      "away": "Coventry City",
+      "kickoff": "2026-11-06T20:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Thierno Barry",
+          "p_shots_gt0.5": 0.899
+        },
+        {
+          "player": "Tyrique George",
+          "p_shots_gt0.5": 0.888
+        },
+        {
+          "player": "Brennan Johnson",
+          "p_shots_gt0.5": 0.837
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Taiwo Awoniyi",
+          "p_shots_gt0.5": 0.826
+        },
+        {
+          "player": "Sidiki Ch\u00e9rif",
+          "p_shots_gt0.5": 0.809
+        },
+        {
+          "player": "Brandon Thomas-Asante",
+          "p_shots_gt0.5": 0.757
+        }
+      ]
     }
   ]
 }
