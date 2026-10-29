@@ -120,6 +120,12 @@
     "kickoff": "2026-11-07T15:00:00+00:00"
   },
   {
+    "fixture_id": "fpl_91",
+    "home": "Arsenal",
+    "away": "Hull City",
+    "kickoff": "2026-11-07T15:00:00+00:00"
+  },
+  {
     "fixture_id": "us_31271",
     "home": "Brighton",
     "away": "Brentford",
@@ -141,6 +147,12 @@
     "fixture_id": "us_31274",
     "home": "Fulham",
     "away": "Newcastle United",
+    "kickoff": "2026-11-07T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_95",
+    "home": "Fulham",
+    "away": "Newcastle",
     "kickoff": "2026-11-07T15:00:00+00:00"
   },
   {
@@ -172,5 +184,11 @@
     "home": "Sunderland",
     "away": "Chelsea",
     "kickoff": "2026-11-07T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_99",
+    "home": "Nott'm Forest",
+    "away": "Man City",
+    "kickoff": "2026-11-07T17:30:00+00:00"
   }
 ]

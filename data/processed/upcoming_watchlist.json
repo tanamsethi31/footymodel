@@ -613,6 +613,40 @@
       ]
     },
     {
+      "fixture_id": "fpl_91",
+      "home": "Arsenal",
+      "away": "Hull City",
+      "kickoff": "2026-11-07T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Bukayo Saka",
+          "p_shots_gt0.5": 0.895
+        },
+        {
+          "player": "Eberechi Eze",
+          "p_shots_gt0.5": 0.893
+        },
+        {
+          "player": "Kai Havertz",
+          "p_shots_gt0.5": 0.871
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Joe Gelhardt",
+          "p_shots_gt0.5": 0.807
+        },
+        {
+          "player": "Mohamed Belloumi",
+          "p_shots_gt0.5": 0.698
+        },
+        {
+          "player": "Oliver McBurnie",
+          "p_shots_gt0.5": 0.673
+        }
+      ]
+    },
+    {
       "fixture_id": "us_31271",
       "home": "Brighton",
       "away": "Brentford",
@@ -718,6 +752,40 @@
       "fixture_id": "us_31274",
       "home": "Fulham",
       "away": "Newcastle United",
+      "kickoff": "2026-11-07T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Gonzalo Garc\u00eda",
+          "p_shots_gt0.5": 0.867
+        },
+        {
+          "player": "C\u00e9sar Palacios",
+          "p_shots_gt0.5": 0.841
+        },
+        {
+          "player": "Joshua King",
+          "p_shots_gt0.5": 0.82
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Harvey Barnes",
+          "p_shots_gt0.5": 0.802
+        },
+        {
+          "player": "Yoane Wissa",
+          "p_shots_gt0.5": 0.8
+        },
+        {
+          "player": "Jacob Murphy",
+          "p_shots_gt0.5": 0.736
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_95",
+      "home": "Fulham",
+      "away": "Newcastle",
       "kickoff": "2026-11-07T15:00:00+00:00",
       "home_watch": [
         {
@@ -915,6 +983,40 @@
         {
           "player": "Danny Welbeck",
           "p_shots_gt0.5": 0.81
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_99",
+      "home": "Nott'm Forest",
+      "away": "Man City",
+      "kickoff": "2026-11-07T17:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Liam Delap",
+          "p_shots_gt0.5": 0.755
+        },
+        {
+          "player": "Igor Jesus",
+          "p_shots_gt0.5": 0.742
+        },
+        {
+          "player": "Morgan Gibbs-White",
+          "p_shots_gt0.5": 0.678
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Erling Haaland",
+          "p_shots_gt0.5": 0.894
+        },
+        {
+          "player": "Mathis Cherki",
+          "p_shots_gt0.5": 0.838
+        },
+        {
+          "player": "Phil Foden",
+          "p_shots_gt0.5": 0.83
         }
       ]
     }
