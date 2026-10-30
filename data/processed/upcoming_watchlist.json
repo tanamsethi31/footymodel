@@ -124,7 +124,7 @@
       "away_watch": [
         {
           "player": "Liam Delap",
-          "p_shots_gt0.5": 0.857
+          "p_shots_gt0.5": 0.856
         },
         {
           "player": "Igor Jesus",
@@ -158,7 +158,7 @@
       "away_watch": [
         {
           "player": "Liam Delap",
-          "p_shots_gt0.5": 0.857
+          "p_shots_gt0.5": 0.856
         },
         {
           "player": "Igor Jesus",
@@ -824,7 +824,7 @@
       "home_watch": [
         {
           "player": "Julio Enciso",
-          "p_shots_gt0.5": 0.9
+          "p_shots_gt0.5": 0.899
         },
         {
           "player": "Emersonn",
