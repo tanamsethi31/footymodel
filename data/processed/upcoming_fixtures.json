@@ -190,5 +190,35 @@
     "home": "Nott'm Forest",
     "away": "Man City",
     "kickoff": "2026-11-07T17:30:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_92",
+    "home": "Brighton",
+    "away": "Brentford",
+    "kickoff": "2026-11-08T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_93",
+    "home": "Crystal Palace",
+    "away": "Liverpool",
+    "kickoff": "2026-11-08T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_96",
+    "home": "Ipswich Town",
+    "away": "Bournemouth",
+    "kickoff": "2026-11-08T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_100",
+    "home": "Sunderland",
+    "away": "Chelsea",
+    "kickoff": "2026-11-08T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_98",
+    "home": "Man Utd",
+    "away": "Aston Villa",
+    "kickoff": "2026-11-08T16:30:00+00:00"
   }
 ]
