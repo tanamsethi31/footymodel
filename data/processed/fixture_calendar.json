@@ -1,15 +1,8 @@
 {
-  "refreshed_at": "2026-10-31T13:21:14.571793+00:00",
+  "refreshed_at": "2026-11-01T14:03:46.340337+00:00",
   "horizon_days": 10,
   "source": "fantasy-premier-league",
   "fixtures": [
-    {
-      "fixture_id": "fpl_84",
-      "league_id": 39,
-      "home": "Chelsea",
-      "away": "Man Utd",
-      "kickoff": "2026-10-31T12:30:00+00:00"
-    },
     {
       "fixture_id": "fpl_82",
       "league_id": 39,
