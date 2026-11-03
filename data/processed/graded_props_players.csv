@@ -1,4 +1,26 @@
 fixture_id,kickoff,home,away,player,team,proxy_xi,actual_shots,actual_sot,actual_xg,p_shots_gt0.5,p_shots_gt1.5,p_shots_gt2.5,p_sot_gt0.5,p_sot_gt1.5
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Lukás Hornícek,Newcastle,True,,,,0.001,0.0,0.0,,
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Lewis Miley,Newcastle,True,,,,0.502,0.193,0.064,0.228,0.036
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Malick Thiaw,Newcastle,True,,,,0.452,0.153,0.045,,
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Sven Botman,Newcastle,True,,,,0.499,0.189,0.062,0.231,0.038
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Lewis Hall,Newcastle,True,,,,0.547,0.232,0.085,0.292,0.061
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Nico González,Newcastle,True,,,,0.545,0.23,0.084,,
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Joelinton,Newcastle,True,,,,0.716,0.423,0.223,0.305,0.067
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Harvey Barnes,Newcastle,True,,,,0.86,0.658,0.464,0.575,0.259
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Yoane Wissa,Newcastle,True,,,,0.859,0.656,0.461,,
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Matias Fernandez-Pardo,Newcastle,True,,,,0.74,0.457,0.253,,
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Joe Willock,Newcastle,True,,,,0.785,0.527,0.319,0.299,0.064
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Jordan Pickford,Everton,True,,,,0.0,0.0,0.0,0.0,0.0
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,James Tarkowski,Everton,True,,,,0.381,0.107,0.026,0.199,0.028
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Vitalii Mykolenko,Everton,True,,,,0.279,0.056,0.009,0.213,0.032
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Jarrad Branthwaite,Everton,True,,,,0.368,0.099,0.023,0.192,0.026
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,James Garner,Everton,True,,,,0.549,0.233,0.086,0.257,0.047
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Merlin Röhl,Everton,True,,,,0.659,0.351,0.165,,
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Thierno Barry,Everton,True,,,,0.809,0.567,0.361,,
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Kiernan Dewsbury-Hall,Everton,True,,,,0.706,0.411,0.213,,
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Jack Grealish,Everton,True,,,,0.71,0.416,0.217,0.276,0.054
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Harrison Armstrong,Everton,True,,,,0.52,0.208,0.072,,
+hist_newcastle_everton_20261102,2026-11-02T15:00:00+00:00,Newcastle,Everton,Ainsley Maitland-Niles,Everton,True,,,,0.347,0.087,0.019,,
 hist_liverpool_arsenal_20261101,2026-11-01T15:00:00+00:00,Liverpool,Arsenal,Alisson,Liverpool,True,,,,0.001,0.0,0.0,0.0,0.0
 hist_liverpool_arsenal_20261101,2026-11-01T15:00:00+00:00,Liverpool,Arsenal,Virgil van Dijk,Liverpool,True,,,,0.445,0.149,0.043,0.161,0.018
 hist_liverpool_arsenal_20261101,2026-11-01T15:00:00+00:00,Liverpool,Arsenal,Jérémy Jacquet,Liverpool,True,,,,0.292,0.061,0.011,,
@@ -197,25 +219,3 @@ hist_chelsea_manunited_20261031,2026-10-31T15:00:00+00:00,Chelsea,Man United,Bru
 hist_chelsea_manunited_20261031,2026-10-31T15:00:00+00:00,Chelsea,Man United,Youri Tielemans,Man United,True,,,,0.533,0.219,0.078,,
 hist_chelsea_manunited_20261031,2026-10-31T15:00:00+00:00,Chelsea,Man United,Carlos Baleba,Man United,True,,,,0.542,0.227,0.083,,
 hist_chelsea_manunited_20261031,2026-10-31T15:00:00+00:00,Chelsea,Man United,Lisandro Martínez,Man United,True,,,,0.357,0.093,0.021,0.201,0.028
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Alisson,Liverpool,True,,,,0.001,0.0,0.0,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Virgil van Dijk,Liverpool,True,,,,0.478,0.173,0.054,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Jérémy Jacquet,Liverpool,True,,,,0.317,0.073,0.014,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Milos Kerkez,Liverpool,True,,,,0.338,0.083,0.017,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Alexis Mac Allister,Liverpool,True,,,,0.712,0.418,0.219,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Florian Wirtz,Liverpool,True,,,,0.77,0.503,0.296,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Bradley Barcola,Liverpool,True,,,,0.763,0.492,0.286,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Víctor Muñoz,Liverpool,True,,,,0.794,0.541,0.334,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Alexander Isak,Liverpool,True,,,,0.848,0.635,0.436,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Treymaurice Nyoni,Liverpool,True,,,,0.645,0.334,0.152,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Ronald Araújo,Liverpool,True,,,,0.253,0.045,0.007,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Bart Verbruggen,Brighton,True,,,,0.0,0.0,0.0,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Ferdi Kadioglu,Brighton,True,,,,0.379,0.106,0.025,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Lewis Dunk,Brighton,True,,,,0.331,0.079,0.016,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Luka Vuskovic,Brighton,True,,,,0.518,0.206,0.071,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Chema Andres,Brighton,True,,,,0.431,0.138,0.038,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Diego Gómez,Brighton,True,,,,0.671,0.366,0.176,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Maxim De Cuyper,Brighton,True,,,,0.528,0.215,0.076,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Olivier Boscagli,Brighton,True,,,,0.213,0.032,0.004,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Yasin Ayari,Brighton,True,,,,0.618,0.304,0.131,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Pascal Groß,Brighton,True,,,,0.518,0.206,0.071,,
-hist_liverpool_brighton_20261025,2026-10-25T15:00:00+00:00,Liverpool,Brighton,Charalampos Kostoulas,Brighton,True,,,,0.813,0.572,0.367,,
