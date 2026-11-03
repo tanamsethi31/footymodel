@@ -5,165 +5,150 @@ CALSCALE:GREGORIAN
 X-WR-CALNAME:Footymodel PL matchday
 BEGIN:VEVENT
 UID:footymodel-1@local
-DTSTAMP:20261103T160315Z
-DTSTART:20261102T183000Z
-DTEND:20261102T200000Z
-SUMMARY:Footymodel poll: Newcastle v Everton
-DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
-END:VEVENT
-BEGIN:VEVENT
-UID:footymodel-ko-2@local
-DTSTAMP:20261103T160315Z
-DTSTART:20261102T200000Z
-DTEND:20261102T220000Z
-SUMMARY:KO Newcastle v Everton
-END:VEVENT
-BEGIN:VEVENT
-UID:footymodel-3@local
-DTSTAMP:20261103T160315Z
+DTSTAMP:20261103T215157Z
 DTSTART:20261106T183000Z
 DTEND:20261106T200000Z
 SUMMARY:Footymodel poll: Everton v Coventry City
 DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-ko-4@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-ko-2@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261106T200000Z
 DTEND:20261106T220000Z
 SUMMARY:KO Everton v Coventry City
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-5@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-3@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261107T110000Z
 DTEND:20261107T123000Z
 SUMMARY:Footymodel poll: Leeds v Spurs
 DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-ko-6@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-ko-4@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261107T123000Z
 DTEND:20261107T143000Z
 SUMMARY:KO Leeds v Spurs
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-7@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-5@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261107T133000Z
 DTEND:20261107T150000Z
 SUMMARY:Footymodel poll: Arsenal v Hull City
 DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-ko-8@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-ko-6@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261107T150000Z
 DTEND:20261107T170000Z
 SUMMARY:KO Arsenal v Hull City
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-9@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-7@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261107T133000Z
 DTEND:20261107T150000Z
 SUMMARY:Footymodel poll: Fulham v Newcastle
 DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-ko-10@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-ko-8@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261107T150000Z
 DTEND:20261107T170000Z
 SUMMARY:KO Fulham v Newcastle
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-11@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-9@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261107T160000Z
 DTEND:20261107T173000Z
 SUMMARY:Footymodel poll: Nott'm Forest v Man City
 DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-ko-12@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-ko-10@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261107T173000Z
 DTEND:20261107T193000Z
 SUMMARY:KO Nott'm Forest v Man City
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-13@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-11@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261108T123000Z
 DTEND:20261108T140000Z
 SUMMARY:Footymodel poll: Brighton v Brentford
 DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-ko-14@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-ko-12@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261108T140000Z
 DTEND:20261108T160000Z
 SUMMARY:KO Brighton v Brentford
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-15@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-13@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261108T123000Z
 DTEND:20261108T140000Z
 SUMMARY:Footymodel poll: Crystal Palace v Liverpool
 DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-ko-16@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-ko-14@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261108T140000Z
 DTEND:20261108T160000Z
 SUMMARY:KO Crystal Palace v Liverpool
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-17@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-15@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261108T123000Z
 DTEND:20261108T140000Z
 SUMMARY:Footymodel poll: Ipswich Town v Bournemouth
 DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-ko-18@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-ko-16@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261108T140000Z
 DTEND:20261108T160000Z
 SUMMARY:KO Ipswich Town v Bournemouth
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-19@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-17@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261108T123000Z
 DTEND:20261108T140000Z
 SUMMARY:Footymodel poll: Sunderland v Chelsea
 DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-ko-20@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-ko-18@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261108T140000Z
 DTEND:20261108T160000Z
 SUMMARY:KO Sunderland v Chelsea
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-21@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-19@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261108T150000Z
 DTEND:20261108T163000Z
 SUMMARY:Footymodel poll: Man Utd v Aston Villa
 DESCRIPTION:Start on home Wi-Fi:\n./scripts/matchday_laptop.sh loop 900 --push\nOr trigger self-hosted workflow live_poll_props_selfhosted.yml
 END:VEVENT
 BEGIN:VEVENT
-UID:footymodel-ko-22@local
-DTSTAMP:20261103T160315Z
+UID:footymodel-ko-20@local
+DTSTAMP:20261103T215157Z
 DTSTART:20261108T163000Z
 DTEND:20261108T183000Z
 SUMMARY:KO Man Utd v Aston Villa
