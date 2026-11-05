@@ -1,15 +1,8 @@
 {
-  "refreshed_at": "2026-11-03T16:03:11.438101+00:00",
+  "refreshed_at": "2026-11-05T16:23:08.586466+00:00",
   "horizon_days": 10,
   "source": "fantasy-premier-league",
   "fixtures": [
-    {
-      "fixture_id": "fpl_89",
-      "league_id": 39,
-      "home": "Newcastle",
-      "away": "Everton",
-      "kickoff": "2026-11-02T20:00:00+00:00"
-    },
     {
       "fixture_id": "fpl_94",
       "league_id": 39,
