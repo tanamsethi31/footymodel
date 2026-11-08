@@ -1,38 +1,3 @@
 {
-  "fixtures": [
-    {
-      "fixture_id": "fpl_98",
-      "home": "Man Utd",
-      "away": "Aston Villa",
-      "kickoff": "2026-11-08T16:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Matheus Cunha",
-          "p_shots_gt0.5": 0.887
-        },
-        {
-          "player": "Bruno Fernandes",
-          "p_shots_gt0.5": 0.86
-        },
-        {
-          "player": "Marcus Rashford",
-          "p_shots_gt0.5": 0.854
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Johan Manzambi",
-          "p_shots_gt0.5": 0.836
-        },
-        {
-          "player": "Nicolas Jackson",
-          "p_shots_gt0.5": 0.822
-        },
-        {
-          "player": "Emiliano Buend\u00eda",
-          "p_shots_gt0.5": 0.775
-        }
-      ]
-    }
-  ]
+  "fixtures": []
 }
