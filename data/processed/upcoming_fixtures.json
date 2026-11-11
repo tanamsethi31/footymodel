@@ -1,1 +1,86 @@
-[]
+[
+  {
+    "fixture_id": "fpl_108",
+    "home": "Man City",
+    "away": "Fulham",
+    "kickoff": "2026-11-21T12:30:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_101",
+    "home": "Aston Villa",
+    "away": "Sunderland",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31280",
+    "home": "Bournemouth",
+    "away": "Nottingham Forest",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_102",
+    "home": "Bournemouth",
+    "away": "Nott'm Forest",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31282",
+    "home": "Brentford",
+    "away": "Everton",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_104",
+    "home": "Chelsea",
+    "away": "Leeds",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31284",
+    "home": "Coventry",
+    "away": "Crystal Palace",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_105",
+    "home": "Coventry City",
+    "away": "Crystal Palace",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31285",
+    "home": "Hull",
+    "away": "Brighton",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31286",
+    "home": "Liverpool",
+    "away": "Manchester United",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31287",
+    "home": "Manchester City",
+    "away": "Fulham",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31288",
+    "home": "Newcastle United",
+    "away": "Arsenal",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_110",
+    "home": "Spurs",
+    "away": "Ipswich Town",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31289",
+    "home": "Tottenham",
+    "away": "Ipswich",
+    "kickoff": "2026-11-21T15:00:00+00:00"
+  }
+]

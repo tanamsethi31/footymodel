@@ -1,3 +1,446 @@
 {
-  "fixtures": []
+  "fixtures": [
+    {
+      "fixture_id": "fpl_108",
+      "home": "Man City",
+      "away": "Fulham",
+      "kickoff": "2026-11-21T12:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Erling Haaland",
+          "p_shots_gt0.5": 0.906
+        },
+        {
+          "player": "Mathis Cherki",
+          "p_shots_gt0.5": 0.853
+        },
+        {
+          "player": "Phil Foden",
+          "p_shots_gt0.5": 0.846
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Gonzalo Garc\u00eda",
+          "p_shots_gt0.5": 0.694
+        },
+        {
+          "player": "C\u00e9sar Palacios",
+          "p_shots_gt0.5": 0.654
+        },
+        {
+          "player": "Joshua King",
+          "p_shots_gt0.5": 0.627
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_101",
+      "home": "Aston Villa",
+      "away": "Sunderland",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Johan Manzambi",
+          "p_shots_gt0.5": 0.896
+        },
+        {
+          "player": "Nicolas Jackson",
+          "p_shots_gt0.5": 0.886
+        },
+        {
+          "player": "Emiliano Buend\u00eda",
+          "p_shots_gt0.5": 0.849
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Wilson Isidor",
+          "p_shots_gt0.5": 0.854
+        },
+        {
+          "player": "Tymur Tutierov",
+          "p_shots_gt0.5": 0.784
+        },
+        {
+          "player": "Brian Brobbey",
+          "p_shots_gt0.5": 0.756
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31280",
+      "home": "Bournemouth",
+      "away": "Nottingham Forest",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "David Brooks",
+          "p_shots_gt0.5": 0.877
+        },
+        {
+          "player": "Evanilson",
+          "p_shots_gt0.5": 0.856
+        },
+        {
+          "player": "Rayan",
+          "p_shots_gt0.5": 0.853
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Liam Delap",
+          "p_shots_gt0.5": 0.848
+        },
+        {
+          "player": "Igor Jesus",
+          "p_shots_gt0.5": 0.838
+        },
+        {
+          "player": "Morgan Gibbs-White",
+          "p_shots_gt0.5": 0.786
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_102",
+      "home": "Bournemouth",
+      "away": "Nott'm Forest",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "David Brooks",
+          "p_shots_gt0.5": 0.877
+        },
+        {
+          "player": "Evanilson",
+          "p_shots_gt0.5": 0.856
+        },
+        {
+          "player": "Rayan",
+          "p_shots_gt0.5": 0.853
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Liam Delap",
+          "p_shots_gt0.5": 0.848
+        },
+        {
+          "player": "Igor Jesus",
+          "p_shots_gt0.5": 0.838
+        },
+        {
+          "player": "Morgan Gibbs-White",
+          "p_shots_gt0.5": 0.786
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31282",
+      "home": "Brentford",
+      "away": "Everton",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Thiago",
+          "p_shots_gt0.5": 0.84
+        },
+        {
+          "player": "Dango Ouattara",
+          "p_shots_gt0.5": 0.834
+        },
+        {
+          "player": "Kevin Schade",
+          "p_shots_gt0.5": 0.814
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Thierno Barry",
+          "p_shots_gt0.5": 0.829
+        },
+        {
+          "player": "Tyrique George",
+          "p_shots_gt0.5": 0.814
+        },
+        {
+          "player": "Brennan Johnson",
+          "p_shots_gt0.5": 0.748
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_104",
+      "home": "Chelsea",
+      "away": "Leeds",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Cole Palmer",
+          "p_shots_gt0.5": 0.902
+        },
+        {
+          "player": "Jo\u00e3o Pedro",
+          "p_shots_gt0.5": 0.869
+        },
+        {
+          "player": "Danny Welbeck",
+          "p_shots_gt0.5": 0.847
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Dominic Calvert-Lewin",
+          "p_shots_gt0.5": 0.751
+        },
+        {
+          "player": "Noah Okafor",
+          "p_shots_gt0.5": 0.694
+        },
+        {
+          "player": "Anton Stach",
+          "p_shots_gt0.5": 0.652
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31284",
+      "home": "Coventry",
+      "away": "Crystal Palace",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Taiwo Awoniyi",
+          "p_shots_gt0.5": 0.852
+        },
+        {
+          "player": "Sidiki Ch\u00e9rif",
+          "p_shots_gt0.5": 0.836
+        },
+        {
+          "player": "Brandon Thomas-Asante",
+          "p_shots_gt0.5": 0.789
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Eddie Nketiah",
+          "p_shots_gt0.5": 0.902
+        },
+        {
+          "player": "J\u00f8rgen Strand Larsen",
+          "p_shots_gt0.5": 0.815
+        },
+        {
+          "player": "Yeremi Pino",
+          "p_shots_gt0.5": 0.809
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_105",
+      "home": "Coventry City",
+      "away": "Crystal Palace",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Taiwo Awoniyi",
+          "p_shots_gt0.5": 0.852
+        },
+        {
+          "player": "Sidiki Ch\u00e9rif",
+          "p_shots_gt0.5": 0.836
+        },
+        {
+          "player": "Brandon Thomas-Asante",
+          "p_shots_gt0.5": 0.789
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Eddie Nketiah",
+          "p_shots_gt0.5": 0.902
+        },
+        {
+          "player": "J\u00f8rgen Strand Larsen",
+          "p_shots_gt0.5": 0.815
+        },
+        {
+          "player": "Yeremi Pino",
+          "p_shots_gt0.5": 0.809
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31285",
+      "home": "Hull",
+      "away": "Brighton",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Joe Gelhardt",
+          "p_shots_gt0.5": 0.868
+        },
+        {
+          "player": "Mohamed Belloumi",
+          "p_shots_gt0.5": 0.777
+        },
+        {
+          "player": "Oliver McBurnie",
+          "p_shots_gt0.5": 0.756
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Charalampos Kostoulas",
+          "p_shots_gt0.5": 0.894
+        },
+        {
+          "player": "Malick Yalcouy\u00e9",
+          "p_shots_gt0.5": 0.803
+        },
+        {
+          "player": "Diego G\u00f3mez",
+          "p_shots_gt0.5": 0.786
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31286",
+      "home": "Liverpool",
+      "away": "Manchester United",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Alexander Isak",
+          "p_shots_gt0.5": 0.865
+        },
+        {
+          "player": "Lewis Koumas",
+          "p_shots_gt0.5": 0.854
+        },
+        {
+          "player": "Cody Gakpo",
+          "p_shots_gt0.5": 0.853
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Matheus Cunha",
+          "p_shots_gt0.5": 0.784
+        },
+        {
+          "player": "Bruno Fernandes",
+          "p_shots_gt0.5": 0.746
+        },
+        {
+          "player": "Marcus Rashford",
+          "p_shots_gt0.5": 0.737
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31287",
+      "home": "Manchester City",
+      "away": "Fulham",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Erling Haaland",
+          "p_shots_gt0.5": 0.906
+        },
+        {
+          "player": "Mathis Cherki",
+          "p_shots_gt0.5": 0.853
+        },
+        {
+          "player": "Phil Foden",
+          "p_shots_gt0.5": 0.846
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Gonzalo Garc\u00eda",
+          "p_shots_gt0.5": 0.694
+        },
+        {
+          "player": "C\u00e9sar Palacios",
+          "p_shots_gt0.5": 0.654
+        },
+        {
+          "player": "Joshua King",
+          "p_shots_gt0.5": 0.627
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31288",
+      "home": "Newcastle United",
+      "away": "Arsenal",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Harvey Barnes",
+          "p_shots_gt0.5": 0.8
+        },
+        {
+          "player": "Yoane Wissa",
+          "p_shots_gt0.5": 0.798
+        },
+        {
+          "player": "Jacob Murphy",
+          "p_shots_gt0.5": 0.734
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Bukayo Saka",
+          "p_shots_gt0.5": 0.845
+        },
+        {
+          "player": "Eberechi Eze",
+          "p_shots_gt0.5": 0.842
+        },
+        {
+          "player": "Kai Havertz",
+          "p_shots_gt0.5": 0.814
+        }
+      ]
+    },
+    {
+      "fixture_id": "us_31289",
+      "home": "Tottenham",
+      "away": "Ipswich",
+      "kickoff": "2026-11-21T15:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Omar Marmoush",
+          "p_shots_gt0.5": 0.918
+        },
+        {
+          "player": "Dominic Solanke",
+          "p_shots_gt0.5": 0.886
+        },
+        {
+          "player": "S\u00e1vio",
+          "p_shots_gt0.5": 0.877
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Julio Enciso",
+          "p_shots_gt0.5": 0.857
+        },
+        {
+          "player": "Emersonn",
+          "p_shots_gt0.5": 0.817
+        },
+        {
+          "player": "Jaden Philogene-Bidace",
+          "p_shots_gt0.5": 0.775
+        }
+      ]
+    }
+  ]
 }
