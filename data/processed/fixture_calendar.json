@@ -1,5 +1,5 @@
 {
-  "refreshed_at": "2026-11-11T16:00:49.242316+00:00",
+  "refreshed_at": "2026-11-13T16:04:21.981747+00:00",
   "horizon_days": 10,
   "source": "fantasy-premier-league",
   "fixtures": [
@@ -44,6 +44,27 @@
       "home": "Spurs",
       "away": "Ipswich Town",
       "kickoff": "2026-11-21T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_109",
+      "league_id": 39,
+      "home": "Newcastle",
+      "away": "Arsenal",
+      "kickoff": "2026-11-21T17:30:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_106",
+      "league_id": 39,
+      "home": "Hull City",
+      "away": "Brighton",
+      "kickoff": "2026-11-22T14:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_107",
+      "league_id": 39,
+      "home": "Liverpool",
+      "away": "Man Utd",
+      "kickoff": "2026-11-22T16:30:00+00:00"
     }
   ]
 }

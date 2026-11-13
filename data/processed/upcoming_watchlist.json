@@ -441,6 +441,108 @@
           "p_shots_gt0.5": 0.775
         }
       ]
+    },
+    {
+      "fixture_id": "fpl_109",
+      "home": "Newcastle",
+      "away": "Arsenal",
+      "kickoff": "2026-11-21T17:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Harvey Barnes",
+          "p_shots_gt0.5": 0.8
+        },
+        {
+          "player": "Yoane Wissa",
+          "p_shots_gt0.5": 0.798
+        },
+        {
+          "player": "Jacob Murphy",
+          "p_shots_gt0.5": 0.734
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Bukayo Saka",
+          "p_shots_gt0.5": 0.845
+        },
+        {
+          "player": "Eberechi Eze",
+          "p_shots_gt0.5": 0.842
+        },
+        {
+          "player": "Kai Havertz",
+          "p_shots_gt0.5": 0.814
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_106",
+      "home": "Hull City",
+      "away": "Brighton",
+      "kickoff": "2026-11-22T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Joe Gelhardt",
+          "p_shots_gt0.5": 0.868
+        },
+        {
+          "player": "Mohamed Belloumi",
+          "p_shots_gt0.5": 0.776
+        },
+        {
+          "player": "Oliver McBurnie",
+          "p_shots_gt0.5": 0.757
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Charalampos Kostoulas",
+          "p_shots_gt0.5": 0.894
+        },
+        {
+          "player": "Malick Yalcouy\u00e9",
+          "p_shots_gt0.5": 0.803
+        },
+        {
+          "player": "Diego G\u00f3mez",
+          "p_shots_gt0.5": 0.786
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_107",
+      "home": "Liverpool",
+      "away": "Man Utd",
+      "kickoff": "2026-11-22T16:30:00+00:00",
+      "home_watch": [
+        {
+          "player": "Alexander Isak",
+          "p_shots_gt0.5": 0.865
+        },
+        {
+          "player": "Lewis Koumas",
+          "p_shots_gt0.5": 0.854
+        },
+        {
+          "player": "Cody Gakpo",
+          "p_shots_gt0.5": 0.853
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Matheus Cunha",
+          "p_shots_gt0.5": 0.784
+        },
+        {
+          "player": "Bruno Fernandes",
+          "p_shots_gt0.5": 0.746
+        },
+        {
+          "player": "Marcus Rashford",
+          "p_shots_gt0.5": 0.737
+        }
+      ]
     }
   ]
 }

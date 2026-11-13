@@ -82,5 +82,23 @@
     "home": "Tottenham",
     "away": "Ipswich",
     "kickoff": "2026-11-21T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_109",
+    "home": "Newcastle",
+    "away": "Arsenal",
+    "kickoff": "2026-11-21T17:30:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_106",
+    "home": "Hull City",
+    "away": "Brighton",
+    "kickoff": "2026-11-22T14:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_107",
+    "home": "Liverpool",
+    "away": "Man Utd",
+    "kickoff": "2026-11-22T16:30:00+00:00"
   }
 ]
