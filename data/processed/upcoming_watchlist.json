@@ -543,6 +543,40 @@
           "p_shots_gt0.5": 0.737
         }
       ]
+    },
+    {
+      "fixture_id": "fpl_103",
+      "home": "Brentford",
+      "away": "Everton",
+      "kickoff": "2026-11-23T20:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Thiago",
+          "p_shots_gt0.5": 0.84
+        },
+        {
+          "player": "Dango Ouattara",
+          "p_shots_gt0.5": 0.834
+        },
+        {
+          "player": "Kevin Schade",
+          "p_shots_gt0.5": 0.814
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Thierno Barry",
+          "p_shots_gt0.5": 0.829
+        },
+        {
+          "player": "Tyrique George",
+          "p_shots_gt0.5": 0.814
+        },
+        {
+          "player": "Brennan Johnson",
+          "p_shots_gt0.5": 0.748
+        }
+      ]
     }
   ]
 }
