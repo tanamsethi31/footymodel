@@ -76,7 +76,7 @@
       "home_watch": [
         {
           "player": "David Brooks",
-          "p_shots_gt0.5": 0.877
+          "p_shots_gt0.5": 0.876
         },
         {
           "player": "Evanilson",
@@ -84,7 +84,7 @@
         },
         {
           "player": "Rayan",
-          "p_shots_gt0.5": 0.853
+          "p_shots_gt0.5": 0.852
         }
       ],
       "away_watch": [
@@ -110,7 +110,7 @@
       "home_watch": [
         {
           "player": "David Brooks",
-          "p_shots_gt0.5": 0.877
+          "p_shots_gt0.5": 0.876
         },
         {
           "player": "Evanilson",
@@ -118,7 +118,7 @@
         },
         {
           "player": "Rayan",
-          "p_shots_gt0.5": 0.853
+          "p_shots_gt0.5": 0.852
         }
       ],
       "away_watch": [
@@ -178,7 +178,7 @@
       "home_watch": [
         {
           "player": "Cole Palmer",
-          "p_shots_gt0.5": 0.902
+          "p_shots_gt0.5": 0.901
         },
         {
           "player": "Jo\u00e3o Pedro",
@@ -416,7 +416,7 @@
       "home_watch": [
         {
           "player": "Omar Marmoush",
-          "p_shots_gt0.5": 0.918
+          "p_shots_gt0.5": 0.917
         },
         {
           "player": "Dominic Solanke",
