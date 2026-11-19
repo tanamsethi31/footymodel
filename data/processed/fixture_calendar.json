@@ -1,5 +1,5 @@
 {
-  "refreshed_at": "2026-11-17T17:32:10.355676+00:00",
+  "refreshed_at": "2026-11-19T17:15:15.096199+00:00",
   "horizon_days": 10,
   "source": "fantasy-premier-league",
   "fixtures": [
@@ -72,6 +72,76 @@
       "home": "Brentford",
       "away": "Everton",
       "kickoff": "2026-11-23T20:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_119",
+      "league_id": 39,
+      "home": "Nott'm Forest",
+      "away": "Chelsea",
+      "kickoff": "2026-11-27T20:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_117",
+      "league_id": 39,
+      "home": "Leeds",
+      "away": "Coventry City",
+      "kickoff": "2026-11-28T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_118",
+      "league_id": 39,
+      "home": "Man Utd",
+      "away": "Brentford",
+      "kickoff": "2026-11-28T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_116",
+      "league_id": 39,
+      "home": "Ipswich Town",
+      "away": "Aston Villa",
+      "kickoff": "2026-11-28T17:30:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_114",
+      "league_id": 39,
+      "home": "Everton",
+      "away": "Liverpool",
+      "kickoff": "2026-11-29T12:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_112",
+      "league_id": 39,
+      "home": "Brighton",
+      "away": "Newcastle",
+      "kickoff": "2026-11-29T14:05:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_113",
+      "league_id": 39,
+      "home": "Crystal Palace",
+      "away": "Hull City",
+      "kickoff": "2026-11-29T14:05:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_115",
+      "league_id": 39,
+      "home": "Fulham",
+      "away": "Bournemouth",
+      "kickoff": "2026-11-29T14:05:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_120",
+      "league_id": 39,
+      "home": "Sunderland",
+      "away": "Spurs",
+      "kickoff": "2026-11-29T14:05:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_111",
+      "league_id": 39,
+      "home": "Arsenal",
+      "away": "Man City",
+      "kickoff": "2026-11-29T16:30:00+00:00"
     }
   ]
 }
