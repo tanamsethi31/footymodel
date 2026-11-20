@@ -8,7 +8,7 @@
       "home_watch": [
         {
           "player": "Erling Haaland",
-          "p_shots_gt0.5": 0.906
+          "p_shots_gt0.5": 0.905
         },
         {
           "player": "Mathis Cherki",
@@ -22,7 +22,7 @@
       "away_watch": [
         {
           "player": "Gonzalo Garc\u00eda",
-          "p_shots_gt0.5": 0.694
+          "p_shots_gt0.5": 0.693
         },
         {
           "player": "C\u00e9sar Palacios",
@@ -348,7 +348,7 @@
       "home_watch": [
         {
           "player": "Erling Haaland",
-          "p_shots_gt0.5": 0.906
+          "p_shots_gt0.5": 0.905
         },
         {
           "player": "Mathis Cherki",
@@ -362,7 +362,7 @@
       "away_watch": [
         {
           "player": "Gonzalo Garc\u00eda",
-          "p_shots_gt0.5": 0.694
+          "p_shots_gt0.5": 0.693
         },
         {
           "player": "C\u00e9sar Palacios",
@@ -710,7 +710,7 @@
         },
         {
           "player": "Oliver McBurnie",
-          "p_shots_gt0.5": 0.736
+          "p_shots_gt0.5": 0.737
         }
       ]
     },
@@ -842,7 +842,7 @@
         },
         {
           "player": "Sidiki Ch\u00e9rif",
-          "p_shots_gt0.5": 0.82
+          "p_shots_gt0.5": 0.821
         },
         {
           "player": "Brandon Thomas-Asante",
@@ -876,7 +876,7 @@
         },
         {
           "player": "Sidiki Ch\u00e9rif",
-          "p_shots_gt0.5": 0.82
+          "p_shots_gt0.5": 0.821
         },
         {
           "player": "Brandon Thomas-Asante",
@@ -1152,7 +1152,7 @@
         },
         {
           "player": "Oliver McBurnie",
-          "p_shots_gt0.5": 0.736
+          "p_shots_gt0.5": 0.737
         }
       ]
     },
