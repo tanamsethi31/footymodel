@@ -1,40 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "fpl_109",
-      "home": "Newcastle",
-      "away": "Arsenal",
-      "kickoff": "2026-11-21T17:30:00+00:00",
-      "home_watch": [
-        {
-          "player": "Harvey Barnes",
-          "p_shots_gt0.5": 0.8
-        },
-        {
-          "player": "Yoane Wissa",
-          "p_shots_gt0.5": 0.798
-        },
-        {
-          "player": "Jacob Murphy",
-          "p_shots_gt0.5": 0.734
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Bukayo Saka",
-          "p_shots_gt0.5": 0.845
-        },
-        {
-          "player": "Eberechi Eze",
-          "p_shots_gt0.5": 0.842
-        },
-        {
-          "player": "Kai Havertz",
-          "p_shots_gt0.5": 0.814
-        }
-      ]
-    },
-    {
       "fixture_id": "fpl_106",
       "home": "Hull City",
       "away": "Brighton",
