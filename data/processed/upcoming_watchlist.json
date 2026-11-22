@@ -1,40 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "fpl_106",
-      "home": "Hull City",
-      "away": "Brighton",
-      "kickoff": "2026-11-22T14:00:00+00:00",
-      "home_watch": [
-        {
-          "player": "Joe Gelhardt",
-          "p_shots_gt0.5": 0.868
-        },
-        {
-          "player": "Mohamed Belloumi",
-          "p_shots_gt0.5": 0.775
-        },
-        {
-          "player": "Oliver McBurnie",
-          "p_shots_gt0.5": 0.757
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Charalampos Kostoulas",
-          "p_shots_gt0.5": 0.894
-        },
-        {
-          "player": "Malick Yalcouy\u00e9",
-          "p_shots_gt0.5": 0.803
-        },
-        {
-          "player": "Diego G\u00f3mez",
-          "p_shots_gt0.5": 0.786
-        }
-      ]
-    },
-    {
       "fixture_id": "fpl_107",
       "home": "Liverpool",
       "away": "Man Utd",
