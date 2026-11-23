@@ -1,11 +1,11 @@
 fixture_id,kickoff,home,away,home_goals,away_goals,home_shots,away_shots,understat_match_id,proxy_xi,n_players_graded,source
-hist_manunited_astonvilla_20261108,2026-11-08T15:00:00+00:00,Man United,Aston Villa,4,4,26,12,,True,0,backfill_proxy_xi
-hist_sunderland_chelsea_20261108,2026-11-08T15:00:00+00:00,Sunderland,Chelsea,1,0,9,10,,True,0,backfill_proxy_xi
-hist_ipswich_bournemouth_20261108,2026-11-08T15:00:00+00:00,Ipswich,Bournemouth,1,2,10,15,,True,0,backfill_proxy_xi
+hist_liverpool_manunited_20261122,2026-11-22T15:00:00+00:00,Liverpool,Man United,4,0,28,10,,True,0,backfill_proxy_xi
+hist_hull_brighton_20261122,2026-11-22T15:00:00+00:00,Hull,Brighton,2,0,11,15,,True,0,backfill_proxy_xi
+hist_newcastle_arsenal_20261121,2026-11-21T15:00:00+00:00,Newcastle,Arsenal,2,2,12,13,,True,0,backfill_proxy_xi
+hist_tottenham_ipswich_20261121,2026-11-21T15:00:00+00:00,Tottenham,Ipswich,2,0,18,11,,True,0,backfill_proxy_xi
+hist_coventry_crystalpalace_20261121,2026-11-21T15:00:00+00:00,Coventry,Crystal Palace,3,2,11,14,,True,0,backfill_proxy_xi
+hist_chelsea_leeds_20261121,2026-11-21T15:00:00+00:00,Chelsea,Leeds,1,4,14,21,,True,0,backfill_proxy_xi
+hist_bournemouth_nottmforest_20261121,2026-11-21T15:00:00+00:00,Bournemouth,Nott'm Forest,2,0,19,18,,True,0,backfill_proxy_xi
+hist_astonvilla_sunderland_20261121,2026-11-21T15:00:00+00:00,Aston Villa,Sunderland,0,0,19,7,,True,0,backfill_proxy_xi
+hist_mancity_fulham_20261121,2026-11-21T15:00:00+00:00,Man City,Fulham,1,1,15,5,,True,0,backfill_proxy_xi
 hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,1,3,19,20,,True,0,backfill_proxy_xi
-hist_brighton_brentford_20261108,2026-11-08T15:00:00+00:00,Brighton,Brentford,2,0,20,5,,True,0,backfill_proxy_xi
-hist_nottmforest_mancity_20261107,2026-11-07T15:00:00+00:00,Nott'm Forest,Man City,3,1,11,12,,True,0,backfill_proxy_xi
-hist_fulham_newcastle_20261107,2026-11-07T15:00:00+00:00,Fulham,Newcastle,1,1,11,9,,True,0,backfill_proxy_xi
-hist_arsenal_hull_20261107,2026-11-07T15:00:00+00:00,Arsenal,Hull,1,0,21,7,,True,0,backfill_proxy_xi
-hist_leeds_tottenham_20261107,2026-11-07T15:00:00+00:00,Leeds,Tottenham,1,0,16,7,,True,0,backfill_proxy_xi
-hist_everton_coventry_20261106,2026-11-06T15:00:00+00:00,Everton,Coventry,3,1,15,15,,True,0,backfill_proxy_xi
