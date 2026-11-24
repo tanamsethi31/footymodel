@@ -1,4 +1,5 @@
 fixture_id,kickoff,home,away,home_goals,away_goals,home_shots,away_shots,understat_match_id,proxy_xi,n_players_graded,source
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,4,0,21,4,,True,0,backfill_proxy_xi
 hist_liverpool_manunited_20261122,2026-11-22T15:00:00+00:00,Liverpool,Man United,4,0,28,10,,True,0,backfill_proxy_xi
 hist_hull_brighton_20261122,2026-11-22T15:00:00+00:00,Hull,Brighton,2,0,11,15,,True,0,backfill_proxy_xi
 hist_newcastle_arsenal_20261121,2026-11-21T15:00:00+00:00,Newcastle,Arsenal,2,2,12,13,,True,0,backfill_proxy_xi
@@ -8,4 +9,3 @@ hist_chelsea_leeds_20261121,2026-11-21T15:00:00+00:00,Chelsea,Leeds,1,4,14,21,,T
 hist_bournemouth_nottmforest_20261121,2026-11-21T15:00:00+00:00,Bournemouth,Nott'm Forest,2,0,19,18,,True,0,backfill_proxy_xi
 hist_astonvilla_sunderland_20261121,2026-11-21T15:00:00+00:00,Aston Villa,Sunderland,0,0,19,7,,True,0,backfill_proxy_xi
 hist_mancity_fulham_20261121,2026-11-21T15:00:00+00:00,Man City,Fulham,1,1,15,5,,True,0,backfill_proxy_xi
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,1,3,19,20,,True,0,backfill_proxy_xi

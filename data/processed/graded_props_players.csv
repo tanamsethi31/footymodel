@@ -1,4 +1,26 @@
 fixture_id,kickoff,home,away,player,team,proxy_xi,actual_shots,actual_sot,actual_xg,p_shots_gt0.5,p_shots_gt1.5,p_shots_gt2.5,p_sot_gt0.5,p_sot_gt1.5
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Caoimhin Kelleher,Brentford,True,,,,0.0,0.0,0.0,,
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Michael Kayode,Brentford,True,,,,0.368,0.099,0.023,,
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Kristoffer Ajer,Brentford,True,,,,0.402,0.119,0.03,0.231,0.037
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Vitaly Janelt,Brentford,True,,,,0.501,0.191,0.063,0.224,0.035
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Thiago,Brentford,True,,,,0.84,0.62,0.42,,
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Keane Lewis-Potter,Brentford,True,,,,0.678,0.375,0.183,0.622,0.308
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Jaidon Anthony,Brentford,True,,,,0.766,0.497,0.29,,
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Sepp van den Berg,Brentford,True,,,,0.489,0.182,0.058,,
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Mathias Jensen,Brentford,True,,,,0.605,0.289,0.121,0.251,0.045
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Dango Ouattara,Brentford,True,,,,0.834,0.609,0.407,,
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Yehor Yarmolyuk,Brentford,True,,,,0.483,0.177,0.056,0.28,0.056
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Jordan Pickford,Everton,True,,,,0.0,0.0,0.0,0.0,0.0
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,James Tarkowski,Everton,True,,,,0.404,0.121,0.031,0.194,0.026
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Vitalii Mykolenko,Everton,True,,,,0.299,0.064,0.012,0.207,0.03
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Jarrad Branthwaite,Everton,True,,,,0.39,0.112,0.028,0.187,0.024
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,James Garner,Everton,True,,,,0.575,0.258,0.101,0.249,0.044
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Merlin Röhl,Everton,True,,,,0.687,0.385,0.192,,
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Thierno Barry,Everton,True,,,,0.829,0.601,0.398,,
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Kiernan Dewsbury-Hall,Everton,True,,,,0.731,0.445,0.242,,
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Jack Grealish,Everton,True,,,,0.735,0.451,0.247,0.267,0.051
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Harrison Armstrong,Everton,True,,,,0.547,0.232,0.085,,
+hist_brentford_everton_20261123,2026-11-23T15:00:00+00:00,Brentford,Everton,Ainsley Maitland-Niles,Everton,True,,,,0.369,0.1,0.023,,
 hist_liverpool_manunited_20261122,2026-11-22T15:00:00+00:00,Liverpool,Man United,Alisson,Liverpool,True,,,,0.001,0.0,0.0,0.0,0.0
 hist_liverpool_manunited_20261122,2026-11-22T15:00:00+00:00,Liverpool,Man United,Virgil van Dijk,Liverpool,True,,,,0.503,0.193,0.064,0.334,0.081
 hist_liverpool_manunited_20261122,2026-11-22T15:00:00+00:00,Liverpool,Man United,Jérémy Jacquet,Liverpool,True,,,,0.34,0.084,0.018,,
@@ -197,25 +219,3 @@ hist_mancity_fulham_20261121,2026-11-21T15:00:00+00:00,Man City,Fulham,Alex Iwob
 hist_mancity_fulham_20261121,2026-11-21T15:00:00+00:00,Man City,Fulham,Gonzalo García,Fulham,True,,,,0.693,0.394,0.199,,
 hist_mancity_fulham_20261121,2026-11-21T15:00:00+00:00,Man City,Fulham,Oscar Bobb,Fulham,True,,,,0.538,0.224,0.081,,
 hist_mancity_fulham_20261121,2026-11-21T15:00:00+00:00,Man City,Fulham,Joshua King,Fulham,True,,,,0.627,0.313,0.138,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Walter Benítez,Crystal Palace,True,,,,0.001,0.0,0.0,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Chris Richards,Crystal Palace,True,,,,0.317,0.073,0.014,0.186,0.024
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Jaydee Canvot,Crystal Palace,True,,,,0.269,0.051,0.008,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Anan Khalaili,Crystal Palace,True,,,,0.598,0.282,0.117,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Adam Wharton,Crystal Palace,True,,,,0.496,0.188,0.061,0.185,0.024
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Tyrick Mitchell,Crystal Palace,True,,,,0.307,0.068,0.013,0.165,0.019
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Daichi Kamada,Crystal Palace,True,,,,0.489,0.181,0.058,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Yeremi Pino,Crystal Palace,True,,,,0.698,0.4,0.204,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Jørgen Strand Larsen,Crystal Palace,True,,,,0.704,0.408,0.21,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Honest Ahanor,Crystal Palace,True,,,,0.284,0.057,0.01,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Quinten Timber,Crystal Palace,True,,,,0.574,0.258,0.101,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Alisson,Liverpool,True,,,,0.001,0.0,0.0,0.0,0.0
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Virgil van Dijk,Liverpool,True,,,,0.456,0.156,0.046,0.211,0.031
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Jérémy Jacquet,Liverpool,True,,,,0.3,0.065,0.012,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Milos Kerkez,Liverpool,True,,,,0.319,0.074,0.014,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Alexis Mac Allister,Liverpool,True,,,,0.69,0.389,0.195,0.205,0.029
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Florian Wirtz,Liverpool,True,,,,0.751,0.473,0.268,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Bradley Barcola,Liverpool,True,,,,0.743,0.462,0.258,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Víctor Muñoz,Liverpool,True,,,,0.775,0.51,0.303,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Alexander Isak,Liverpool,True,,,,0.831,0.605,0.402,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Treymaurice Nyoni,Liverpool,True,,,,0.621,0.307,0.133,,
-hist_crystalpalace_liverpool_20261108,2026-11-08T15:00:00+00:00,Crystal Palace,Liverpool,Ronald Araújo,Liverpool,True,,,,0.24,0.041,0.006,,
