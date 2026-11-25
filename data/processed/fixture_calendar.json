@@ -1,15 +1,8 @@
 {
-  "refreshed_at": "2026-11-23T20:02:14.169932+00:00",
+  "refreshed_at": "2026-11-25T18:35:36.852946+00:00",
   "horizon_days": 10,
   "source": "fantasy-premier-league",
   "fixtures": [
-    {
-      "fixture_id": "fpl_103",
-      "league_id": 39,
-      "home": "Brentford",
-      "away": "Everton",
-      "kickoff": "2026-11-23T20:00:00+00:00"
-    },
     {
       "fixture_id": "fpl_119",
       "league_id": 39,
@@ -149,6 +142,48 @@
       "home": "Spurs",
       "away": "Fulham",
       "kickoff": "2026-12-03T20:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_134",
+      "league_id": 39,
+      "home": "Chelsea",
+      "away": "Liverpool",
+      "kickoff": "2026-12-05T12:30:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_131",
+      "league_id": 39,
+      "home": "Aston Villa",
+      "away": "Crystal Palace",
+      "kickoff": "2026-12-05T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_132",
+      "league_id": 39,
+      "home": "Bournemouth",
+      "away": "Hull City",
+      "kickoff": "2026-12-05T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_136",
+      "league_id": 39,
+      "home": "Leeds",
+      "away": "Ipswich Town",
+      "kickoff": "2026-12-05T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_137",
+      "league_id": 39,
+      "home": "Man Utd",
+      "away": "Coventry City",
+      "kickoff": "2026-12-05T15:00:00+00:00"
+    },
+    {
+      "fixture_id": "fpl_139",
+      "league_id": 39,
+      "home": "Nott'm Forest",
+      "away": "Brighton",
+      "kickoff": "2026-12-05T17:30:00+00:00"
     }
   ]
 }

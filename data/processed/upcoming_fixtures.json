@@ -208,5 +208,89 @@
     "home": "Spurs",
     "away": "Fulham",
     "kickoff": "2026-12-03T20:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_134",
+    "home": "Chelsea",
+    "away": "Liverpool",
+    "kickoff": "2026-12-05T12:30:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_131",
+    "home": "Aston Villa",
+    "away": "Crystal Palace",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31310",
+    "home": "Bournemouth",
+    "away": "Hull",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_132",
+    "home": "Bournemouth",
+    "away": "Hull City",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31314",
+    "home": "Brentford",
+    "away": "Manchester City",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31316",
+    "home": "Everton",
+    "away": "Fulham",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31318",
+    "home": "Leeds",
+    "away": "Ipswich",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_136",
+    "home": "Leeds",
+    "away": "Ipswich Town",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_137",
+    "home": "Man Utd",
+    "away": "Coventry City",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31317",
+    "home": "Manchester United",
+    "away": "Coventry",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31319",
+    "home": "Newcastle United",
+    "away": "Sunderland",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31312",
+    "home": "Nottingham Forest",
+    "away": "Brighton",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "us_31313",
+    "home": "Tottenham",
+    "away": "Arsenal",
+    "kickoff": "2026-12-05T15:00:00+00:00"
+  },
+  {
+    "fixture_id": "fpl_139",
+    "home": "Nott'm Forest",
+    "away": "Brighton",
+    "kickoff": "2026-12-05T17:30:00+00:00"
   }
 ]
