@@ -1597,6 +1597,108 @@
           "p_shots_gt0.5": 0.77
         }
       ]
+    },
+    {
+      "fixture_id": "fpl_133",
+      "home": "Brentford",
+      "away": "Man City",
+      "kickoff": "2026-12-05T20:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Thiago",
+          "p_shots_gt0.5": 0.705
+        },
+        {
+          "player": "Dango Ouattara",
+          "p_shots_gt0.5": 0.697
+        },
+        {
+          "player": "Kevin Schade",
+          "p_shots_gt0.5": 0.671
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Erling Haaland",
+          "p_shots_gt0.5": 0.903
+        },
+        {
+          "player": "Mathis Cherki",
+          "p_shots_gt0.5": 0.85
+        },
+        {
+          "player": "Phil Foden",
+          "p_shots_gt0.5": 0.843
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_135",
+      "home": "Everton",
+      "away": "Fulham",
+      "kickoff": "2026-12-06T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Thierno Barry",
+          "p_shots_gt0.5": 0.832
+        },
+        {
+          "player": "Tyrique George",
+          "p_shots_gt0.5": 0.817
+        },
+        {
+          "player": "Brennan Johnson",
+          "p_shots_gt0.5": 0.752
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Gonzalo Garc\u00eda",
+          "p_shots_gt0.5": 0.831
+        },
+        {
+          "player": "C\u00e9sar Palacios",
+          "p_shots_gt0.5": 0.8
+        },
+        {
+          "player": "Joshua King",
+          "p_shots_gt0.5": 0.778
+        }
+      ]
+    },
+    {
+      "fixture_id": "fpl_138",
+      "home": "Newcastle",
+      "away": "Sunderland",
+      "kickoff": "2026-12-06T14:00:00+00:00",
+      "home_watch": [
+        {
+          "player": "Harvey Barnes",
+          "p_shots_gt0.5": 0.872
+        },
+        {
+          "player": "Yoane Wissa",
+          "p_shots_gt0.5": 0.871
+        },
+        {
+          "player": "Jacob Murphy",
+          "p_shots_gt0.5": 0.82
+        }
+      ],
+      "away_watch": [
+        {
+          "player": "Wilson Isidor",
+          "p_shots_gt0.5": 0.859
+        },
+        {
+          "player": "Tymur Tutierov",
+          "p_shots_gt0.5": 0.791
+        },
+        {
+          "player": "Brian Brobbey",
+          "p_shots_gt0.5": 0.762
+        }
+      ]
     }
   ]
 }
