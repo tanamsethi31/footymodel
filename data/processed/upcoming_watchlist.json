@@ -1,40 +1,6 @@
 {
   "fixtures": [
     {
-      "fixture_id": "fpl_119",
-      "home": "Nott'm Forest",
-      "away": "Chelsea",
-      "kickoff": "2026-11-27T20:00:00+00:00",
-      "home_watch": [
-        {
-          "player": "Liam Delap",
-          "p_shots_gt0.5": 0.825
-        },
-        {
-          "player": "Igor Jesus",
-          "p_shots_gt0.5": 0.815
-        },
-        {
-          "player": "Morgan Gibbs-White",
-          "p_shots_gt0.5": 0.759
-        }
-      ],
-      "away_watch": [
-        {
-          "player": "Cole Palmer",
-          "p_shots_gt0.5": 0.865
-        },
-        {
-          "player": "Jo\u00e3o Pedro",
-          "p_shots_gt0.5": 0.826
-        },
-        {
-          "player": "Danny Welbeck",
-          "p_shots_gt0.5": 0.8
-        }
-      ]
-    },
-    {
       "fixture_id": "us_31290",
       "home": "Arsenal",
       "away": "Manchester City",
@@ -1216,7 +1182,7 @@
         },
         {
           "player": "Mohamed Belloumi",
-          "p_shots_gt0.5": 0.781
+          "p_shots_gt0.5": 0.78
         },
         {
           "player": "Oliver McBurnie",
@@ -1250,7 +1216,7 @@
         },
         {
           "player": "Mohamed Belloumi",
-          "p_shots_gt0.5": 0.781
+          "p_shots_gt0.5": 0.78
         },
         {
           "player": "Oliver McBurnie",
@@ -1348,7 +1314,7 @@
       "away_watch": [
         {
           "player": "Julio Enciso",
-          "p_shots_gt0.5": 0.87
+          "p_shots_gt0.5": 0.869
         },
         {
           "player": "Emersonn",
@@ -1382,7 +1348,7 @@
       "away_watch": [
         {
           "player": "Julio Enciso",
-          "p_shots_gt0.5": 0.87
+          "p_shots_gt0.5": 0.869
         },
         {
           "player": "Emersonn",
@@ -1484,7 +1450,7 @@
       "away_watch": [
         {
           "player": "Wilson Isidor",
-          "p_shots_gt0.5": 0.859
+          "p_shots_gt0.5": 0.858
         },
         {
           "player": "Tymur Tutierov",
@@ -1688,7 +1654,7 @@
       "away_watch": [
         {
           "player": "Wilson Isidor",
-          "p_shots_gt0.5": 0.859
+          "p_shots_gt0.5": 0.858
         },
         {
           "player": "Tymur Tutierov",
